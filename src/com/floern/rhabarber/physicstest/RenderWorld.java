@@ -41,8 +41,6 @@ public class RenderWorld extends World {
 					+ b.positionFX().yAsInt() + ", radius " + radius);
 		} else {
 			// draw the polygon
-			Log.d("bla", "polygon at " + b.positionFX().xAsInt() + ", "
-					+ b.positionFX().yAsInt() + ", radius ");
 			for (int i = 0; i < positions.length - 1; i++) {
 				c.drawLine(positions[i].xAsInt(), positions[i].yAsInt(),
 						positions[i + 1].xAsInt(), positions[i + 1].yAsInt(),
