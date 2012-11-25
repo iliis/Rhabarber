@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.app.Activity;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -20,6 +21,7 @@ import android.view.SurfaceView;
 import android.support.v4.app.NavUtils;
 import at.emini.physics2D.Body;
 import at.emini.physics2D.Shape;
+import at.emini.physics2D.util.FXUtil;
 import at.emini.physics2D.util.FXVector;
 
 public class PhysicsTestActivity extends Activity implements Callback,
@@ -61,7 +63,7 @@ public class PhysicsTestActivity extends Activity implements Callback,
 		private Canvas physicsCanvas;
 
 		// to be set to true in onDestroy
-		public boolean stop;
+		public volatile boolean stop;
 
 		@Override
 		protected void onPreExecute() {
@@ -81,15 +83,17 @@ public class PhysicsTestActivity extends Activity implements Callback,
 
 			
 			//create bodies based on shapes above
-			Body anchor_top = new Body(width / 2, 5, bigbox_long, false);
-			Body anchor_left = new Body(5, height / 2, bigbox_high, false);
+			Body anchor_top   = new Body(width / 2, 5,  bigbox_long, false);
+			Body anchor_left  = new Body(5, height / 2, bigbox_high, false);
 			Body anchor_right = new Body(width - 5, height / 2, bigbox_high,
 					false);
-			Body anchor_bot = new Body(width / 2, height - 5, bigbox_long,
+			Body anchor_bot   = new Body(width / 2, height - 5, bigbox_long,
 					false);
 
-			Body boxbody = new Body(width / 2, height / 2, smallbox, true);
-			Body boxbody2 = new Body(width / 4, height / 2, smallbox, true);
+			Body boxbody    = new Body(width / 2, height / 2, smallbox, true);
+			Body boxbody2   = new Body(width / 4, height / 2, smallbox, true);
+			
+			Body spherebody = new Body(width / 3, height / 3, Shape.createCircle(30), true);
 
 			//add bodies to world
 			myWorld.addBody(anchor_top);
@@ -98,8 +102,11 @@ public class PhysicsTestActivity extends Activity implements Callback,
 			myWorld.addBody(anchor_right);
 			myWorld.addBody(boxbody);
 			myWorld.addBody(boxbody2);
+			myWorld.addBody(spherebody);
 			stop = false;
 			myHolder.unlockCanvasAndPost(physicsCanvas);
+			
+			//myWorld.setGravity(0); // disable gravity if we apply the acceleration direct
 		}
 
 		@Override
@@ -112,9 +119,11 @@ public class PhysicsTestActivity extends Activity implements Callback,
 				start = SystemClock.elapsedRealtime();
 
 				// get gravity
+				// TODO: is this synchronized really necessary here? we only read the gravity-vector
 				synchronized(tmpgravity)
 				{
 					myWorld.setGravity(tmpgravity);
+					//applyAcceleration(tmpgravity);
 				}
 				
 				// simulate
@@ -130,6 +139,7 @@ public class PhysicsTestActivity extends Activity implements Callback,
 					Thread.sleep(sleep);
 				} catch (InterruptedException e) {
 					Log.d("Rhabarber", "interrupted");
+					stop = true;
 				}
 
 			}
@@ -144,10 +154,21 @@ public class PhysicsTestActivity extends Activity implements Callback,
 				if (physicsCanvas != null) {
 					myWorld.draw(physicsCanvas);
 				}
+				
+				// TODO: This causes an IllegalArgumentException when closing the Activity
 				myHolder.unlockCanvasAndPost(physicsCanvas);
 			}
 		}
 
+	}
+	
+	public void applyAcceleration(FXVector v) {
+		int bodyCount = myWorld.getBodyCount();
+		Body[] bodies = myWorld.getBodies();
+		
+		for (int i = 0; i < bodyCount; i++) {
+			bodies[i].applyAcceleration(v, myWorld.getTimestepFX());
+		}
 	}
 
 	@Override
@@ -185,6 +206,10 @@ public class PhysicsTestActivity extends Activity implements Callback,
 		// TODO Auto-generated method stub
 
 	}
+	
+	public static int floatToFX(float v) {
+		return (int) (v * (1 << FXUtil.DECIMAL));
+	}
 
 	public void onSensorChanged(SensorEvent event) {
 		/*
@@ -195,9 +220,12 @@ public class PhysicsTestActivity extends Activity implements Callback,
 		if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
 			// update acceleration values
 			synchronized (tmpgravity) {
-				tmpgravity.assignFX((int) event.values[1], (int) event.values[0]);
-				tmpgravity.normalize();
-				tmpgravity.mult(50);
+				tmpgravity.assignFX(floatToFX(event.values[1]), floatToFX(event.values[0]));
+				//tmpgravity.normalize();
+				
+				// sensor gives value in G, physics engine takes gravity as pixel/s^2
+				// so, 1 G = 10 pixel/s^2 --> ca. 1 pixel = 1m
+				tmpgravity.mult(10);
 			}
 		}
 	}

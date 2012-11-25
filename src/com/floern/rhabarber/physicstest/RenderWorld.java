@@ -6,6 +6,7 @@ import android.graphics.Paint;
 import android.util.Log;
 import at.emini.physics2D.Body;
 import at.emini.physics2D.World;
+import at.emini.physics2D.util.FXUtil;
 import at.emini.physics2D.util.FXVector;
 
 public class RenderWorld extends World {
@@ -33,23 +34,22 @@ public class RenderWorld extends World {
 		if (positions.length == 1) {
 			// draw a circle
 
-			int radius = b.shape().getBoundingRadiusFX();
+			int radius = FXUtil.fromFX(b.shape().getBoundingRadiusFX());
 			c.drawCircle(b.positionFX().xAsInt(), b.positionFX().yAsInt(),
-					radius * 2, paint);
+					radius, paint);
 
 			Log.d("bla", "circle at " + b.positionFX().xAsInt() + ", "
 					+ b.positionFX().yAsInt() + ", radius " + radius);
 		} else {
 			// draw the polygon
-			for (int i = 0; i < positions.length - 1; i++) {
-				c.drawLine(positions[i].xAsInt(), positions[i].yAsInt(),
-						positions[i + 1].xAsInt(), positions[i + 1].yAsInt(),
-						paint);
+			int L = positions.length;
+			for (int i = 0; i < L; i++) {
+				c.drawLine(positions[i].xAsInt(),
+						   positions[i].yAsInt(),
+						   positions[(i + 1) % L].xAsInt(),
+						   positions[(i + 1) % L].yAsInt(),
+						   paint);
 			}
-			// draw the final segment
-			c.drawLine(positions[positions.length - 1].xAsInt(),
-					positions[positions.length - 1].yAsInt(),
-					positions[0].xAsInt(), positions[0].yAsInt(), paint);
 		}
 	}
 }
