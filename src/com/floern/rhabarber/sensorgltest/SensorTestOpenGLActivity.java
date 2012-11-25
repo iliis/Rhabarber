@@ -7,6 +7,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.view.Window;
 import android.view.WindowManager;
 
 
@@ -23,13 +24,17 @@ public class SensorTestOpenGLActivity extends Activity implements SensorEventLis
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		// avoid screen turning off
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        
+        // fullscreen
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
 
 		// set View
         surfaceView = new TestSurfaceView(this);
         setContentView(surfaceView);
-
-        // avoid screen turning off
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         
         // setup sensor manager
         sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
