@@ -1,5 +1,6 @@
 package com.floern.rhabarber;
 
+import com.floern.rhabarber.physicstest.PhysicsTestActivity;
 import com.floern.rhabarber.sensorgltest.SensorTestOpenGLActivity;
 
 import android.os.Bundle;
@@ -14,7 +15,6 @@ public class MainActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        
     }
     
     
@@ -24,6 +24,14 @@ public class MainActivity extends Activity {
      */
     public void startSensorTestOpenGLActivity(View v) {
     	startActivity(new Intent(this, SensorTestOpenGLActivity.class));
+    }
+    
+    /**
+     * onClick event for starting physics test activity
+     * @param v pressed Button
+     */
+    public void onPhysicsTestActivityButtonPressed(View v) {
+    	startActivity(new Intent(this, PhysicsTestActivity.class));
     }
     
 

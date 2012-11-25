@@ -69,7 +69,7 @@ public class SensorTestOpenGLActivity extends Activity implements SensorEventLis
     }
 
     
-	@Override
+	
 	public void onAccuracyChanged(Sensor sensor, int accuracy) {
 	}
 
