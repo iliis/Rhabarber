@@ -43,9 +43,10 @@ public class SensorTestOpenGLActivity extends Activity implements SensorEventLis
 	 */
     @SuppressLint("FloatMath")
 	public void onSensorChanged(SensorEvent event) {
-    	if (event.accuracy == SensorManager.SENSOR_STATUS_UNRELIABLE) {
+    	// some devices always report UNRELIABLE, making it unusable with this code:
+    	/*if (event.accuracy == SensorManager.SENSOR_STATUS_UNRELIABLE) {
     		return; // sensor data unreliable
-    	}
+    	}*/
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
         	// update acceleration values
         	System.arraycopy(event.values, 0, TestRenderer.acceleration, 0, 3);
