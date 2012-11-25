@@ -26,15 +26,6 @@
             android:configChanges="keyboard|keyboardHidden"
             android:label="SensorTestOpenGl"
             android:screenOrientation="landscape" />
-        <activity
-            android:name=".physicstest.PhysicsTestActivity"
-            android:label="@string/title_activity_physics_test"
-            android:screenOrientation="landscape"
-            android:configChanges="keyboard|keyboardHidden" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.floern.rhabarber.MainActivity" />
-        </activity>
     </application>
 
 </manifest>

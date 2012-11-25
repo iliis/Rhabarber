@@ -13,15 +13,5 @@
         android:layout_alignParentTop="true"
         android:onClick="startSensorTestOpenGLActivity"
         android:text="Sensor &amp; OpenGL Test" />
-
-    <Button
-        android:id="@+id/physicsTestButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/button2"
-        android:layout_alignRight="@+id/button2"
-        android:layout_below="@+id/button2"
-        android:text="@string/title_activity_physics_test"
-        android:onClick="onPhysicsTestActivityButtonPressed"/>
 
 </RelativeLayout>
