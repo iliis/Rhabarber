@@ -31,7 +31,9 @@ public class PhysicsTestActivity extends Activity implements Callback,
 	private PhysicsTask task;
 	private SensorManager sensorManager;
 	private RenderWorld myWorld;
-	private FXVector tmpgravity;
+	private volatile FXVector tmpgravity; // gravity (constant amplitutde of 1G)
+	private volatile FXVector tmpaccel;   // 0 when device is not moved
+	private float gravity[] = new float[3], linear_acceleration[] = new float[3]; // used for low/high-pass filter of accelerometer
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -45,6 +47,7 @@ public class PhysicsTestActivity extends Activity implements Callback,
 		
 		sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 		tmpgravity = new FXVector(0, 10);
+		tmpaccel   = new FXVector(0, 0);
 		myWorld = new RenderWorld();
 		sensorEnable();
 	}
@@ -123,7 +126,7 @@ public class PhysicsTestActivity extends Activity implements Callback,
 				synchronized(tmpgravity)
 				{
 					myWorld.setGravity(tmpgravity);
-					//applyAcceleration(tmpgravity);
+					//applyAcceleration(tmpaccel);
 				}
 				
 				// simulate
@@ -218,16 +221,34 @@ public class PhysicsTestActivity extends Activity implements Callback,
 		}
 		*/
 		if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+			
+			// low/high-pass according to https://developer.android.com/reference/android/hardware/SensorEvent.html#values
+			final float alpha = 0.7f;
+			
+			gravity[0] = alpha * gravity[0] + (1 - alpha) * event.values[0];
+			gravity[1] = alpha * gravity[1] + (1 - alpha) * event.values[1];
+			gravity[2] = alpha * gravity[2] + (1 - alpha) * event.values[2];
+			
+			linear_acceleration[0] = event.values[0] - gravity[0];
+			linear_acceleration[1] = event.values[1] - gravity[1];
+			linear_acceleration[2] = event.values[2] - gravity[2];
+			
+			
 			// update acceleration values
 			synchronized (tmpgravity) {
-				tmpgravity.assignFX(floatToFX(event.values[1]), floatToFX(event.values[0]));
+				tmpgravity.assignFX(floatToFX(gravity[1]), floatToFX(gravity[0]));
 				//tmpgravity.normalize();
 				
-				// sensor gives value in G, physics engine takes gravity as pixel/s^2
-				// so, 1 G = 10 pixel/s^2 --> ca. 1 pixel = 1m
-				tmpgravity.mult(10);
+				// sensor gives value in m/s^2, physics engine takes gravity as pixel/s^2
+				tmpgravity.mult(20);
+			}
+			
+			synchronized (tmpaccel) {
+				tmpaccel.assignFX(floatToFX(linear_acceleration[1]), floatToFX(linear_acceleration[0]));
+				tmpaccel.mult(-200);
 			}
 		}
+		
 	}
 	
     /**
