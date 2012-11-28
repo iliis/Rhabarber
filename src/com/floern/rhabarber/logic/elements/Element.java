@@ -1,13 +1,26 @@
 package com.floern.rhabarber.logic.elements;
 
-public abstract class Element {
+import at.emini.physics2D.Body;
+import at.emini.physics2D.Shape;
+import at.emini.physics2D.util.FXVector;
 
-	/**
-	 * @param args
+public abstract class Element extends Body {
+
+	/*
+	 * defines how Elements stack on each other higher number means drawn in
+	 * front player layer is 0
 	 */
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+	public int layer;
 
+	public Element(Body b) {
+		super(b);
 	}
 
+	public Element(FXVector pos, Shape shape, boolean dynamic) {
+		super(pos, shape, dynamic);
+	}
+
+	public Element(int x, int y, Shape shape, boolean dynamic) {
+		super(x, y, shape, dynamic);
+	}
 }
