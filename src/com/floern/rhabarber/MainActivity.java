@@ -25,6 +25,11 @@ public class MainActivity extends Activity {
     	startActivity(new Intent(this, SensorTestOpenGLActivity.class));
     }
     
+
+    public void startGameActivity(View v) {
+    	startActivity(new Intent(this, GameActivity.class));
+    }
+    
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.activity_main, menu);

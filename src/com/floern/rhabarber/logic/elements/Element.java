@@ -7,8 +7,8 @@ import at.emini.physics2D.util.FXVector;
 public abstract class Element extends Body {
 
 	/*
-	 * defines how Elements stack on each other higher number means drawn in
-	 * front player layer is 0
+	 * defines how Elements stack on each other
+	 * higher number means drawn in front, player layer is 0
 	 */
 	public int layer;
 

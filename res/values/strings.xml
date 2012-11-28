@@ -1,9 +1,9 @@
 <resources>
 
     <string name="app_name">Rhabarber</string>
-    <string name="hello_world">Hello world!</string>
     <string name="menu_settings">Settings</string>
     <string name="title_activity_main">Rhabarber</string>
     <string name="title_activity_physics_test">PhysicsTestActivity</string>
+    <string name="title_activity_game">GameActivity</string>
 
 </resources>
