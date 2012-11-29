@@ -1,12 +1,18 @@
 package com.floern.rhabarber;
 
+import java.io.File;
+
+import javax.microedition.khronos.opengles.GL10;
+
 import com.floern.rhabarber.graphic.GameGLSurfaceView;
+import com.floern.rhabarber.physics.PhysicsController;
 
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 import android.annotation.SuppressLint;
@@ -21,6 +27,10 @@ public class GameActivity extends Activity implements SensorEventListener {
 	private GameGLSurfaceView surfaceView;
 	
 	private SensorManager sensorManager;
+	
+	PhysicsController physics;
+	
+	private float[] acceleration = new float[3];
 
     
 	@Override
@@ -36,11 +46,24 @@ public class GameActivity extends Activity implements SensorEventListener {
 
 		// set View
         surfaceView = new GameGLSurfaceView(this);
+        surfaceView.setRendererCallback(this);
         setContentView(surfaceView);
         
         // setup sensor manager
-        sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        
+        
+        // setup up the actual game
+        physics = new PhysicsController(this.getResources().openRawResource(R.raw.testworld));
+        //File f = new File("/mnt/sdcard/testworld.phy");
+        //physics = new PhysicsController(f);
 
+	}
+	
+	public void onDraw(GL10 gl) {
+		physics.tick();
+		physics.setAccel(acceleration);
+		physics.draw(gl);
 	}
 	
 
@@ -57,7 +80,7 @@ public class GameActivity extends Activity implements SensorEventListener {
     	
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
         	// update acceleration values
-        	// TODO: System.arraycopy(event.values, 0, GameActivity.acceleration, 0, 3);
+        	System.arraycopy(event.values, 0, acceleration, 0, 3);
         }
     }
 

@@ -1,5 +1,7 @@
 package com.floern.rhabarber.graphic;
 
+import com.floern.rhabarber.GameActivity;
+
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 
@@ -19,6 +21,10 @@ public class GameGLSurfaceView extends GLSurfaceView {
         // You would also have to change a few other things
         // (namely implement the glOrtho as a vertex shader, implement a fragment shader) 
         // setEGLContextClientVersion(2);
+    }
+    
+    public void setRendererCallback(GameActivity a) {
+    	renderer.setRendererCallback(a);
     }
     
     

@@ -3,14 +3,15 @@ package com.floern.rhabarber.graphic;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import com.floern.rhabarber.graphic.primitives.Line;
+import com.floern.rhabarber.GameActivity;
+import com.floern.rhabarber.physics.PhysicsController;
 
 import android.opengl.GLES10;
 import android.opengl.GLSurfaceView;
 
 public class GameRenderer implements GLSurfaceView.Renderer {
 	
-	Line testline = new Line();
+	GameActivity render_callback;
 
 	public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 		// Set the background frame color
@@ -23,13 +24,12 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         // Enable use of vertex arrays
         gl.glEnableClientState(GLES10.GL_VERTEX_ARRAY);
 		
-        testline.addPoint(100, 100);
-        testline.addPoint(200, 100);
-        testline.addPoint(100, 200);
-        testline.setClosed(true);
-        testline.setThickness(3);
+        
 	}
 	
+	public void setRendererCallback(GameActivity a) {
+		render_callback = a;
+	}
 	
 
 	public void onSurfaceChanged(GL10 gl, int width, int height) {
@@ -49,10 +49,10 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 		
 	}
 	
-	
 	public void onDrawFrame(GL10 gl) {
+		
 		gl.glClear(GLES10.GL_COLOR_BUFFER_BIT);
 		
-		testline.draw(gl);
+		render_callback.onDraw(gl);
 	}
 }
