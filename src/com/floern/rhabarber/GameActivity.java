@@ -5,6 +5,8 @@ import java.io.File;
 import javax.microedition.khronos.opengles.GL10;
 
 import com.floern.rhabarber.graphic.GameGLSurfaceView;
+import com.floern.rhabarber.graphic.primitives.SkeletonKeyframe;
+import com.floern.rhabarber.logic.elements.Player;
 import com.floern.rhabarber.physics.PhysicsController;
 
 import android.hardware.Sensor;
@@ -54,9 +56,13 @@ public class GameActivity extends Activity implements SensorEventListener {
         
         
         // setup up the actual game
-        // TODO: nicely implement this loading of ressources 
-        physics = new PhysicsController(this.getResources().openRawResource(R.raw.testworld),
-        								this.getResources().openRawResource(R.raw.player));
+        // TODO: nicely implement this loading of ressources
+        Player p = new Player(100,100,1,this.getResources().openRawResource(R.raw.player));
+        p.anim_running_left  = SkeletonKeyframe.loadSKAnimation(p.skeleton, this.getResources().openRawResource(R.raw.player_running_left));
+        p.anim_running_right = SkeletonKeyframe.loadSKAnimation(p.skeleton, this.getResources().openRawResource(R.raw.player_running_right));
+        p.anim_standing      = SkeletonKeyframe.loadSKAnimation(p.skeleton, this.getResources().openRawResource(R.raw.player_standing));
+        p.setActiveAnim(p.anim_running_right);
+        physics = new PhysicsController(this.getResources().openRawResource(R.raw.testworld), p);
         
         //File f = new File("/mnt/sdcard/testworld.phy");
         //physics = new PhysicsController(f);

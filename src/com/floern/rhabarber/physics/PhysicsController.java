@@ -16,7 +16,6 @@ import at.emini.physics2D.util.FXVector;
 import at.emini.physics2D.util.PhysicsFileReader;
 
 import com.floern.rhabarber.graphic.primitives.Vertexes;
-import com.floern.rhabarber.logic.elements.GameWorld;
 import com.floern.rhabarber.logic.elements.Player;
 import com.floern.rhabarber.util.FXMath;
 import com.floern.rhabarber.util.Vector;
@@ -32,15 +31,17 @@ public class PhysicsController {
 	Vertexes outline;
 	private float[] acceleration = new float[3];
 	
+	long last_tick;
 	
-	public PhysicsController(InputStream level, InputStream player) {
+	
+	public PhysicsController(InputStream level, Player p) {
 		
 		// Use GameWorld here (eg. do not use a modified world, or implement a loading function to GameWorld)
 		this.world = World.loadWorld(new PhysicsFileReader(level));// new GameWorld();
 		
 		//more than 4 players are probably not feasible anyway
 		this.players = new ArrayList<Player>(4);
-		addPlayer(new Player(100,100,1,player));
+		addPlayer(p);
 		//loadLevel(level);
 		
 		
@@ -56,6 +57,8 @@ public class PhysicsController {
 			outline.addPoint(A.xAsFloat(), A.yAsFloat());
 			outline.addPoint(B.xAsFloat(), B.yAsFloat());
 		}
+		
+		last_tick = System.nanoTime();
 	}
 	
 	
@@ -77,9 +80,17 @@ public class PhysicsController {
 	//calculates next state of world
 	public void tick()
 	{
+		// what about overflows? (so far I hadn't any bugs)
+		long dt = System.nanoTime() - last_tick;
+		last_tick = System.nanoTime();
+		
 		int timestep = world.getTimestepFX();
 		applyPlayerGravities(timestep);
 		world.tick();
+		
+		for(Player p: players) {
+			p.animate(((float) dt) / 1000000000);
+		}
 	}
 	
 	public void setAccel(float[] g) {

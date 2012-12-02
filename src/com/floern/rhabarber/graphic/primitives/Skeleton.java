@@ -40,11 +40,6 @@ public class Skeleton extends GLPrimitive {
 			float angle   = Float.parseFloat(vals[3].trim());
 			
 			Bone b = new Bone(angle, length*scale, name);
-			Log.d("foo", "created new Bone:");
-			Log.d("foo", "name:   "+name);
-			Log.d("foo", "parent: "+parent);
-			Log.d("foo", "angle:  "+Float.toString(angle));
-			Log.d("foo", "length: "+Float.toString(length));
 			
 			if (!parent.equals("NULL")) {
 				this.getBone(parent).addBone(b);
@@ -59,7 +54,7 @@ public class Skeleton extends GLPrimitive {
 			rootBone.addBone(b);
 		}
 		
-		allBones.put(b.getName(), b);
+		allBones.put(b.name, b);
 	}
 	
 	public Bone getBone(String name) {

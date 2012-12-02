@@ -15,10 +15,10 @@ import com.floern.rhabarber.util.Vector;
 
 public class Bone {
 	
-	private List<Bone> children = new LinkedList<Bone>();
-	private Bone parent = null;
+	public List<Bone> children = new LinkedList<Bone>();
+	public Bone parent = null;
 	
-	private String name;
+	public String name;
 	
 	float angle, length;
 	
@@ -81,10 +81,6 @@ public class Bone {
 		} else {
 			return this.angle;
 		}
-	}
-	
-	public String getName() {
-		return this.name;
 	}
 	
 	

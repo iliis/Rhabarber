@@ -1,8 +1,11 @@
 package com.floern.rhabarber.logic.elements;
 
 import java.io.InputStream;
+import java.util.List;
+import java.util.ListIterator;
 
 import com.floern.rhabarber.graphic.primitives.Skeleton;
+import com.floern.rhabarber.graphic.primitives.SkeletonKeyframe;
 
 import at.emini.physics2D.Shape;
 import at.emini.physics2D.util.FXVector;
@@ -18,6 +21,8 @@ public class Player extends MovableElement {
 	private static final int elasticity = 30; //"bouncyness", 0% to 100% energy conserved
 	private static final int friction = 10; // 0% to 100%
 	
+	
+	
 	//defines playernumber
 	private int playerIdx;
 	
@@ -25,6 +30,15 @@ public class Player extends MovableElement {
 	
 	// graphics properties (yeah, this may belong somewhere else...
 	public Skeleton skeleton;
+	public List<SkeletonKeyframe> anim_standing, anim_running_left, anim_running_right;
+	
+	private static final float ANIM_SPEED_FACTOR = 5; // higher = faster
+	private static final float MOVING_THRESHOLD = 5f; // everything lower is considered standing still
+	
+	private List<SkeletonKeyframe>active_anim;
+	private SkeletonKeyframe active_kf, next_kf;
+	private ListIterator<SkeletonKeyframe> kfIterator;
+	private float frame_age = 0;
 	
 	public Player(FXVector pos, int playerIdx, InputStream skeleton) {
 		this(pos.xFX, pos.yFX, playerIdx, skeleton);
@@ -44,6 +58,48 @@ public class Player extends MovableElement {
 	public int getIdx()
 	{
 		return playerIdx;
+	}
+	
+	public void setActiveAnim(List<SkeletonKeyframe> a) {
+		assert(a.size() > 1);
+		
+		if(a != active_anim) {
+			active_anim = a;
+			kfIterator  = a.listIterator(0);
+			active_kf   = kfIterator.next();
+			next_kf     = kfIterator.next();
+			frame_age   = 0;
+		}
+	}
+	
+	public void animate(float dt) {
+		
+		if (this.velocityFX().xAsFloat() > MOVING_THRESHOLD)
+			this.setActiveAnim(this.anim_running_right);
+		else if (this.velocityFX().xAsFloat() < -MOVING_THRESHOLD)
+			this.setActiveAnim(this.anim_running_left);
+		else
+			this.setActiveAnim(this.anim_standing);
+		
+		if (this.active_anim != null)
+		{
+			assert(active_anim.size() > 1);
+			
+			
+			frame_age += dt * ANIM_SPEED_FACTOR; // / (touching?1:2); ///< slow in midair
+			while(frame_age >= active_kf.duration)
+			{
+				frame_age -= active_kf.duration;
+				
+				if(!kfIterator.hasNext())
+					kfIterator = active_anim.listIterator(0);
+					
+				active_kf = next_kf;
+				next_kf = kfIterator.next();
+			}
+
+			active_kf.apply_interpolated(frame_age / active_kf.duration, next_kf);
+		}
 	}
 	
 	//TODO add rotation stuff
