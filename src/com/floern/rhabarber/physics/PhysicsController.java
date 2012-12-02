@@ -39,6 +39,7 @@ public class PhysicsController {
 		
 		//more than 4 players are probably not feasible anyway
 		this.players = new ArrayList<Player>(4);
+		addPlayer(new Player(100,100,1));
 		//loadLevel(level);
 		
 		
@@ -120,6 +121,13 @@ public class PhysicsController {
 				FXVector vr = rot.mult(v);
 				verts.addPoint(vr.xAsFloat()+pos.xAsFloat(), vr.yAsFloat()+pos.yAsFloat());
 			}
+			
+			if (b[i] instanceof Player) {
+				gl.glColor4f(1, 0.2f, 0, 1);
+			} else {
+				gl.glColor4f(1, 1, 1, 1);
+			}
+			
 			verts.draw(gl);
 		}
 	}
