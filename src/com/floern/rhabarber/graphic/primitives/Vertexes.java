@@ -1,10 +1,14 @@
 package com.floern.rhabarber.graphic.primitives;
 
+import java.util.List;
+
 import javax.microedition.khronos.opengles.GL10;
 
 import com.floern.rhabarber.util.DynamicFloatBuffer;
+import com.floern.rhabarber.util.Vector;
 
 import android.opengl.GLES10;
+import at.emini.physics2D.util.FXVector;
 
 public class Vertexes extends GLPrimitive {
 	
@@ -18,6 +22,34 @@ public class Vertexes extends GLPrimitive {
 	
 	public Vertexes() {
 		vertices = new DynamicFloatBuffer(2*vertexDim);
+	}
+	
+	public Vertexes(FXVector[] vs) {
+		vertices = new DynamicFloatBuffer(vs.length*vertexDim);
+		for(FXVector v: vs) {
+			addPoint(v.xAsFloat(), v.yAsFloat());
+		}
+	}
+	
+	public Vertexes(Vector[] vs) {
+		vertices = new DynamicFloatBuffer(vs.length*vertexDim);
+		for(Vector v: vs) {
+			addPoint(v.x, v.y);
+		}
+	}
+	
+	public Vertexes(List<Vector> vs) {
+		vertices = new DynamicFloatBuffer(vs.size()*vertexDim);
+		for(Vector v: vs) {
+			addPoint(v.x, v.y);
+		}
+	}
+	
+	public Vertexes(List<Vector> vs, Vector offset) {
+		vertices = new DynamicFloatBuffer(vs.size()*vertexDim);
+		for(Vector v: vs) {
+			addPoint(v.x+offset.x, v.y+offset.y);
+		}
 	}
 	
 	public void addPoint(float x, float y) {
@@ -35,6 +67,7 @@ public class Vertexes extends GLPrimitive {
 		
 		// add color here
 		gl.glLineWidth(thickness);
+		gl.glPointSize(thickness);
 		
 		gl.glVertexPointer(2, GLES10.GL_FLOAT, 0, vertices.get());
 		gl.glDrawArrays(mode,  0, length);

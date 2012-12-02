@@ -19,6 +19,7 @@ import com.floern.rhabarber.graphic.primitives.Vertexes;
 import com.floern.rhabarber.logic.elements.GameWorld;
 import com.floern.rhabarber.logic.elements.Player;
 import com.floern.rhabarber.util.FXMath;
+import com.floern.rhabarber.util.Vector;
 
 public class PhysicsController {
 	
@@ -32,14 +33,14 @@ public class PhysicsController {
 	private float[] acceleration = new float[3];
 	
 	
-	public PhysicsController(InputStream level) {
+	public PhysicsController(InputStream level, InputStream player) {
 		
 		// Use GameWorld here (eg. do not use a modified world, or implement a loading function to GameWorld)
 		this.world = World.loadWorld(new PhysicsFileReader(level));// new GameWorld();
 		
 		//more than 4 players are probably not feasible anyway
 		this.players = new ArrayList<Player>(4);
-		addPlayer(new Player(100,100,1));
+		addPlayer(new Player(100,100,1,player));
 		//loadLevel(level);
 		
 		
@@ -91,8 +92,8 @@ public class PhysicsController {
 		FXVector sharedGravity = new FXVector(FXMath.floatToFX(acceleration[1]), FXMath.floatToFX(acceleration[0]));
 		
 		for (Player p : players) {
-			p.applyAcceleration(p.playerGravity, timestep);
-			sharedGravity.add(p.playerGravity);
+			//p.applyAcceleration(p.playerGravity, timestep);
+			//sharedGravity.add(p.playerGravity);
 		}
 		
 		//sharedGravity.normalize()?
@@ -108,7 +109,7 @@ public class PhysicsController {
 		 * Also beware of fixed point vectors (FXVector) -> see emini physics documentation
 		 */
 		
-		
+		gl.glColor4f(0.6f, 0.7f, 1, 1);
 		outline.draw(gl);
 		
 		Body[] b = world.getBodies();
@@ -124,6 +125,14 @@ public class PhysicsController {
 			
 			if (b[i] instanceof Player) {
 				gl.glColor4f(1, 0.2f, 0, 1);
+				
+				Player p = (Player) b[i];
+				p.skeleton.position = new Vector(p.positionFX().xAsFloat(), p.positionFX().yAsFloat()-4);
+				p.skeleton.rotation = FXMath.FX2toFloat(p.rotation2FX());
+				p.skeleton.draw(gl);
+				
+				gl.glColor4f(1, 0.2f, 0, 0.6f);
+				
 			} else {
 				gl.glColor4f(1, 1, 1, 1);
 			}

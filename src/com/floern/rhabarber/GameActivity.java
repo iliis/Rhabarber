@@ -54,7 +54,10 @@ public class GameActivity extends Activity implements SensorEventListener {
         
         
         // setup up the actual game
-        physics = new PhysicsController(this.getResources().openRawResource(R.raw.testworld));
+        // TODO: nicely implement this loading of ressources 
+        physics = new PhysicsController(this.getResources().openRawResource(R.raw.testworld),
+        								this.getResources().openRawResource(R.raw.player));
+        
         //File f = new File("/mnt/sdcard/testworld.phy");
         //physics = new PhysicsController(f);
 
