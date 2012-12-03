@@ -11,7 +11,7 @@ import android.opengl.GLSurfaceView;
 
 public class GameRenderer implements GLSurfaceView.Renderer {
 	
-	GameActivity render_callback;
+	public GameActivity render_callback;
 
 	public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 		// Set the background frame color

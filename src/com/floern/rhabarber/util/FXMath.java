@@ -15,6 +15,6 @@ public class FXMath {
 	
 	// FX2 uses 24 lower bits (for small values)
 	public static float FX2toFloat(int v) {
-		return ((float) v) / (1 << FXUtil.DECIMAL*2);
+		return ((float) v) / (1 << FXUtil.DECIMAL2);
 	}
 }

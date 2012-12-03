@@ -15,8 +15,8 @@ public class Player extends MovableElement {
 	/*
 	 * physical properties of players as used by physics engine
 	 */
-	private static final int hitBoxWidth = 10;
-	private static final int hitBoxHeight = 20;
+	private static final int hitBoxWidth = 15;
+	private static final int hitBoxHeight = 30;
 	private static final int mass = 50;
 	private static final int elasticity = 30; //"bouncyness", 0% to 100% energy conserved
 	private static final int friction = 10; // 0% to 100%
@@ -52,6 +52,7 @@ public class Player extends MovableElement {
 		this.playerIdx = playerIdx;
 		this.playerGravity = new FXVector(0, 10);
 		//this.setGravityAffected(false);
+		this.setRotatable(false);
 		this.skeleton = new Skeleton(skeleton, 0.04f);
 	}
 	
