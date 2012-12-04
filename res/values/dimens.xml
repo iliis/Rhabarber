@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="menu_subtitle">10pt</dimen>
+    <dimen name="label_space">5dp</dimen>
+    <dimen name="group_space">20dp</dimen>
+</resources>

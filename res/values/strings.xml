@@ -5,5 +5,17 @@
     <string name="title_activity_main">Rhabarber</string>
     <string name="title_activity_physics_test">PhysicsTestActivity</string>
     <string name="title_activity_game">GameActivity</string>
-
+    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_menu">Menu</string>
+    <string name="idle">idle</string>
+	<string name="advertised">advertised</string>
+	<string name="toggle_button_host_channel">Advertise game</string>
+	<string name="empty_string"></string>
+	<string name="subtitle_join">Join an existing game</string>
+	<string name="subtitle_host">Host a new game</string>
+	<string name="game_name_hint">Enter a game name</string>
+	<string name="player_count">players</string>
+	<string name="map_prompt">Choose map...</string>
+	<string name="joined">have joined</string>
+	<string name="default_map">Default Map</string>
 </resources>

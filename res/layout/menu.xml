@@ -1,0 +1,142 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/LinearLayout1"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/textViewJoinGame"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/subtitle_join"
+        android:textSize="@dimen/menu_subtitle" />
+
+    <ListView
+        android:id="@+id/listViewChannels"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:transcriptMode="alwaysScroll" >
+
+    </ListView>
+
+    <TextView
+        android:id="@+id/textViewHostGame"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/subtitle_host"
+        android:textSize="@dimen/menu_subtitle" />
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0" >
+
+        <TableRow
+            android:id="@+id/tableRow1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0" >
+
+	        <RadioButton
+	            android:id="@+id/radioButton1"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:text="@string/empty_string" />
+  		
+        	<EditText
+        	    android:id="@+id/editTextGameName"
+        	    android:layout_width="wrap_content"
+        	    android:layout_height="wrap_content"
+        	    android:layout_marginRight="@dimen/group_space"
+        	    android:layout_weight="1"
+        	    android:ems="10"
+        	    android:hint="@string/game_name_hint"
+        	    android:inputType="text" />
+
+        	<LinearLayout
+        	    android:layout_width="wrap_content"
+        	    android:layout_height="match_parent"
+        	    android:layout_marginRight="@dimen/group_space" >
+
+        		<EditText
+        		    android:id="@+id/editTextPlayerCount"
+        		    android:layout_width="50dp"
+        		    android:layout_height="wrap_content"
+        		    android:layout_marginRight="@dimen/label_space"
+        		    android:layout_weight="0"
+        		    android:ems="10"
+        		    android:inputType="number" >
+        		</EditText>
+
+        		<TextView
+        		    android:id="@+id/textViewPlayerCount"
+        		    android:layout_width="wrap_content"
+        		    android:layout_height="wrap_content"
+        		    android:layout_weight="0"
+        		    android:text="@string/player_count" />
+
+        	</LinearLayout>
+
+        	<View
+        	    android:id="@+id/View2"
+        	    android:layout_width="0dp"
+        	    android:layout_height="match_parent"
+        	    android:layout_weight="0" />
+  		
+  		</TableRow>
+
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:orientation="vertical" >
+
+          	<View
+          	    android:layout_width="0dp"
+          	    android:layout_height="match_parent" >
+
+          	</View>
+
+            <Spinner
+                android:id="@+id/spinnerMap"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="@dimen/group_space"
+                android:layout_weight="1"
+                android:prompt="@string/map_prompt" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginRight="@dimen/group_space"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/textViewJoined"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="@string/joined" />
+
+                <ProgressBar
+                    android:id="@+id/progressBarPlayerCount"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
+           	
+           	  <ToggleButton
+           	      android:id="@+id/toggleButtonAdvertise"
+           	      android:layout_width="80dp"
+           	      android:layout_height="wrap_content"
+           	      android:onClick="onClickHost"
+           	      android:text="@string/toggle_button_host_channel"
+           	      android:textOff="@string/idle"
+           	      android:textOn="@string/advertised" />
+
+        </TableRow>
+    </TableLayout>
+</LinearLayout>
