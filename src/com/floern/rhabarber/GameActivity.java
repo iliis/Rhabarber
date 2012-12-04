@@ -5,7 +5,10 @@ import java.io.File;
 import javax.microedition.khronos.opengles.GL10;
 
 import com.floern.rhabarber.graphic.GameGLSurfaceView;
+import com.floern.rhabarber.graphic.primitives.SkeletonKeyframe;
+import com.floern.rhabarber.logic.elements.Player;
 import com.floern.rhabarber.physics.PhysicsController;
+import com.floern.rhabarber.util.FXMath;
 
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -13,10 +16,13 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.Window;
 import android.view.WindowManager;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import at.emini.physics2D.util.FXUtil;
+import at.emini.physics2D.util.FXVector;
 
 
 /* contains the game itself, starts open gl (which calls the physics and logic on every frame)
@@ -31,6 +37,8 @@ public class GameActivity extends Activity implements SensorEventListener {
 	PhysicsController physics;
 	
 	private float[] acceleration = new float[3];
+	Player p;
+	boolean walk_left = false, walk_right = false;
 
     
 	@Override
@@ -54,7 +62,14 @@ public class GameActivity extends Activity implements SensorEventListener {
         
         
         // setup up the actual game
-        physics = new PhysicsController(this.getResources().openRawResource(R.raw.testworld));
+        // TODO: nicely implement this loading of ressources
+        p = new Player(100,100,1,this.getResources().openRawResource(R.raw.player));
+        p.anim_running_left  = SkeletonKeyframe.loadSKAnimation(p.skeleton, this.getResources().openRawResource(R.raw.player_running_left));
+        p.anim_running_right = SkeletonKeyframe.loadSKAnimation(p.skeleton, this.getResources().openRawResource(R.raw.player_running_right));
+        p.anim_standing      = SkeletonKeyframe.loadSKAnimation(p.skeleton, this.getResources().openRawResource(R.raw.player_standing));
+        p.setActiveAnim(p.anim_running_right);
+        physics = new PhysicsController(this.getResources().openRawResource(R.raw.testworld), p);
+        
         //File f = new File("/mnt/sdcard/testworld.phy");
         //physics = new PhysicsController(f);
 
@@ -63,8 +78,42 @@ public class GameActivity extends Activity implements SensorEventListener {
 	public void onDraw(GL10 gl) {
 		physics.tick();
 		physics.setAccel(acceleration);
+		if (walk_left != walk_right) {
+			// TODO: limit the max velocity or some such
+			
+			FXVector dir = new FXVector(1<<FXUtil.DECIMAL,0);
+			if(walk_left) {
+				dir.mult(-1);
+				p.applyAcceleration(dir, FXMath.floatToFX(1f));
+			} else
+				p.applyAcceleration(dir, FXMath.floatToFX(1f));
+		}
 		physics.draw(gl);
 	}
+	
+	
+	@Override
+    public boolean onTouchEvent(MotionEvent ev) {
+    	if (ev != null) {
+    		walk_right = false;
+    		walk_left  = false;
+    		
+    		if((MotionEvent.ACTION_MASK & ev.getAction()) != MotionEvent.ACTION_UP) {
+	    		
+	    		for (int p = 0; p < ev.getPointerCount(); p++) {
+	    			if(ev.getX(p) > this.getWindow().getDecorView().getWidth()/2) {
+		    			walk_right = true;
+		    		} else {
+		    			walk_left  = true;
+		    		}
+	    		}
+    		}
+    		
+    		return true;
+    	}
+    	
+    	return super.onTouchEvent(ev);
+    }
 	
 
 	/**

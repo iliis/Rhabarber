@@ -16,9 +16,9 @@ import at.emini.physics2D.util.FXVector;
 import at.emini.physics2D.util.PhysicsFileReader;
 
 import com.floern.rhabarber.graphic.primitives.Vertexes;
-import com.floern.rhabarber.logic.elements.GameWorld;
 import com.floern.rhabarber.logic.elements.Player;
 import com.floern.rhabarber.util.FXMath;
+import com.floern.rhabarber.util.Vector;
 
 public class PhysicsController {
 	
@@ -31,14 +31,17 @@ public class PhysicsController {
 	Vertexes outline;
 	private float[] acceleration = new float[3];
 	
+	long last_tick;
 	
-	public PhysicsController(InputStream level) {
+	
+	public PhysicsController(InputStream level, Player p) {
 		
 		// Use GameWorld here (eg. do not use a modified world, or implement a loading function to GameWorld)
 		this.world = World.loadWorld(new PhysicsFileReader(level));// new GameWorld();
 		
 		//more than 4 players are probably not feasible anyway
 		this.players = new ArrayList<Player>(4);
+		addPlayer(p);
 		//loadLevel(level);
 		
 		
@@ -54,6 +57,8 @@ public class PhysicsController {
 			outline.addPoint(A.xAsFloat(), A.yAsFloat());
 			outline.addPoint(B.xAsFloat(), B.yAsFloat());
 		}
+		
+		last_tick = System.nanoTime();
 	}
 	
 	
@@ -75,9 +80,17 @@ public class PhysicsController {
 	//calculates next state of world
 	public void tick()
 	{
+		// what about overflows? (so far I hadn't any bugs)
+		long dt = System.nanoTime() - last_tick;
+		last_tick = System.nanoTime();
+		
 		int timestep = world.getTimestepFX();
 		applyPlayerGravities(timestep);
 		world.tick();
+		
+		for(Player p: players) {
+			p.animate(((float) dt) / 1000000000);
+		}
 	}
 	
 	public void setAccel(float[] g) {
@@ -90,8 +103,8 @@ public class PhysicsController {
 		FXVector sharedGravity = new FXVector(FXMath.floatToFX(acceleration[1]), FXMath.floatToFX(acceleration[0]));
 		
 		for (Player p : players) {
-			p.applyAcceleration(p.playerGravity, timestep);
-			sharedGravity.add(p.playerGravity);
+			//p.applyAcceleration(p.playerGravity, timestep);
+			//sharedGravity.add(p.playerGravity);
 		}
 		
 		//sharedGravity.normalize()?
@@ -107,7 +120,7 @@ public class PhysicsController {
 		 * Also beware of fixed point vectors (FXVector) -> see emini physics documentation
 		 */
 		
-		
+		gl.glColor4f(0.6f, 0.7f, 1, 1);
 		outline.draw(gl);
 		
 		Body[] b = world.getBodies();
@@ -120,6 +133,21 @@ public class PhysicsController {
 				FXVector vr = rot.mult(v);
 				verts.addPoint(vr.xAsFloat()+pos.xAsFloat(), vr.yAsFloat()+pos.yAsFloat());
 			}
+			
+			if (b[i] instanceof Player) {
+				gl.glColor4f(1, 0.2f, 0, 1);
+				
+				Player p = (Player) b[i];
+				p.skeleton.position = new Vector(p.positionFX().xAsFloat(), p.positionFX().yAsFloat()-4);
+				p.skeleton.rotation = FXMath.FX2toFloat(p.rotation2FX());
+				p.skeleton.draw(gl);
+				
+				gl.glColor4f(1, 0.2f, 0, 0.6f);
+				
+			} else {
+				gl.glColor4f(1, 1, 1, 1);
+			}
+			
 			verts.draw(gl);
 		}
 	}

@@ -4,6 +4,8 @@ import com.floern.rhabarber.GameActivity;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
+import android.util.Log;
+import android.view.MotionEvent;
 
 public class GameGLSurfaceView extends GLSurfaceView {
 	
@@ -26,6 +28,8 @@ public class GameGLSurfaceView extends GLSurfaceView {
     public void setRendererCallback(GameActivity a) {
     	renderer.setRendererCallback(a);
     }
+    
+    
     
     
     @Override
