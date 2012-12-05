@@ -18,4 +18,5 @@
 	<string name="map_prompt">Choose map...</string>
 	<string name="joined">have joined</string>
 	<string name="default_map">Default Map</string>
+	<string name="start_game">Start game</string>
 </resources>
