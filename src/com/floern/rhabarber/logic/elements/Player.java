@@ -6,6 +6,7 @@ import java.util.ListIterator;
 
 import com.floern.rhabarber.graphic.primitives.Skeleton;
 import com.floern.rhabarber.graphic.primitives.SkeletonKeyframe;
+import com.floern.rhabarber.util.FXMath;
 
 import android.util.Log;
 import at.emini.physics2D.Shape;
@@ -32,7 +33,7 @@ public class Player extends MovableElement {
 	public List<SkeletonKeyframe> anim_standing, anim_running_left,
 			anim_running_right;
 
-	private static final float ANIM_SPEED_FACTOR = 5; // higher = faster
+	private static float ANIM_SPEED_FACTOR = 5; // higher = faster
 	private static final float MOVING_THRESHOLD = 5f; // everything lower is
 														// considered standing
 														// still
@@ -75,6 +76,7 @@ public class Player extends MovableElement {
 	}
 
 	public void animate(float dt) {
+		ANIM_SPEED_FACTOR = FXMath.FXtoFloat(this.velocityFX().lengthFX()) / 10;
 
 		if (this.velocityFX().xAsFloat() > MOVING_THRESHOLD)
 			this.setActiveAnim(this.anim_running_right);

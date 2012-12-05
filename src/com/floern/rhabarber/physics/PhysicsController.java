@@ -42,7 +42,7 @@ public class PhysicsController {
 		
 		World tmpWorld = World.loadWorld(new PhysicsFileReader(level));
 		this.world = new GameWorld();
-		world.setLandscape(tmpWorld.getLandscape());s
+		world.setLandscape(tmpWorld.getLandscape());
 		
 		//more than 4 players are probably not feasible anyway
 		this.players = new ArrayList<Player>(4);
