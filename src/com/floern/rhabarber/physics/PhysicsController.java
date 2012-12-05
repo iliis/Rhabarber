@@ -103,7 +103,9 @@ public class PhysicsController {
 		FXVector sharedGravity = new FXVector(FXMath.floatToFX(acceleration[1]), FXMath.floatToFX(acceleration[0]));
 		
 		for (Player p : players) {
-			//p.applyAcceleration(p.playerGravity, timestep);
+			p.playerGravity = sharedGravity;
+			p.applyAcceleration(p.playerGravity, timestep);
+			p.setRotationFromGravity();
 			//sharedGravity.add(p.playerGravity);
 		}
 		

@@ -7,9 +7,6 @@ public class GameWorld extends World{
 	public GameWorld()
 	{
 		super();
-		
-		//disable global Gravity
-		this.setGravity(0);
 	}
 
 }
