@@ -1,15 +1,9 @@
 package com.floern.rhabarber.physics;
 
-import java.io.File;
 import java.io.InputStream;
-import java.util.ArrayList;
-
 import javax.microedition.khronos.opengles.GL10;
 
-import android.content.res.AssetManager;
-import android.content.res.AssetManager.AssetInputStream;
 import android.opengl.GLES10;
-import android.util.Log;
 import at.emini.physics2D.Body;
 import at.emini.physics2D.Landscape;
 import at.emini.physics2D.World;
@@ -17,7 +11,6 @@ import at.emini.physics2D.util.FXMatrix;
 import at.emini.physics2D.util.FXVector;
 import at.emini.physics2D.util.PhysicsFileReader;
 
-import com.floern.rhabarber.R;
 import com.floern.rhabarber.graphic.primitives.Vertexes;
 import com.floern.rhabarber.logic.elements.GameWorld;
 import com.floern.rhabarber.logic.elements.Player;
@@ -27,9 +20,6 @@ import com.floern.rhabarber.util.Vector;
 public class PhysicsController {
 	
 	private GameWorld world;
-	//separate list of players for easier retrieval of players
-	private ArrayList<Player> players;
-	
 	
 	// tmp
 	Vertexes outline;
@@ -39,17 +29,10 @@ public class PhysicsController {
 	
 	
 	public PhysicsController(InputStream level, Player p) {
-		
-		World tmpWorld = World.loadWorld(new PhysicsFileReader(level));
-		this.world = new GameWorld();
-		world.setLandscape(tmpWorld.getLandscape());
-		
-		//more than 4 players are probably not feasible anyway
-		this.players = new ArrayList<Player>(4);
-		addPlayer(p);
-		//loadLevel(level);
-		
-		
+
+		loadLevel(level);
+		world.addPlayer(p);
+
 		outline = new Vertexes();
 		outline.setMode(GLES10.GL_LINES); // disconnected bunch of lines
 		outline.setThickness(3);
@@ -67,19 +50,11 @@ public class PhysicsController {
 	}
 	
 	
-	//TODO adapt to android file handling
-	private void loadLevel(File data)
+	private void loadLevel(InputStream level)
 	{
-		
-		// for more advanced stuff, maybe AssetManager would be better
-		PhysicsFileReader reader = new PhysicsFileReader(data);
-		world.setLandscape(Landscape.loadLandscape(reader));
-	}
-	
-	public void addPlayer(Player p)
-	{
-		world.addBody(p);
-		players.add(p);
+		World tmp = World.loadWorld(new PhysicsFileReader(level));
+		this.world = new GameWorld();
+		world.setLandscape(tmp.getLandscape());
 	}
 	
 	//calculates next state of world
@@ -90,33 +65,16 @@ public class PhysicsController {
 		last_tick = System.nanoTime();
 		
 		int timestep = world.getTimestepFX();
-		applyPlayerGravities(timestep);
+		world.applyPlayerGravities(timestep, acceleration);
 		world.tick();
 		
-		for(Player p: players) {
+		for(Player p: world.getPlayers()) {
 			p.animate(((float) dt) / 1000000000);
 		}
 	}
 	
 	public void setAccel(float[] g) {
 		this.acceleration = g;
-	}
-	
-	private void applyPlayerGravities(int timestep)
-	{
-		//shared gravity is normal (global) gravity and players are just not affected by normal gravity
-		FXVector sharedGravity = new FXVector(FXMath.floatToFX(acceleration[1]), FXMath.floatToFX(acceleration[0]));
-		
-		for (Player p : players) {
-			//TODO: change when distributed gravity is ready
-			p.playerGravity = sharedGravity;
-			p.applyAcceleration(p.playerGravity, timestep);
-			p.setRotationFromGravity();
-			//sharedGravity.add(p.playerGravity);
-		}
-		
-		//sharedGravity.normalize()?
-		world.setGravity(sharedGravity);
 	}
 	
 	public void draw(GL10 gl)

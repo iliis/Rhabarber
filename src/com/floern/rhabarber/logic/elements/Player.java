@@ -114,7 +114,6 @@ public class Player extends MovableElement {
 			} else {
 				this.setRotationDeg(-(int) Math.toDegrees(angle));
 			}
-			Log.d("bla", "set angle to " + angle + " radians.");
 		}
 	}
 }
