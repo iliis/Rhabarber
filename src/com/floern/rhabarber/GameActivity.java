@@ -1,6 +1,7 @@
 package com.floern.rhabarber;
 
 import java.io.File;
+import java.io.IOException;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -68,7 +69,14 @@ public class GameActivity extends Activity implements SensorEventListener {
         p.anim_running_right = SkeletonKeyframe.loadSKAnimation(p.skeleton, this.getResources().openRawResource(R.raw.player_running_right));
         p.anim_standing      = SkeletonKeyframe.loadSKAnimation(p.skeleton, this.getResources().openRawResource(R.raw.player_standing));
         p.setActiveAnim(p.anim_running_right);
-        physics = new PhysicsController(this.getResources().openRawResource(R.raw.testworld), p);
+        
+        try {
+			physics = new PhysicsController(this.getAssets().open("level/testWorld.phy"), p);
+			Log.d("bla","load successful");
+		} catch (IOException e) {
+			Log.d("bla","load failed");
+			e.printStackTrace();
+		}
         
         //File f = new File("/mnt/sdcard/testworld.phy");
         //physics = new PhysicsController(f);

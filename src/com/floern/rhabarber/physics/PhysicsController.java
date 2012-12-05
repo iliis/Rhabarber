@@ -6,6 +6,8 @@ import java.util.ArrayList;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import android.content.res.AssetManager;
+import android.content.res.AssetManager.AssetInputStream;
 import android.opengl.GLES10;
 import android.util.Log;
 import at.emini.physics2D.Body;
@@ -15,14 +17,16 @@ import at.emini.physics2D.util.FXMatrix;
 import at.emini.physics2D.util.FXVector;
 import at.emini.physics2D.util.PhysicsFileReader;
 
+import com.floern.rhabarber.R;
 import com.floern.rhabarber.graphic.primitives.Vertexes;
+import com.floern.rhabarber.logic.elements.GameWorld;
 import com.floern.rhabarber.logic.elements.Player;
 import com.floern.rhabarber.util.FXMath;
 import com.floern.rhabarber.util.Vector;
 
 public class PhysicsController {
 	
-	private World world;
+	private GameWorld world;
 	//separate list of players for easier retrieval of players
 	private ArrayList<Player> players;
 	
@@ -36,8 +40,9 @@ public class PhysicsController {
 	
 	public PhysicsController(InputStream level, Player p) {
 		
-		// Use GameWorld here (eg. do not use a modified world, or implement a loading function to GameWorld)
-		this.world = World.loadWorld(new PhysicsFileReader(level));// new GameWorld();
+		World tmpWorld = World.loadWorld(new PhysicsFileReader(level));
+		this.world = new GameWorld();
+		world.setLandscape(tmpWorld.getLandscape());s
 		
 		//more than 4 players are probably not feasible anyway
 		this.players = new ArrayList<Player>(4);
@@ -103,6 +108,7 @@ public class PhysicsController {
 		FXVector sharedGravity = new FXVector(FXMath.floatToFX(acceleration[1]), FXMath.floatToFX(acceleration[0]));
 		
 		for (Player p : players) {
+			//TODO: change when distributed gravity is ready
 			p.playerGravity = sharedGravity;
 			p.applyAcceleration(p.playerGravity, timestep);
 			p.setRotationFromGravity();
