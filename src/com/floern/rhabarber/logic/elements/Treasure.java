@@ -14,23 +14,29 @@ public class Treasure extends MovableElement {
 	private static final int elasticity = 30; // "bouncyness", 0% to 100% energy
 												// conserved
 	private static final int friction = 10; // 0% to 100%
+	
+	//value as in score
+	private int value;
 
-	public FXVector playerGravity;
-
-	public Treasure(FXVector pos, int playerIdx) {
+	public Treasure(FXVector pos, int value) {
 		super(pos, Shape.createCircle(hitCircleWidth));
 		this.shape().setElasticity(elasticity);
 		this.shape().setMass(mass);
 		this.shape().setFriction(friction);
-		this.playerGravity = new FXVector(0, 10);
+		this.value = value;
 	}
 
-	public Treasure(int x, int y, int playerIdx) {
+	public Treasure(int x, int y, int value) {
 		super(x, y, Shape.createCircle(hitCircleWidth));
 		this.shape().setElasticity(elasticity);
 		this.shape().setMass(mass);
 		this.shape().setFriction(friction);
-		this.playerGravity = new FXVector(0, 10);
+		this.value = value;
+	}
+	
+	public int getValue()
+	{
+		return value;
 	}
 
 }

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 import com.floern.rhabarber.util.FXMath;
 
+import at.emini.physics2D.Event;
+import at.emini.physics2D.PhysicsEventListener;
 import at.emini.physics2D.World;
 import at.emini.physics2D.util.FXVector;
 
@@ -23,6 +25,15 @@ public class GameWorld extends World{
 	{
 		this.addBody(p);
 		players.add(p);
+	}
+	
+	public void addTreasure(Treasure t, PhysicsEventListener l)
+	{
+		this.addBody(t);
+		Event collectedEvent = Event.createBodyEvent(t, t.shape(), Event.TYPE_BODY_COLLISION, 1, 1, 1, 1);
+		this.addEvent(collectedEvent);
+		this.setPhysicsEventListener(l);
+		
 	}
 	
 	public void applyPlayerGravities(int timestep, float[] acceleration)

@@ -8,6 +8,7 @@ import javax.microedition.khronos.opengles.GL10;
 import com.floern.rhabarber.graphic.GameGLSurfaceView;
 import com.floern.rhabarber.graphic.primitives.SkeletonKeyframe;
 import com.floern.rhabarber.logic.elements.Player;
+import com.floern.rhabarber.logic.elements.Treasure;
 import com.floern.rhabarber.physics.PhysicsController;
 import com.floern.rhabarber.util.FXMath;
 
@@ -22,6 +23,8 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import at.emini.physics2D.Event;
+import at.emini.physics2D.PhysicsEventListener;
 import at.emini.physics2D.util.FXUtil;
 import at.emini.physics2D.util.FXVector;
 
@@ -77,7 +80,6 @@ public class GameActivity extends Activity implements SensorEventListener {
 			Log.d("bla","load failed");
 			e.printStackTrace();
 		}
-        
         //File f = new File("/mnt/sdcard/testworld.phy");
         //physics = new PhysicsController(f);
 

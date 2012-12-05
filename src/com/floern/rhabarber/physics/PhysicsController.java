@@ -5,6 +5,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 import android.opengl.GLES10;
 import at.emini.physics2D.Body;
+import at.emini.physics2D.Event;
 import at.emini.physics2D.Landscape;
 import at.emini.physics2D.World;
 import at.emini.physics2D.util.FXMatrix;
@@ -77,6 +78,7 @@ public class PhysicsController {
 		this.acceleration = g;
 	}
 	
+	
 	public void draw(GL10 gl)
 	{
 		/*
@@ -116,5 +118,10 @@ public class PhysicsController {
 			
 			verts.draw(gl);
 		}
+	}
+	
+	public GameWorld getWorld()
+	{
+		return world;
 	}
 }
