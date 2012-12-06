@@ -11,6 +11,9 @@ import android.opengl.GLSurfaceView;
 
 public class GameRenderer implements GLSurfaceView.Renderer {
 	
+	private static final float NORMAL_SCREEN_WIDTH = 800;
+	private static final float NORMAL_SCREEN_HEIGHT = 480;
+	
 	public GameActivity render_callback;
 
 	public void onSurfaceCreated(GL10 gl, EGLConfig config) {
@@ -41,8 +44,14 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 		gl.glMatrixMode(GL10.GL_PROJECTION);
 		gl.glLoadIdentity();
 
-		// for now, map pixels to OpenGL coordinates (0,0 being top left)
-		gl.glOrthof(0.0f, width, height, 0.0f, -1.0f, 1.0f);
+		// map OpenGL coordinates to pixels (0,0 being top left) respecting screen size & density
+		float scaleFactorW = NORMAL_SCREEN_WIDTH / width;
+		float scaleFactorH = NORMAL_SCREEN_HEIGHT / height;
+		float scaleFactor = Math.max(scaleFactorH, scaleFactorW);
+		gl.glOrthof(0.0f, width*scaleFactor, height*scaleFactor, 0.0f, -1.0f, 1.0f);
+		//gl.glOrthof(0.0f, width, height, 0.0f, -1.0f, 1.0f); // old 1:1 mapping
+		
+		
 
 		gl.glMatrixMode(GL10.GL_MODELVIEW);
 		gl.glLoadIdentity();

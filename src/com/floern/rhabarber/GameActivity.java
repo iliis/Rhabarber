@@ -18,11 +18,15 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Display;
 import android.view.MotionEvent;
+import android.view.Surface;
 import android.view.Window;
 import android.view.WindowManager;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
+import android.content.res.Configuration;
 import at.emini.physics2D.Event;
 import at.emini.physics2D.PhysicsEventListener;
 import at.emini.physics2D.util.FXUtil;
@@ -37,6 +41,7 @@ public class GameActivity extends Activity implements SensorEventListener {
 	private GameGLSurfaceView surfaceView;
 	
 	private SensorManager sensorManager;
+	private boolean deviceIsLandscapeDefault;
 	
 	PhysicsController physics;
 	
@@ -44,6 +49,8 @@ public class GameActivity extends Activity implements SensorEventListener {
 	Player p;
 	boolean walk_left = false, walk_right = false;
 
+	
+	
     
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +70,15 @@ public class GameActivity extends Activity implements SensorEventListener {
         
         // setup sensor manager
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        
+        // check default device orientation
+        Display display = ((WindowManager)getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+        int orientation = (display.getWidth() <= display.getHeight()) ? 
+        						Configuration.ORIENTATION_PORTRAIT : Configuration.ORIENTATION_LANDSCAPE;
+        int rotation = display.getRotation();
+        deviceIsLandscapeDefault = // sensor vector is rotated on landscape-default devices (some tablets)
+        		(orientation==Configuration.ORIENTATION_LANDSCAPE && (rotation==Surface.ROTATION_0 || rotation==Surface.ROTATION_180)) ||
+                (orientation==Configuration.ORIENTATION_PORTRAIT && (rotation==Surface.ROTATION_90 || rotation==Surface.ROTATION_270));
         
         
         // setup up the actual game
@@ -139,7 +155,15 @@ public class GameActivity extends Activity implements SensorEventListener {
     	
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
         	// update acceleration values
-        	System.arraycopy(event.values, 0, acceleration, 0, 3);
+        	if (deviceIsLandscapeDefault) {
+        		// rotate X and Y
+        		acceleration[0] = event.values[1];
+        		acceleration[1] = -event.values[0];
+        		acceleration[2] = event.values[2];
+        	}
+        	else {
+        		System.arraycopy(event.values, 0, acceleration, 0, 3);
+        	}
         }
     }
 
