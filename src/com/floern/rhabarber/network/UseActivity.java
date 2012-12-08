@@ -87,7 +87,7 @@ public class UseActivity extends Activity implements Observer {
          * we need to "check in" with the application so it can ensure that our
          * required services are running.
          */
-        mChatApplication = (ChatApplication)getApplication();
+        mChatApplication = (NetworkController)getApplication();
         mChatApplication.checkin();
         
         /*
@@ -108,7 +108,7 @@ public class UseActivity extends Activity implements Observer {
     
 	public void onDestroy() {
         Log.i(TAG, "onDestroy()");
-        mChatApplication = (ChatApplication)getApplication();
+        mChatApplication = (NetworkController)getApplication();
         mChatApplication.deleteObserver(this);
     	super.onDestroy();
  	}
@@ -147,22 +147,22 @@ public class UseActivity extends Activity implements Observer {
         Log.i(TAG, "update(" + arg + ")");
         String qualifier = (String)arg;
         
-        if (qualifier.equals(ChatApplication.APPLICATION_QUIT_EVENT)) {
+        if (qualifier.equals(NetworkController.APPLICATION_QUIT_EVENT)) {
             Message message = mHandler.obtainMessage(HANDLE_APPLICATION_QUIT_EVENT);
             mHandler.sendMessage(message);
         }
         
-        if (qualifier.equals(ChatApplication.HISTORY_CHANGED_EVENT)) {
+        if (qualifier.equals(NetworkController.HISTORY_CHANGED_EVENT)) {
             Message message = mHandler.obtainMessage(HANDLE_HISTORY_CHANGED_EVENT);
             mHandler.sendMessage(message);
         }
         
-        if (qualifier.equals(ChatApplication.USE_CHANNEL_STATE_CHANGED_EVENT)) {
+        if (qualifier.equals(NetworkController.USE_CHANNEL_STATE_CHANGED_EVENT)) {
             Message message = mHandler.obtainMessage(HANDLE_CHANNEL_STATE_CHANGED_EVENT);
             mHandler.sendMessage(message);
         }
         
-        if (qualifier.equals(ChatApplication.ALLJOYN_ERROR_EVENT)) {
+        if (qualifier.equals(NetworkController.ALLJOYN_ERROR_EVENT)) {
             Message message = mHandler.obtainMessage(HANDLE_ALLJOYN_ERROR_EVENT);
             mHandler.sendMessage(message);
         }
@@ -206,8 +206,8 @@ public class UseActivity extends Activity implements Observer {
      * handle the general errors.  We also handle our own errors.
      */
     private void alljoynError() {
-    	if (mChatApplication.getErrorModule() == ChatApplication.Module.GENERAL ||
-    		mChatApplication.getErrorModule() == ChatApplication.Module.USE) {
+    	if (mChatApplication.getErrorModule() == NetworkController.Module.GENERAL ||
+    		mChatApplication.getErrorModule() == NetworkController.Module.USE) {
     		showDialog(DIALOG_ALLJOYN_ERROR_ID);
     	}
     }
@@ -250,7 +250,7 @@ public class UseActivity extends Activity implements Observer {
         }
     };
     
-    private ChatApplication mChatApplication = null;
+    private NetworkController mChatApplication = null;
     
     private ArrayAdapter<String> mHistoryList;
     

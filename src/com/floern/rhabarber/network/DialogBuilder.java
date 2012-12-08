@@ -39,7 +39,7 @@ import com.floern.rhabarber.R;
 public class DialogBuilder {
     private static final String TAG = "Dialogs";
     
-    public Dialog createUseJoinDialog(final Activity activity, final ChatApplication application) {
+    public Dialog createUseJoinDialog(final Activity activity, final NetworkController application) {
     	Log.i(TAG, "createUseJoinDialog()");
     	final Dialog dialog = new Dialog(activity);
     	dialog.requestWindowFeature(dialog.getWindow().FEATURE_NO_TITLE);
@@ -90,7 +90,7 @@ public class DialogBuilder {
     	return dialog;
     }
     
-    public Dialog createUseLeaveDialog(Activity activity, final ChatApplication application) {
+    public Dialog createUseLeaveDialog(Activity activity, final NetworkController application) {
        	Log.i(TAG, "createUseLeaveDialog()");
     	final Dialog dialog = new Dialog(activity);
     	dialog.requestWindowFeature(dialog.getWindow().FEATURE_NO_TITLE);
@@ -116,7 +116,7 @@ public class DialogBuilder {
     }
     
     // Done
-    public Dialog createHostNameDialog(Activity activity, final ChatApplication application) {
+    public Dialog createHostNameDialog(Activity activity, final NetworkController application) {
        	Log.i(TAG, "createHostNameDialog()");
     	final Dialog dialog = new Dialog(activity);
     	dialog.requestWindowFeature(dialog.getWindow().FEATURE_NO_TITLE);
@@ -156,7 +156,7 @@ public class DialogBuilder {
     }
     
     // done
-    public Dialog createHostStartDialog(Activity activity, final ChatApplication application) {
+    public Dialog createHostStartDialog(Activity activity, final NetworkController application) {
        	Log.i(TAG, "createHostStartDialog()");
     	final Dialog dialog = new Dialog(activity);
     	dialog.requestWindowFeature(dialog.getWindow().FEATURE_NO_TITLE);
@@ -181,7 +181,7 @@ public class DialogBuilder {
     }
 
     // done
-    public Dialog createHostStopDialog(Activity activity, final ChatApplication application) {
+    public Dialog createHostStopDialog(Activity activity, final NetworkController application) {
        	Log.i(TAG, "createHostStopDialog()");
     	final Dialog dialog = new Dialog(activity);
     	dialog.requestWindowFeature(dialog.getWindow().FEATURE_NO_TITLE);
@@ -205,7 +205,7 @@ public class DialogBuilder {
     	return dialog;
     }
     
-    public Dialog createAllJoynErrorDialog(Activity activity, final ChatApplication application) {
+    public Dialog createAllJoynErrorDialog(Activity activity, final NetworkController application) {
        	Log.i(TAG, "createAllJoynErrorDialog()");
     	final Dialog dialog = new Dialog(activity);
     	dialog.requestWindowFeature(dialog.getWindow().FEATURE_NO_TITLE);
@@ -224,7 +224,7 @@ public class DialogBuilder {
     	return dialog;
     }
 
-	public Dialog createJoinDialog(Activity activity, final ChatApplication application) {
+	public Dialog createJoinDialog(Activity activity, final NetworkController application) {
 		// TODO Auto-generated method stub
 		return null;
 	}

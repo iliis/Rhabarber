@@ -23,7 +23,7 @@ import org.alljoyn.bus.BusException;
 import org.alljoyn.bus.annotation.BusInterface;
 import org.alljoyn.bus.annotation.BusSignal;
 
-@BusInterface (name = "org.alljoyn.bus.samples.chat")
+@BusInterface (name = "com.floern.rhabarber")
 public interface ChatInterface {
     /*
      * The BusSignal annotation signifies that this function should be used as

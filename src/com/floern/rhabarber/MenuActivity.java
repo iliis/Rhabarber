@@ -27,7 +27,7 @@ public class MenuActivity extends Activity implements Observer {
 
 	private static final int TOAST_DURATION = Toast.LENGTH_SHORT;
 
-	private ChatApplication networkController = null;
+	private NetworkController networkController = null;
 
 	private MyArrayAdapter adapter;
 	ArrayList<GameDescription> gameDescriptions = new ArrayList<GameDescription>();
@@ -71,7 +71,7 @@ public class MenuActivity extends Activity implements Observer {
 		 * need to "check in" with the application so it can ensure that our
 		 * required services are running.
 		 */
-		networkController = (ChatApplication) getApplication();
+		networkController = (NetworkController) getApplication();
 		networkController.checkin();
 
 		/*
@@ -144,7 +144,7 @@ public class MenuActivity extends Activity implements Observer {
 
 	public void onDestroy() {
 		Log.i(TAG, "onDestroy()");
-		networkController = (ChatApplication) getApplication();
+		networkController = (NetworkController) getApplication();
 		networkController.deleteObserver(this);
 		super.onDestroy();
 	}
@@ -174,19 +174,19 @@ public class MenuActivity extends Activity implements Observer {
 		Log.i(TAG, "update(" + arg + ")");
 		String qualifier = (String) arg;
 
-		if (qualifier.equals(ChatApplication.APPLICATION_QUIT_EVENT)) {
+		if (qualifier.equals(NetworkController.APPLICATION_QUIT_EVENT)) {
 			Message message = mHandler
 					.obtainMessage(HANDLE_APPLICATION_QUIT_EVENT);
 			mHandler.sendMessage(message);
 		}
 
-		if (qualifier.equals(ChatApplication.HOST_CHANNEL_STATE_CHANGED_EVENT)) {
+		if (qualifier.equals(NetworkController.HOST_CHANNEL_STATE_CHANGED_EVENT)) {
 			Message message = mHandler
 					.obtainMessage(HANDLE_CHANNEL_STATE_CHANGED_EVENT);
 			mHandler.sendMessage(message);
 		}
 
-		if (qualifier.equals(ChatApplication.ALLJOYN_ERROR_EVENT)) {
+		if (qualifier.equals(NetworkController.ALLJOYN_ERROR_EVENT)) {
 			Message message = mHandler
 					.obtainMessage(HANDLE_ALLJOYN_ERROR_EVENT);
 			mHandler.sendMessage(message);
@@ -246,8 +246,8 @@ public class MenuActivity extends Activity implements Observer {
 	}
 
 	private void alljoynError() {
-		if (networkController.getErrorModule() == ChatApplication.Module.GENERAL
-				|| networkController.getErrorModule() == ChatApplication.Module.USE) {
+		if (networkController.getErrorModule() == NetworkController.Module.GENERAL
+				|| networkController.getErrorModule() == NetworkController.Module.USE) {
 			showDialog(DIALOG_ALLJOYN_ERROR_ID);
 		}
 	}

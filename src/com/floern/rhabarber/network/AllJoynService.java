@@ -68,7 +68,7 @@ public class AllJoynService extends Service implements Observer {
 	public void onCreate() {
         Log.i(TAG, "onCreate()");
         startBusThread();
-        mChatApplication = (ChatApplication)getApplication();
+        mChatApplication = (NetworkController)getApplication();
         mChatApplication.addObserver(this);
         
         CharSequence title = "AllJoyn";
@@ -130,7 +130,7 @@ public class AllJoynService extends Service implements Observer {
      * A reference to a descendent of the Android Application class that is
      * acting as the Model of our MVC-based application.
      */
-     private ChatApplication mChatApplication = null;
+     private NetworkController mChatApplication = null;
 	
     /**
      * This is the event handler for the Observable/Observed design pattern.
@@ -161,37 +161,37 @@ public class AllJoynService extends Service implements Observer {
         Log.i(TAG, "update(" + arg + ")");
         String qualifier = (String)arg;
         
-        if (qualifier.equals(ChatApplication.APPLICATION_QUIT_EVENT)) {
+        if (qualifier.equals(NetworkController.APPLICATION_QUIT_EVENT)) {
             Message message = mHandler.obtainMessage(HANDLE_APPLICATION_QUIT_EVENT);
             mHandler.sendMessage(message);
         }
         
-        if (qualifier.equals(ChatApplication.USE_JOIN_CHANNEL_EVENT)) {
+        if (qualifier.equals(NetworkController.USE_JOIN_CHANNEL_EVENT)) {
             Message message = mHandler.obtainMessage(HANDLE_USE_JOIN_CHANNEL_EVENT);
             mHandler.sendMessage(message);
         }
         
-        if (qualifier.equals(ChatApplication.USE_LEAVE_CHANNEL_EVENT)) {
+        if (qualifier.equals(NetworkController.USE_LEAVE_CHANNEL_EVENT)) {
             Message message = mHandler.obtainMessage(HANDLE_USE_LEAVE_CHANNEL_EVENT);
             mHandler.sendMessage(message);
         }
         
-        if (qualifier.equals(ChatApplication.HOST_INIT_CHANNEL_EVENT)) {
+        if (qualifier.equals(NetworkController.HOST_INIT_CHANNEL_EVENT)) {
             Message message = mHandler.obtainMessage(HANDLE_HOST_INIT_CHANNEL_EVENT);
             mHandler.sendMessage(message);
         }
         
-        if (qualifier.equals(ChatApplication.HOST_START_CHANNEL_EVENT)) {
+        if (qualifier.equals(NetworkController.HOST_START_CHANNEL_EVENT)) {
             Message message = mHandler.obtainMessage(HANDLE_HOST_START_CHANNEL_EVENT);
             mHandler.sendMessage(message);
         }
         
-        if (qualifier.equals(ChatApplication.HOST_STOP_CHANNEL_EVENT)) {
+        if (qualifier.equals(NetworkController.HOST_STOP_CHANNEL_EVENT)) {
             Message message = mHandler.obtainMessage(HANDLE_HOST_STOP_CHANNEL_EVENT);
             mHandler.sendMessage(message);
         }
         
-        if (qualifier.equals(ChatApplication.OUTBOUND_CHANGED_EVENT)) {
+        if (qualifier.equals(NetworkController.OUTBOUND_CHANGED_EVENT)) {
             Message message = mHandler.obtainMessage(HANDLE_OUTBOUND_CHANGED_EVENT);
             mHandler.sendMessage(message);
         }
@@ -611,7 +611,7 @@ public class AllJoynService extends Service implements Observer {
      * clients.  Pretty much all communiation with AllJoyn is going to go through
      * this obejct.
      */
-    private BusAttachment mBus  = new BusAttachment(ChatApplication.PACKAGE_NAME, BusAttachment.RemoteMessage.Receive);
+    private BusAttachment mBus  = new BusAttachment(NetworkController.PACKAGE_NAME, BusAttachment.RemoteMessage.Receive);
     
     /**
      * The well-known name prefix which all bus attachments hosting a channel
@@ -619,7 +619,7 @@ public class AllJoynService extends Service implements Observer {
      * the well-known name a hosting bus attachment will request and 
      * advertise.
      */
-    private static final String NAME_PREFIX = "org.alljoyn.bus.samples.chat";
+    private static final String NAME_PREFIX = "com.floern.rhabarber";
     
 	/**
 	 * The well-known session port used as the contact port for the chat service.
@@ -656,7 +656,7 @@ public class AllJoynService extends Service implements Observer {
 		 */
 		public void foundAdvertisedName(String name, short transport, String namePrefix) {
             Log.i(TAG, "mBusListener.foundAdvertisedName(" + name + ")");
-			ChatApplication application = (ChatApplication)getApplication();
+			NetworkController application = (NetworkController)getApplication();
 			application.addFoundChannel(name);
 		}
 		
@@ -675,7 +675,7 @@ public class AllJoynService extends Service implements Observer {
 		 */
 		public void lostAdvertisedName(String name, short transport, String namePrefix) {
             Log.i(TAG, "mBusListener.lostAdvertisedName(" + name + ")");
-			ChatApplication application = (ChatApplication)getApplication();
+			NetworkController application = (NetworkController)getApplication();
 			application.removeFoundChannel(name);
 		}
     }
@@ -711,19 +711,19 @@ public class AllJoynService extends Service implements Observer {
          */
         Status status = mBus.registerBusObject(mChatService, OBJECT_PATH);
         if (Status.OK != status) {
-    		mChatApplication.alljoynError(ChatApplication.Module.HOST, "Unable to register the chat bus object: (" + status + ")");
+    		mChatApplication.alljoynError(NetworkController.Module.HOST, "Unable to register the chat bus object: (" + status + ")");
         	return;
         }
     	
     	status = mBus.connect();
     	if (status != Status.OK) {
-    		mChatApplication.alljoynError(ChatApplication.Module.GENERAL, "Unable to connect to the bus: (" + status + ")");
+    		mChatApplication.alljoynError(NetworkController.Module.GENERAL, "Unable to connect to the bus: (" + status + ")");
         	return;
     	}
     	
         status = mBus.registerSignalHandlers(this);
     	if (status != Status.OK) {
-    		mChatApplication.alljoynError(ChatApplication.Module.GENERAL, "Unable to register signal handlers: (" + status + ")");
+    		mChatApplication.alljoynError(NetworkController.Module.GENERAL, "Unable to register signal handlers: (" + status + ")");
         	return;
     	}
         
@@ -761,7 +761,7 @@ public class AllJoynService extends Service implements Observer {
         	mBusAttachmentState = BusAttachmentState.DISCOVERING;
         	return;
     	} else {
-    		mChatApplication.alljoynError(ChatApplication.Module.USE, "Unable to start finding advertised names: (" + status + ")");
+    		mChatApplication.alljoynError(NetworkController.Module.USE, "Unable to start finding advertised names: (" + status + ")");
         	return;
     	}
     }
@@ -801,7 +801,7 @@ public class AllJoynService extends Service implements Observer {
           	mHostChannelState = HostChannelState.NAMED;
           	mChatApplication.hostSetChannelState(mHostChannelState);
         } else {
-    		mChatApplication.alljoynError(ChatApplication.Module.USE, "Unable to acquire well-known name: (" + status + ")");
+    		mChatApplication.alljoynError(NetworkController.Module.USE, "Unable to acquire well-known name: (" + status + ")");
         }
     }
     
@@ -900,7 +900,7 @@ public class AllJoynService extends Service implements Observer {
         	mHostChannelState = HostChannelState.BOUND;
           	mChatApplication.hostSetChannelState(mHostChannelState);
         } else {
-    		mChatApplication.alljoynError(ChatApplication.Module.HOST, "Unable to bind session contact port: (" + status + ")");
+    		mChatApplication.alljoynError(NetworkController.Module.HOST, "Unable to bind session contact port: (" + status + ")");
         	return;
         }
     }
@@ -961,7 +961,7 @@ public class AllJoynService extends Service implements Observer {
         	mHostChannelState = HostChannelState.ADVERTISED;
           	mChatApplication.hostSetChannelState(mHostChannelState);
         } else {
-    		mChatApplication.alljoynError(ChatApplication.Module.HOST, "Unable to advertise well-known name: (" + status + ")");
+    		mChatApplication.alljoynError(NetworkController.Module.HOST, "Unable to advertise well-known name: (" + status + ")");
         	return;
         }
     }
@@ -981,7 +981,7 @@ public class AllJoynService extends Service implements Observer {
         Status status = mBus.cancelAdvertiseName(wellKnownName, SessionOpts.TRANSPORT_ANY);
         
         if (status != Status.OK) {
-    		mChatApplication.alljoynError(ChatApplication.Module.HOST, "Unable to cancel advertisement of well-known name: (" + status + ")");
+    		mChatApplication.alljoynError(NetworkController.Module.HOST, "Unable to cancel advertisement of well-known name: (" + status + ")");
         	return;
         }
         
@@ -1099,7 +1099,7 @@ public class AllJoynService extends Service implements Observer {
              */
             public void sessionLost(int sessionId) {
                 Log.i(TAG, "BusListener.sessionLost(" + sessionId + ")");
-        		mChatApplication.alljoynError(ChatApplication.Module.USE, "The chat session has been lost");
+        		mChatApplication.alljoynError(NetworkController.Module.USE, "The chat session has been lost");
              	mUseChannelState = UseChannelState.IDLE;
               	mChatApplication.useSetChannelState(mUseChannelState);
             }
@@ -1109,7 +1109,7 @@ public class AllJoynService extends Service implements Observer {
             Log.i(TAG, "doJoinSession(): use sessionId is " + mUseSessionId);
         	mUseSessionId = sessionId.value;
         } else {
-    		mChatApplication.alljoynError(ChatApplication.Module.USE, "Unable to join chat session: (" + status + ")");
+    		mChatApplication.alljoynError(NetworkController.Module.USE, "Unable to join chat session: (" + status + ")");
         	return;
         }
         
@@ -1175,7 +1175,7 @@ public class AllJoynService extends Service implements Observer {
 					mChatInterface.Chat(message);
 				}
 			} catch (BusException ex) {
-	    		mChatApplication.alljoynError(ChatApplication.Module.USE, "Bus exception while sending message: (" + ex + ")");
+	    		mChatApplication.alljoynError(NetworkController.Module.USE, "Bus exception while sending message: (" + ex + ")");
 			}
     	}
     }
@@ -1210,7 +1210,7 @@ public class AllJoynService extends Service implements Observer {
      * letter capitalized to conform with the DBus convention for signal 
      * handler names.
      */
-    @BusSignalHandler(iface = "org.alljoyn.bus.samples.chat", signal = "Chat")
+    @BusSignalHandler(iface = "com.floern.rhabarber", signal = "Chat")
     public void Chat(String string) {
     	
         /*
