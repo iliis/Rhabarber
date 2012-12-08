@@ -14,6 +14,8 @@ public class GameWorld extends World{
 	//separate list of players for easier retrieval of players
 	private ArrayList<Player> players;
 	
+	public final float G = 100; // gravity
+	
 	public GameWorld()
 	{
 		super();
@@ -41,6 +43,10 @@ public class GameWorld extends World{
 		//shared gravity is normal (global) gravity and players are just not affected by normal gravity
 		FXVector sharedGravity = new FXVector(FXMath.floatToFX(acceleration[1]), FXMath.floatToFX(acceleration[0]));
 		
+		// as of https://trello.com/card/gemeinsame-gravitation-normalisieren/50a0c9d75e0399ad5e0201ca/20
+		sharedGravity.normalize();
+		sharedGravity.multFX(FXMath.floatToFX(G));
+		
 		for (Player p : players) {
 			//TODO: change when distributed gravity is ready
 			p.playerGravity = sharedGravity;
@@ -49,7 +55,7 @@ public class GameWorld extends World{
 			//sharedGravity.add(p.playerGravity);
 		}
 		
-		//sharedGravity.normalize()?
+		
 		setGravity(sharedGravity);
 	}
 	

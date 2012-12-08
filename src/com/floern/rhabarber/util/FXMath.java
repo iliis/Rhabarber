@@ -17,4 +17,8 @@ public class FXMath {
 	public static float FX2toFloat(int v) {
 		return ((float) v) / (1 << FXUtil.DECIMAL2);
 	}
+
+	public static float FXtoFloat(long v) {
+		return ((float) v) / (1 << FXUtil.DECIMAL);
+	}
 }

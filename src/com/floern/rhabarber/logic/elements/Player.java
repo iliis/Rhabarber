@@ -34,8 +34,8 @@ public class Player extends MovableElement {
 	public List<SkeletonKeyframe> anim_standing, anim_running_left,
 			anim_running_right;
 
-	private static float ANIM_SPEED_FACTOR = 2; // lower = faster
-	private static final float MOVING_THRESHOLD = 5f; // everything lower is
+	private static final float ANIM_SPEED_FACTOR =  2; // lower = faster
+	private static final float MOVING_THRESHOLD  = 10; // everything lower is
 														// considered standing
 														// still
 
@@ -77,19 +77,23 @@ public class Player extends MovableElement {
 	}
 
 	public void animate(float dt) {
-		float speed = FloatMath.sqrt(FXMath.FXtoFloat(this.velocityFX().lengthFX())) / ANIM_SPEED_FACTOR;
-
-		if (this.velocityFX().xAsFloat() > MOVING_THRESHOLD)
+		final float aligned_speed = FXMath.FXtoFloat(this.velocityFX().dotFX(this.getAxes()[1]));
+		float speed_factor        = FloatMath.sqrt(aligned_speed>=0?aligned_speed:-aligned_speed) / ANIM_SPEED_FACTOR;
+		//Log.d("foo", Float.toString(aligned_speed) + "  //  " + Float.toString(speed_factor));
+		
+		if (aligned_speed > MOVING_THRESHOLD)
 			this.setActiveAnim(this.anim_running_right);
-		else if (this.velocityFX().xAsFloat() < -MOVING_THRESHOLD)
+		else if (aligned_speed < -MOVING_THRESHOLD)
 			this.setActiveAnim(this.anim_running_left);
-		else
+		else {
 			this.setActiveAnim(this.anim_standing);
+			speed_factor = 1 / ANIM_SPEED_FACTOR;
+		}
 
 		if (this.active_anim != null) {
 			assert (active_anim.size() > 1);
 
-			frame_age += dt * speed; // / (touching?1:2); ///< slow
+			frame_age += dt * speed_factor; // / (touching?1:2); ///< slow
 													// in midair
 			while (frame_age >= active_kf.duration) {
 				frame_age -= active_kf.duration;
