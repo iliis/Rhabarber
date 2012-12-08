@@ -28,6 +28,8 @@ public class PhysicsController {
 	
 	long last_tick;
 	
+	public float min_x, max_x, min_y, max_y; // size of landscape
+	
 	
 	public PhysicsController(InputStream level, Player p) {
 
@@ -45,6 +47,9 @@ public class PhysicsController {
 			
 			outline.addPoint(A.xAsFloat(), A.yAsFloat());
 			outline.addPoint(B.xAsFloat(), B.yAsFloat());
+			
+			min_x = Math.min(Math.min(A.xAsFloat(), B.xAsFloat()), min_x); max_x = Math.max(Math.max(A.xAsFloat(), B.xAsFloat()), max_x);
+			min_y = Math.min(Math.min(A.yAsFloat(), B.yAsFloat()), min_y); max_y = Math.max(Math.max(A.yAsFloat(), B.yAsFloat()), max_y);
 		}
 		
 		last_tick = System.nanoTime();

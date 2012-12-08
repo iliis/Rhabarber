@@ -1,6 +1,5 @@
 package com.floern.rhabarber;
 
-import java.io.File;
 import java.io.IOException;
 
 import javax.microedition.khronos.opengles.GL10;
@@ -8,7 +7,6 @@ import javax.microedition.khronos.opengles.GL10;
 import com.floern.rhabarber.graphic.GameGLSurfaceView;
 import com.floern.rhabarber.graphic.primitives.SkeletonKeyframe;
 import com.floern.rhabarber.logic.elements.Player;
-import com.floern.rhabarber.logic.elements.Treasure;
 import com.floern.rhabarber.physics.PhysicsController;
 import com.floern.rhabarber.util.FXMath;
 
@@ -27,8 +25,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
-import at.emini.physics2D.Event;
-import at.emini.physics2D.PhysicsEventListener;
 import at.emini.physics2D.util.FXUtil;
 import at.emini.physics2D.util.FXVector;
 
@@ -91,6 +87,7 @@ public class GameActivity extends Activity implements SensorEventListener {
         
         try {
 			physics = new PhysicsController(this.getAssets().open("level/testWorld.phy"), p);
+			surfaceView.renderer.readLevelSize(physics);
 			Log.d("bla","load successful");
 		} catch (IOException e) {
 			Log.d("bla","load failed");

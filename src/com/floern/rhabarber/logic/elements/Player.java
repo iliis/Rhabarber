@@ -8,6 +8,7 @@ import com.floern.rhabarber.graphic.primitives.Skeleton;
 import com.floern.rhabarber.graphic.primitives.SkeletonKeyframe;
 import com.floern.rhabarber.util.FXMath;
 
+import android.util.FloatMath;
 import android.util.Log;
 import at.emini.physics2D.Shape;
 import at.emini.physics2D.util.FXVector;
@@ -21,7 +22,7 @@ public class Player extends MovableElement {
 	private static final int mass = 50;
 	private static final int elasticity = 30; // "bouncyness", 0% to 100% energy
 												// conserved
-	private static final int friction = 10; // 0% to 100%
+	private static final int friction = 90; // 0% to 100%
 
 	// defines playernumber
 	private int playerIdx;
@@ -33,7 +34,7 @@ public class Player extends MovableElement {
 	public List<SkeletonKeyframe> anim_standing, anim_running_left,
 			anim_running_right;
 
-	private static float ANIM_SPEED_FACTOR = 5; // higher = faster
+	private static float ANIM_SPEED_FACTOR = 2; // lower = faster
 	private static final float MOVING_THRESHOLD = 5f; // everything lower is
 														// considered standing
 														// still
@@ -76,7 +77,7 @@ public class Player extends MovableElement {
 	}
 
 	public void animate(float dt) {
-		ANIM_SPEED_FACTOR = FXMath.FXtoFloat(this.velocityFX().lengthFX()) / 10;
+		float speed = FloatMath.sqrt(FXMath.FXtoFloat(this.velocityFX().lengthFX())) / ANIM_SPEED_FACTOR;
 
 		if (this.velocityFX().xAsFloat() > MOVING_THRESHOLD)
 			this.setActiveAnim(this.anim_running_right);
@@ -88,7 +89,7 @@ public class Player extends MovableElement {
 		if (this.active_anim != null) {
 			assert (active_anim.size() > 1);
 
-			frame_age += dt * ANIM_SPEED_FACTOR; // / (touching?1:2); ///< slow
+			frame_age += dt * speed; // / (touching?1:2); ///< slow
 													// in midair
 			while (frame_age >= active_kf.duration) {
 				frame_age -= active_kf.duration;
