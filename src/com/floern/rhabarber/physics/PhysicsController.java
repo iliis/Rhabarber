@@ -4,17 +4,21 @@ import java.io.InputStream;
 import javax.microedition.khronos.opengles.GL10;
 
 import android.opengl.GLES10;
+import android.util.Log;
 import at.emini.physics2D.Body;
 import at.emini.physics2D.Event;
 import at.emini.physics2D.Landscape;
+import at.emini.physics2D.PhysicsEventListener;
 import at.emini.physics2D.World;
 import at.emini.physics2D.util.FXMatrix;
 import at.emini.physics2D.util.FXVector;
 import at.emini.physics2D.util.PhysicsFileReader;
 
+import com.floern.rhabarber.graphic.primitives.IGLPrimitive;
 import com.floern.rhabarber.graphic.primitives.Vertexes;
 import com.floern.rhabarber.logic.elements.GameWorld;
 import com.floern.rhabarber.logic.elements.Player;
+import com.floern.rhabarber.logic.elements.Treasure;
 import com.floern.rhabarber.util.FXMath;
 import com.floern.rhabarber.util.Vector;
 
@@ -35,6 +39,11 @@ public class PhysicsController {
 
 		loadLevel(level);
 		world.addPlayer(p);
+		
+		// test treasure
+		world.addTreasure(new Treasure(300, 300, 42), new PhysicsEventListener() {
+			public void eventTriggered(Event arg0, Object arg1) { }
+		});
 
 		outline = new Vertexes();
 		outline.setMode(GLES10.GL_LINES); // disconnected bunch of lines
@@ -98,15 +107,29 @@ public class PhysicsController {
 		
 		Body[] b = world.getBodies();
 		for(int i = 0; i < world.getBodyCount(); i++) {
-			FXVector[] vertsFX = b[i].shape().getCorners();
-			FXVector pos = b[i].positionFX();
-			Vertexes verts = new Vertexes(); verts.setMode(GLES10.GL_LINE_LOOP);
-			FXMatrix rot = b[i].getRotationMatrix();
-			for(FXVector v: vertsFX) {
-				FXVector vr = rot.mult(v);
-				verts.addPoint(vr.xAsFloat()+pos.xAsFloat(), vr.yAsFloat()+pos.yAsFloat());
-			}
+
 			
+			if (b[i] instanceof IGLPrimitive) {
+				// draw element
+				((IGLPrimitive)b[i]).draw(gl);
+			}
+			//else {
+				// draw shape
+				FXVector[] vertsFX = b[i].shape().getCorners();
+				FXVector pos = b[i].positionFX();
+				Vertexes verts = new Vertexes(); verts.setMode(GLES10.GL_LINE_LOOP);
+				FXMatrix rot = b[i].getRotationMatrix();
+				for (FXVector v: vertsFX) {
+					FXVector vr = rot.mult(v);
+					verts.addPoint(vr.xAsFloat()+pos.xAsFloat(), vr.yAsFloat()+pos.yAsFloat());
+				}
+				gl.glColor4f(1, 1, 1, 1);
+				verts.draw(gl);
+			//}
+			
+			
+			
+			/* // old draw code
 			if (b[i] instanceof Player) {
 				gl.glColor4f(1, 0.2f, 0, 1);
 				
@@ -120,8 +143,8 @@ public class PhysicsController {
 			} else {
 				gl.glColor4f(1, 1, 1, 1);
 			}
-			
 			verts.draw(gl);
+			*/
 		}
 	}
 	

@@ -4,9 +4,12 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.ListIterator;
 
+import javax.microedition.khronos.opengles.GL10;
+
 import com.floern.rhabarber.graphic.primitives.Skeleton;
 import com.floern.rhabarber.graphic.primitives.SkeletonKeyframe;
 import com.floern.rhabarber.util.FXMath;
+import com.floern.rhabarber.util.Vector;
 
 import android.util.FloatMath;
 import android.util.Log;
@@ -120,5 +123,14 @@ public class Player extends MovableElement {
 				this.setRotationDeg(-(int) Math.toDegrees(angle));
 			}
 		}
+	}
+
+	
+	public void draw(GL10 gl) {
+		gl.glColor4f(1, 0.2f, 0, 1);
+		
+		skeleton.position = new Vector(positionFX().xAsFloat(), positionFX().yAsFloat()-4);
+		skeleton.rotation = FXMath.FX2toFloat(rotation2FX());
+		skeleton.draw(gl);
 	}
 }
