@@ -1,10 +1,12 @@
 package com.floern.rhabarber.logic.elements;
 
+import com.floern.rhabarber.graphic.primitives.IGLPrimitive;
+
 import at.emini.physics2D.Body;
 import at.emini.physics2D.Shape;
 import at.emini.physics2D.util.FXVector;
 
-public abstract class Element extends Body {
+public abstract class Element extends Body implements IGLPrimitive {
 
 	/*
 	 * defines how Elements stack on each other

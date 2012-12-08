@@ -4,10 +4,14 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.ListIterator;
 
+import javax.microedition.khronos.opengles.GL10;
+
 import com.floern.rhabarber.graphic.primitives.Skeleton;
 import com.floern.rhabarber.graphic.primitives.SkeletonKeyframe;
 import com.floern.rhabarber.util.FXMath;
+import com.floern.rhabarber.util.Vector;
 
+import android.util.FloatMath;
 import android.util.Log;
 import at.emini.physics2D.Shape;
 import at.emini.physics2D.util.FXVector;
@@ -21,7 +25,7 @@ public class Player extends MovableElement {
 	private static final int mass = 50;
 	private static final int elasticity = 30; // "bouncyness", 0% to 100% energy
 												// conserved
-	private static final int friction = 10; // 0% to 100%
+	private static final int friction = 90; // 0% to 100%
 
 	// defines playernumber
 	private int playerIdx;
@@ -33,8 +37,8 @@ public class Player extends MovableElement {
 	public List<SkeletonKeyframe> anim_standing, anim_running_left,
 			anim_running_right;
 
-	private static float ANIM_SPEED_FACTOR = 5; // higher = faster
-	private static final float MOVING_THRESHOLD = 5f; // everything lower is
+	private static final float ANIM_SPEED_FACTOR =  2; // lower = faster
+	private static final float MOVING_THRESHOLD  = 10; // everything lower is
 														// considered standing
 														// still
 
@@ -76,19 +80,23 @@ public class Player extends MovableElement {
 	}
 
 	public void animate(float dt) {
-		ANIM_SPEED_FACTOR = FXMath.FXtoFloat(this.velocityFX().lengthFX()) / 10;
-
-		if (this.velocityFX().xAsFloat() > MOVING_THRESHOLD)
+		final float aligned_speed = FXMath.FXtoFloat(this.velocityFX().dotFX(this.getAxes()[1]));
+		float speed_factor        = FloatMath.sqrt(aligned_speed>=0?aligned_speed:-aligned_speed) / ANIM_SPEED_FACTOR;
+		//Log.d("foo", Float.toString(aligned_speed) + "  //  " + Float.toString(speed_factor));
+		
+		if (aligned_speed > MOVING_THRESHOLD)
 			this.setActiveAnim(this.anim_running_right);
-		else if (this.velocityFX().xAsFloat() < -MOVING_THRESHOLD)
+		else if (aligned_speed < -MOVING_THRESHOLD)
 			this.setActiveAnim(this.anim_running_left);
-		else
+		else {
 			this.setActiveAnim(this.anim_standing);
+			speed_factor = 1 / ANIM_SPEED_FACTOR;
+		}
 
 		if (this.active_anim != null) {
 			assert (active_anim.size() > 1);
 
-			frame_age += dt * ANIM_SPEED_FACTOR; // / (touching?1:2); ///< slow
+			frame_age += dt * speed_factor; // / (touching?1:2); ///< slow
 													// in midair
 			while (frame_age >= active_kf.duration) {
 				frame_age -= active_kf.duration;
@@ -115,5 +123,14 @@ public class Player extends MovableElement {
 				this.setRotationDeg(-(int) Math.toDegrees(angle));
 			}
 		}
+	}
+
+	
+	public void draw(GL10 gl) {
+		gl.glColor4f(1, 0.2f, 0, 1);
+		
+		skeleton.position = new Vector(positionFX().xAsFloat(), positionFX().yAsFloat()-4);
+		skeleton.rotation = FXMath.FX2toFloat(rotation2FX());
+		skeleton.draw(gl);
 	}
 }

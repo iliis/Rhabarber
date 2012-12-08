@@ -8,11 +8,15 @@ import com.floern.rhabarber.physics.PhysicsController;
 
 import android.opengl.GLES10;
 import android.opengl.GLSurfaceView;
+import android.util.Log;
 
 public class GameRenderer implements GLSurfaceView.Renderer {
 	
-	private static final float NORMAL_SCREEN_WIDTH = 800;
-	private static final float NORMAL_SCREEN_HEIGHT = 480;
+	private float
+		world_min_x = 0,
+		world_min_y = 0,
+		world_max_x = 800,
+		world_max_y = 480;
 	
 	public GameActivity render_callback;
 
@@ -34,6 +38,13 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 		render_callback = a;
 	}
 	
+	public void readLevelSize(PhysicsController l) {
+		world_min_x = l.min_x;
+		world_max_x = l.max_x;
+		world_min_y = l.min_y;
+		world_max_y = l.max_y;
+	}
+	
 
 	public void onSurfaceChanged(GL10 gl, int width, int height) {
 		
@@ -43,16 +54,34 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 		
 		gl.glMatrixMode(GL10.GL_PROJECTION);
 		gl.glLoadIdentity();
-
-		// map OpenGL coordinates to pixels (0,0 being top left) respecting screen size & density
-		float scaleFactorW = NORMAL_SCREEN_WIDTH / width;
-		float scaleFactorH = NORMAL_SCREEN_HEIGHT / height;
-		float scaleFactor = Math.max(scaleFactorH, scaleFactorW);
-		gl.glOrthof(0.0f, width*scaleFactor, height*scaleFactor, 0.0f, -1.0f, 1.0f);
-		//gl.glOrthof(0.0f, width, height, 0.0f, -1.0f, 1.0f); // old 1:1 mapping
 		
 		
-
+		// map OpenGL coordinates to world coordinates (minimum being top left) respecting screen size & density
+		
+		final float aspect = ((float) width) / height;
+		final float world_width  = world_max_x-world_min_x; 
+		final float world_height = world_max_y-world_min_y; 
+		
+		if (world_width >= world_height * aspect) {
+			// map is wider than high (even considering a non-quadratic screen)
+			final float h  = world_width/aspect;
+			gl.glOrthof(world_min_x,
+						world_max_x,
+						world_min_y+h+(world_height-h)/2,
+						world_min_y+  (world_height-h)/2,
+						-1f, 1f);
+		} else {
+			// map is higher than wide (even considering a non-quadratic screen)
+			final float w  = world_height*aspect;
+			gl.glOrthof(world_min_x+  (world_width -w)/2,
+						world_min_x+w+(world_width -w)/2,
+						world_max_y,
+						world_min_y,
+						-1f, 1f);
+		}
+		
+		
+		
 		gl.glMatrixMode(GL10.GL_MODELVIEW);
 		gl.glLoadIdentity();
 		
