@@ -111,7 +111,7 @@ public class PhysicsController {
 				gl.glColor4f(1, 0.2f, 0, 1);
 				
 				Player p = (Player) b[i];
-				p.skeleton.position = new Vector(p.positionFX().xAsFloat(), p.positionFX().yAsFloat()-4);
+				p.skeleton.position = new Vector(p.positionFX().xAsFloat(), p.positionFX().yAsFloat()-6);
 				p.skeleton.rotation = FXMath.FX2toFloat(p.rotation2FX());
 				p.skeleton.draw(gl);
 				
