@@ -107,8 +107,6 @@ public class PhysicsController {
 		
 		Body[] b = world.getBodies();
 		for(int i = 0; i < world.getBodyCount(); i++) {
-
-			
 			if (b[i] instanceof IGLPrimitive) {
 				// draw element
 				((IGLPrimitive)b[i]).draw(gl);
@@ -126,25 +124,6 @@ public class PhysicsController {
 				gl.glColor4f(1, 1, 1, 1);
 				verts.draw(gl);
 			//}
-			
-			
-			
-			/* // old draw code
-			if (b[i] instanceof Player) {
-				gl.glColor4f(1, 0.2f, 0, 1);
-				
-				Player p = (Player) b[i];
-				p.skeleton.position = new Vector(p.positionFX().xAsFloat(), p.positionFX().yAsFloat()-6);
-				p.skeleton.rotation = FXMath.FX2toFloat(p.rotation2FX());
-				p.skeleton.draw(gl);
-				
-				gl.glColor4f(1, 0.2f, 0, 0.6f);
-				
-			} else {
-				gl.glColor4f(1, 1, 1, 1);
-			}
-			verts.draw(gl);
-			*/
 		}
 	}
 	
