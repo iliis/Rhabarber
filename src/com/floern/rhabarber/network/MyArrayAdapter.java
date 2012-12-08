@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.RadioButton;
 import android.widget.TextView;
 
 public class MyArrayAdapter extends ArrayAdapter<GameDescription> {
@@ -32,32 +33,32 @@ public class MyArrayAdapter extends ArrayAdapter<GameDescription> {
 	public View getView(int position, View convertView, ViewGroup parent) {
 		// Performance optimization: reuse views outside of visible area if
 		// possible
-		View messageView = convertView;
-		if (messageView == null) {
+		View descriptionView = convertView;
+		if (descriptionView == null) {
 			LayoutInflater inflater = (LayoutInflater) context
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			messageView = inflater.inflate(R.layout.game_description, parent,
-					false);
+			descriptionView = inflater.inflate(R.layout.game_description,
+					parent, false);
 			// Performance optimization: enables faster access to view via
 			// static class
 			ViewHolder viewHolder = new ViewHolder();
-			viewHolder.textViewGameName = (TextView) messageView
+			viewHolder.textViewGameName = (TextView) descriptionView
 					.findViewById(R.id.textViewGameName);
-			viewHolder.textViewMapName = (TextView) messageView
+			viewHolder.textViewMapName = (TextView) descriptionView
 					.findViewById(R.id.textViewMapName);
-			viewHolder.textViewPlayerCount = (TextView) messageView
+			viewHolder.textViewPlayerCount = (TextView) descriptionView
 					.findViewById(R.id.textViewPlayerCount);
-			messageView.setTag(viewHolder);
+			descriptionView.setTag(viewHolder);
 		}
 
-		ViewHolder holder = (ViewHolder) messageView.getTag();
+		ViewHolder holder = (ViewHolder) descriptionView.getTag();
 
 		holder.textViewGameName.setText(this.gameDescriptions.get(position)
 				.getGameName());
 		holder.textViewMapName.setText(this.gameDescriptions.get(position)
 				.getMapName());
 		holder.textViewPlayerCount.setText(this.gameDescriptions.get(position)
-				.getPlayerCount()+"");
-		return messageView;
+				.getPlayerCount() + "");
+		return descriptionView;
 	}
 }

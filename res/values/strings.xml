@@ -19,4 +19,6 @@
 	<string name="joined">have joined</string>
 	<string name="default_map">Default Map</string>
 	<string name="start_game">Start game</string>
+	<string name="menu_quit">Quit game</string>
+	<string name="name_invalid">The name must not be empty</string>
 </resources>

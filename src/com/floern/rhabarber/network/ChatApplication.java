@@ -272,7 +272,7 @@ public class ChatApplication extends Application implements Observable {
 	}
     
 	/**
-	 * Get the state of the "use" channel. 
+	 * Get the state of the "host" channel. 
 	 */
 	public synchronized AllJoynService.HostChannelState hostGetChannelState() {
 		return mHostChannelState;

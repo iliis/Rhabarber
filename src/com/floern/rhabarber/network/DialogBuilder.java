@@ -37,7 +37,7 @@ import java.util.List;
 import com.floern.rhabarber.R;
 
 public class DialogBuilder {
-    private static final String TAG = "chat.Dialogs";
+    private static final String TAG = "Dialogs";
     
     public Dialog createUseJoinDialog(final Activity activity, final ChatApplication application) {
     	Log.i(TAG, "createUseJoinDialog()");
@@ -115,6 +115,7 @@ public class DialogBuilder {
     	return dialog;
     }
     
+    // Done
     public Dialog createHostNameDialog(Activity activity, final ChatApplication application) {
        	Log.i(TAG, "createHostNameDialog()");
     	final Dialog dialog = new Dialog(activity);
@@ -154,6 +155,7 @@ public class DialogBuilder {
         return dialog;
     }
     
+    // done
     public Dialog createHostStartDialog(Activity activity, final ChatApplication application) {
        	Log.i(TAG, "createHostStartDialog()");
     	final Dialog dialog = new Dialog(activity);
@@ -178,6 +180,7 @@ public class DialogBuilder {
     	return dialog;
     }
 
+    // done
     public Dialog createHostStopDialog(Activity activity, final ChatApplication application) {
        	Log.i(TAG, "createHostStopDialog()");
     	final Dialog dialog = new Dialog(activity);
@@ -220,4 +223,9 @@ public class DialogBuilder {
     	
     	return dialog;
     }
+
+	public Dialog createJoinDialog(Activity activity, final ChatApplication application) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

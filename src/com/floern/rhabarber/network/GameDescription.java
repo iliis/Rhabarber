@@ -3,14 +3,22 @@ package com.floern.rhabarber.network;
 public class GameDescription {
 	private String gameName;
 	private String mapName;
+	private int playerCount;
+
 	public GameDescription(String gameName, String mapName, int playerCount) {
 		super();
 		this.gameName = gameName;
 		this.mapName = mapName;
 		this.playerCount = playerCount;
 	}
+	
+	/**
+	 * Creates a default description.
+	 */
+	public GameDescription(){
+		this("","Default Map",0);
+	}
 
-	private int playerCount;
 
 	public String getGameName() {
 		return gameName;
@@ -35,5 +43,4 @@ public class GameDescription {
 	public void setPlayerCount(int playerCount) {
 		this.playerCount = playerCount;
 	}
-
 }

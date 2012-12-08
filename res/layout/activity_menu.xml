@@ -38,12 +38,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0" >
-
-	        <RadioButton
-	            android:id="@+id/radioButton1"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:text="@string/empty_string" />
   		
         	<EditText
         	    android:id="@+id/editTextGameName"
@@ -77,12 +71,6 @@
             android:layout_height="wrap_content"
             android:layout_weight="0"
             android:orientation="vertical" >
-
-          	<View
-          	    android:layout_width="0dp"
-          	    android:layout_height="match_parent" >
-
-          	</View>
 
             <Spinner
                 android:id="@+id/spinnerMap"

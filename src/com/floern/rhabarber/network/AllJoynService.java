@@ -46,7 +46,7 @@ import android.content.Intent;
 import android.util.Log;
 
 public class AllJoynService extends Service implements Observer {
-	private static final String TAG = "chat.AllJoynService";
+	private static final String TAG = "AllJoynService";
 
 	/**
 	 * We don't use the bindery to communiate between any client and this
