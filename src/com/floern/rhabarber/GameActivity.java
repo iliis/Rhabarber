@@ -102,6 +102,7 @@ public class GameActivity extends Activity implements SensorEventListener {
 		physics.tick();
 		physics.setAccel(acceleration);
 		if (walk_left != walk_right) {
+			
 			// TODO: limit the max velocity or some such
 			
 			FXVector dir = new FXVector(p.getAxes()[1]);

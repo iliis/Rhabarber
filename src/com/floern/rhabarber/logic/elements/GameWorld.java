@@ -11,16 +11,20 @@ import at.emini.physics2D.util.FXVector;
 
 public class GameWorld extends World{
 	
-	//separate list of players for easier retrieval of players
-	private ArrayList<Player> players;
+	// separate list of players for easier retrieval of players
+	// more than 4 players are probably not feasible anyway
+	private ArrayList<Player> players = new ArrayList<Player>(4);
 	
 	public final float G = 100; // gravity
 	
 	public GameWorld()
 	{
 		super();
-		//more than 4 players are probably not feasible anyway
-		this.players = new ArrayList<Player>(4);
+	}
+	
+	public GameWorld(World w)
+	{
+		super(w);
 	}
 	
 	public void addPlayer(Player p)

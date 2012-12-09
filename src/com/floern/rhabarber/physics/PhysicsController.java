@@ -68,8 +68,9 @@ public class PhysicsController {
 	private void loadLevel(InputStream level)
 	{
 		World tmp = World.loadWorld(new PhysicsFileReader(level));
-		this.world = new GameWorld();
-		world.setLandscape(tmp.getLandscape());
+		this.world = new GameWorld(tmp);
+		//this.world = new GameWorld();
+		//world.setLandscape(tmp.getLandscape());
 	}
 	
 	//calculates next state of world
@@ -113,15 +114,10 @@ public class PhysicsController {
 			}
 			//else {
 				// draw shape
-				FXVector[] vertsFX = b[i].shape().getCorners();
-				FXVector pos = b[i].positionFX();
-				Vertexes verts = new Vertexes(); verts.setMode(GLES10.GL_LINE_LOOP);
-				FXMatrix rot = b[i].getRotationMatrix();
-				for (FXVector v: vertsFX) {
-					FXVector vr = rot.mult(v);
-					verts.addPoint(vr.xAsFloat()+pos.xAsFloat(), vr.yAsFloat()+pos.yAsFloat());
-				}
+				
+				Vertexes verts = new Vertexes(b[i]);
 				gl.glColor4f(1, 1, 1, 1);
+				verts.setMode(GLES10.GL_LINE_LOOP);
 				verts.draw(gl);
 			//}
 		}
