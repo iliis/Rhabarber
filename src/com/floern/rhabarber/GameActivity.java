@@ -9,7 +9,6 @@ import com.floern.rhabarber.graphic.primitives.SkeletonKeyframe;
 import com.floern.rhabarber.logic.elements.Player;
 import com.floern.rhabarber.physics.PhysicsController;
 import com.floern.rhabarber.util.FXMath;
-
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -25,10 +24,8 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
-import at.emini.physics2D.Body;
 import at.emini.physics2D.Event;
 import at.emini.physics2D.PhysicsEventListener;
-import at.emini.physics2D.util.FXUtil;
 import at.emini.physics2D.util.FXVector;
 
 /* contains the game itself, starts open gl (which calls the physics and logic on every frame)
@@ -113,6 +110,7 @@ public class GameActivity extends Activity implements SensorEventListener,
 		physics.tick();
 		physics.setAccel(acceleration);
 		if (walk_left != walk_right) {
+			
 			// TODO: limit the max velocity or some such
 
 			FXVector dir = new FXVector(p.getAxes()[1]);

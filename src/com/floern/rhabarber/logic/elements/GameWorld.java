@@ -13,17 +13,22 @@ import at.emini.physics2D.util.FXVector;
 public class GameWorld extends World {
 
 	// separate list of players for easier retrieval of players
-	private ArrayList<Player> players;
+		// more than 4 players are probably not feasible anyway
+	private ArrayList<Player> players = new ArrayList<Player>(4);
 	private Random rand;
 	private int max_x;
 	private int max_y;
-
+	
 	public final float G = 100; // gravity
 
 	public GameWorld() {
 		super();
-		// more than 4 players are probably not feasible anyway
-		this.players = new ArrayList<Player>(4);
+		rand = new Random();
+	}
+	
+	public GameWorld(World w)
+	{
+		super(w);
 		rand = new Random();
 	}
 
