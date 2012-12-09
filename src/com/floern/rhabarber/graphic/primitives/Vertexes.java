@@ -8,6 +8,8 @@ import com.floern.rhabarber.util.DynamicFloatBuffer;
 import com.floern.rhabarber.util.Vector;
 
 import android.opengl.GLES10;
+import android.util.FloatMath;
+import android.util.Log;
 import at.emini.physics2D.Body;
 import at.emini.physics2D.util.FXMatrix;
 import at.emini.physics2D.util.FXVector;
@@ -55,11 +57,24 @@ public class Vertexes implements IGLPrimitive {
 	}
 	
 	public Vertexes(FXVector[] vs, FXVector displacement, FXMatrix rotation) {
-		vertices = new DynamicFloatBuffer(vs.length*vertexDim);		
-		for (FXVector v : vs) {
-			FXVector vr = rotation.mult(v);
-			vr.add(displacement);
-			addPoint(vr.xAsFloat(), vr.yAsFloat());
+		if(vs.length == 1) {
+			// it's a circle!
+			float r = vs[0].yAsFloat(); if (r<0) r=-r;
+			float incr = (float) Math.PI / 16*2;
+			float a = 0;
+			vertices = new DynamicFloatBuffer(16*vertexDim);
+			for(int i=0;i<16;i++) {
+				addPoint(FloatMath.sin(a)*r+displacement.xAsFloat(), FloatMath.cos(a)*r+displacement.yAsFloat());
+				a += incr;
+			}
+		}
+		else {
+			vertices = new DynamicFloatBuffer(vs.length*vertexDim);		
+			for (FXVector v : vs) {
+				FXVector vr = rotation.mult(v);
+				vr.add(displacement);
+				addPoint(vr.xAsFloat(), vr.yAsFloat());
+			}
 		}
 	}
 	
