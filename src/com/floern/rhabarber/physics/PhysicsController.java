@@ -1,4 +1,3 @@
-
 package com.floern.rhabarber.physics;
 
 import java.io.InputStream;
@@ -11,11 +10,13 @@ import at.emini.physics2D.PhysicsEventListener;
 import at.emini.physics2D.World;
 import at.emini.physics2D.util.FXVector;
 import at.emini.physics2D.util.PhysicsFileReader;
+
 import com.floern.rhabarber.graphic.primitives.IGLPrimitive;
 import com.floern.rhabarber.graphic.primitives.Vertexes;
 import com.floern.rhabarber.logic.elements.GameWorld;
 import com.floern.rhabarber.logic.elements.Player;
 import com.floern.rhabarber.logic.elements.Treasure;
+import com.floern.rhabarber.util.GameBodyUserData;
 
 public class PhysicsController {
 	
@@ -62,7 +63,7 @@ public class PhysicsController {
 	
 	private void loadLevel(InputStream level)
 	{
-		World tmp = World.loadWorld(new PhysicsFileReader(level));
+		World tmp = World.loadWorld(new PhysicsFileReader(level), new GameBodyUserData());
 		this.world = new GameWorld(tmp);
 		//this.world = new GameWorld();
 		//world.setLandscape(tmp.getLandscape());

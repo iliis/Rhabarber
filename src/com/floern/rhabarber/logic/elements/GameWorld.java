@@ -3,10 +3,13 @@ package com.floern.rhabarber.logic.elements;
 import java.util.ArrayList;
 import java.util.Random;
 import com.floern.rhabarber.util.FXMath;
+import com.floern.rhabarber.util.GameBodyUserData;
 
 import android.util.Log;
+import at.emini.physics2D.Body;
 import at.emini.physics2D.Event;
 import at.emini.physics2D.PhysicsEventListener;
+import at.emini.physics2D.UserData;
 import at.emini.physics2D.World;
 import at.emini.physics2D.util.FXVector;
 
@@ -15,7 +18,7 @@ public class GameWorld extends World {
 	// separate list of players for easier retrieval of players
 		// more than 4 players are probably not feasible anyway
 	private ArrayList<Player> players = new ArrayList<Player>(4);
-	private Random rand;
+	private Random rand = new Random();
 	private int max_x;
 	private int max_y;
 	
@@ -23,13 +26,45 @@ public class GameWorld extends World {
 
 	public GameWorld() {
 		super();
-		rand = new Random();
 	}
 	
 	public GameWorld(World w)
 	{
 		super(w);
-		rand = new Random();
+		convertBodies();
+	}
+	
+	// reads the additional UserData set in the Editor and uses it to create the appropriate objects out of them
+	// eg. it converts all Bodies marked as 'Treasure' into instances of Treasure 
+	private void convertBodies() {
+		Body[] b = getBodies().clone();
+		final int N = getBodyCount();
+		for(int i = 0; i < N; i++) {
+			if (((GameBodyUserData) b[i].getUserData()).is_game_element) {
+				Log.d("foo", "removing a body");
+				removeBody(b[i]);
+				
+				addBody((Body) convertBody(b[i]));
+			}
+		}
+	}
+	
+	// Factory for game Elements, reads the UserData and creates the appropriate Element
+	// TODO: change this into void and add newly created element directly to this world (by usint addPlayer(), addTreasure() etc.)
+	private Element convertBody(Body b) {
+		GameBodyUserData userdata = (GameBodyUserData) b.getUserData();
+		assert (userdata.is_game_element == true);
+		
+		Log.d("foo", "has key element? "+(userdata.data.containsKey("element")?"yes":"no"));
+		
+		assert (userdata.data.containsKey("element"));
+		
+		if (userdata.data.get("element").equals("treasure")) {
+			return new Treasure(b.positionFX(), Integer.parseInt(userdata.data.get("value")));
+		}
+		
+		Log.e("foo", "Unknown element of type '"+userdata.data.get("element")+"' in GameWorld.convertBody()");
+		return null;
 	}
 
 	private void setBotLeft() {
