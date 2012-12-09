@@ -619,7 +619,7 @@ public class AllJoynService extends Service implements Observer {
      * the well-known name a hosting bus attachment will request and 
      * advertise.
      */
-    private static final String NAME_PREFIX = "com.floern.rhabarber";
+    private static final String NAME_PREFIX = "com.floern.rhabarber.network";
     
 	/**
 	 * The well-known session port used as the contact port for the chat service.
@@ -1210,7 +1210,7 @@ public class AllJoynService extends Service implements Observer {
      * letter capitalized to conform with the DBus convention for signal 
      * handler names.
      */
-    @BusSignalHandler(iface = "com.floern.rhabarber", signal = "Chat")
+    @BusSignalHandler(iface = "com.floern.rhabarber.network", signal = "Chat")
     public void Chat(String string) {
     	
         /*

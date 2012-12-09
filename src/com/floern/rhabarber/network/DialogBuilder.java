@@ -39,6 +39,7 @@ import com.floern.rhabarber.R;
 public class DialogBuilder {
     private static final String TAG = "Dialogs";
     
+    // done
     public Dialog createUseJoinDialog(final Activity activity, final NetworkController application) {
     	Log.i(TAG, "createUseJoinDialog()");
     	final Dialog dialog = new Dialog(activity);

@@ -1,6 +1,7 @@
 package com.floern.rhabarber;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -12,6 +13,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -29,7 +33,7 @@ public class MenuActivity extends Activity implements Observer {
 
 	private NetworkController networkController = null;
 
-	private MyArrayAdapter adapter;
+	private MyArrayAdapter listViewAdapter;
 	ArrayList<GameDescription> gameDescriptions = new ArrayList<GameDescription>();
 
 	private GameDescription hostGameDescription = new GameDescription();
@@ -38,6 +42,8 @@ public class MenuActivity extends Activity implements Observer {
 	private ToggleButton toggleButtonHost;
 	private Button buttonStartGame;
 	private TextView textViewPlayerCount;
+	private ListView listViewGameDescriptions;
+	private Spinner spinnerMap;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -51,19 +57,48 @@ public class MenuActivity extends Activity implements Observer {
 		toggleButtonHost = (ToggleButton) findViewById(R.id.toggleButtonAdvertise);
 		toggleButtonHost.setText("Idle");
 
+		listViewGameDescriptions = (ListView) findViewById(R.id.listViewGameDescriptions);
+		listViewGameDescriptions
+				.setOnItemClickListener(new ListView.OnItemClickListener() {
+					public void onItemClick(AdapterView<?> parent, View view,
+							int position, long id) {
+						String name = parent
+								.getItemAtPosition(position).toString();
+						Log.i(TAG,"useSetChannelName("+name+")");
+						networkController.useSetChannelName(name);
+						networkController.useJoinChannel();
+					}
+				});
+
+		spinnerMap = (Spinner) findViewById(R.id.spinnerMap);
+		spinnerMap.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+			public void onItemSelected(AdapterView<?> parent, View view,
+					int pos, long id) {
+				String selected = parent.getItemAtPosition(pos).toString();
+				hostGameDescription.setMapName(selected);
+			}
+
+			public void onNothingSelected(AdapterView parent) {
+				// Do nothing.
+			}
+		});
+
 		textViewPlayerCount = (TextView) findViewById(R.id.textViewPlayerCount);
 
 		buttonStartGame = (Button) findViewById(R.id.buttonStartGame);
 		buttonStartGame.setEnabled(false);
 
 		// TODO delete test
-		this.gameDescriptions.add(new GameDescription("Test name", "Test map",
-				0));
 		ListView listView = (ListView) findViewById(R.id.listViewGameDescriptions);
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+				android.R.layout.simple_spinner_item,
+				new String[] { "Test Map" });
+		spinnerMap.setAdapter(adapter);
 
 		// Assign adapter to ListView
-		adapter = new MyArrayAdapter(this, gameDescriptions);
-		listView.setAdapter(adapter);
+		listViewAdapter = new MyArrayAdapter(this, gameDescriptions);
+		listView.setAdapter(listViewAdapter);
 
 		/*
 		 * Keep a pointer to the Android Appliation class around. We use this as
@@ -120,12 +155,14 @@ public class MenuActivity extends Activity implements Observer {
 			} else {
 				Log.i(TAG, "onClickHostGame() - Start hosting game");
 
+				// update game description object
+				this.hostGameDescription.setGameName(name);
+
 				// update name in application object
-				networkController.hostSetChannelName(name);
+				networkController.hostSetChannelName(hostGameDescription
+						.getStringRepresentation());
 				networkController.hostInitChannel();
 				networkController.hostStartChannel();
-
-				// TODO also set map
 			}
 
 		} else {
@@ -134,6 +171,12 @@ public class MenuActivity extends Activity implements Observer {
 			networkController.hostStopChannel();
 		}
 		updateChannelState();
+	}
+
+	public void onClickRefresh(View v) {
+		Message message = mHandler
+				.obtainMessage(HANDLE_CHANNEL_LIST_CHANGED_EVENT);
+		mHandler.sendMessage(message);
 	}
 
 	public void onClickStartGame(View v) {
@@ -180,7 +223,8 @@ public class MenuActivity extends Activity implements Observer {
 			mHandler.sendMessage(message);
 		}
 
-		if (qualifier.equals(NetworkController.HOST_CHANNEL_STATE_CHANGED_EVENT)) {
+		if (qualifier
+				.equals(NetworkController.HOST_CHANNEL_STATE_CHANGED_EVENT)) {
 			Message message = mHandler
 					.obtainMessage(HANDLE_CHANNEL_STATE_CHANGED_EVENT);
 			mHandler.sendMessage(message);
@@ -191,12 +235,38 @@ public class MenuActivity extends Activity implements Observer {
 					.obtainMessage(HANDLE_ALLJOYN_ERROR_EVENT);
 			mHandler.sendMessage(message);
 		}
+
+		if (qualifier.equals(NetworkController.USE_JOIN_CHANNEL_EVENT)) {
+			Message message = mHandler
+					.obtainMessage(HANDLE_CHANNEL_STATE_CHANGED_EVENT);
+			mHandler.sendMessage(message);
+		}
+
+		if (qualifier.equals(NetworkController.USE_LEAVE_CHANNEL_EVENT)) {
+			Message message = mHandler
+					.obtainMessage(HANDLE_CHANNEL_LIST_CHANGED_EVENT);
+			mHandler.sendMessage(message);
+		}
+	}
+
+	private void updateChannelList() {
+		listViewAdapter.clear();
+		List<String> channels = networkController.getFoundChannels();
+		for (String channel : channels) {
+			int lastDot = channel.lastIndexOf('.');
+			if (lastDot < 0) {
+				continue;
+			}
+			listViewAdapter.add(new GameDescription(channel
+					.substring(lastDot + 1)));
+		}
+		listViewAdapter.notifyDataSetChanged();
 	}
 
 	private void updateChannelState() {
 		AllJoynService.HostChannelState channelState = networkController
 				.hostGetChannelState();
-		Log.i(TAG,"updateChannelState - channelState = "+channelState);
+		Log.i(TAG, "updateChannelState - channelState = " + channelState);
 
 		switch (channelState) {
 		case IDLE:
@@ -221,7 +291,7 @@ public class MenuActivity extends Activity implements Observer {
 			toggleButtonHost.setText("Unknown");
 			break;
 		}
-		
+
 		if (channelState == AllJoynService.HostChannelState.IDLE) {
 			EditText editTextGameName = (EditText) findViewById(R.id.editTextGameName);
 			if (editTextGameName.getTag() != null)
@@ -230,7 +300,7 @@ public class MenuActivity extends Activity implements Observer {
 
 			toggleButtonHost.setChecked(false);
 
-			((Spinner) findViewById(R.id.spinnerMap)).setClickable(true);
+			spinnerMap.setClickable(true);
 			buttonStartGame.setEnabled(false);
 		} else {
 			EditText editTextGameName = (EditText) findViewById(R.id.editTextGameName);
@@ -238,9 +308,11 @@ public class MenuActivity extends Activity implements Observer {
 				editTextGameName.setTag(editTextGameName.getKeyListener());
 			editTextGameName.setKeyListener(null);
 
+			editTextGameName.setText(networkController.hostGetChannelName());
+
 			toggleButtonHost.setChecked(true);
 
-			((Spinner) findViewById(R.id.spinnerMap)).setClickable(false);
+			spinnerMap.setClickable(false);
 			buttonStartGame.setEnabled(true);
 		}
 	}
@@ -255,6 +327,7 @@ public class MenuActivity extends Activity implements Observer {
 	private static final int HANDLE_APPLICATION_QUIT_EVENT = 0;
 	private static final int HANDLE_CHANNEL_STATE_CHANGED_EVENT = 1;
 	private static final int HANDLE_ALLJOYN_ERROR_EVENT = 2;
+	private static final int HANDLE_CHANNEL_LIST_CHANGED_EVENT = 3;
 
 	private Handler mHandler = new Handler() {
 		public void handleMessage(Message msg) {
@@ -269,6 +342,12 @@ public class MenuActivity extends Activity implements Observer {
 				Log.i(TAG,
 						"mHandler.handleMessage(): HANDLE_CHANNEL_STATE_CHANGED_EVENT");
 				updateChannelState();
+			}
+				break;
+			case HANDLE_CHANNEL_LIST_CHANGED_EVENT: {
+				Log.i(TAG,
+						"mHandler.handleMessage(): HANDLE_CHANNEL_LIST_CHANGED_EVENT");
+				updateChannelList();
 			}
 				break;
 			case HANDLE_ALLJOYN_ERROR_EVENT: {
