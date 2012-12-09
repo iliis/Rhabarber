@@ -9,7 +9,6 @@ import android.util.Log;
 import at.emini.physics2D.Body;
 import at.emini.physics2D.Event;
 import at.emini.physics2D.PhysicsEventListener;
-import at.emini.physics2D.UserData;
 import at.emini.physics2D.World;
 import at.emini.physics2D.util.FXVector;
 
@@ -19,8 +18,9 @@ public class GameWorld extends World {
 		// more than 4 players are probably not feasible anyway
 	private ArrayList<Player> players = new ArrayList<Player>(4);
 	private Random rand = new Random();
-	private int max_x;
-	private int max_y;
+	
+	private ArrayList<FXVector> spawnpoints_player   = new ArrayList<FXVector>();
+	private ArrayList<FXVector> spawnpoints_treasure = new ArrayList<FXVector>();
 	
 	public final float G = 100; // gravity
 
@@ -44,45 +44,35 @@ public class GameWorld extends World {
 				Log.d("foo", "removing a body");
 				removeBody(b[i]);
 				
-				addBody((Body) convertBody(b[i]));
+				convertAndAddBody(b[i]);
 			}
 		}
 	}
 	
 	// Factory for game Elements, reads the UserData and creates the appropriate Element
 	// TODO: change this into void and add newly created element directly to this world (by usint addPlayer(), addTreasure() etc.)
-	private Element convertBody(Body b) {
+	private void convertAndAddBody(Body b) {
 		GameBodyUserData userdata = (GameBodyUserData) b.getUserData();
 		assert (userdata.is_game_element == true);
-		
-		Log.d("foo", "has key element? "+(userdata.data.containsKey("element")?"yes":"no"));
-		
 		assert (userdata.data.containsKey("element"));
 		
-		if (userdata.data.get("element").equals("treasure")) {
-			return new Treasure(b.positionFX(), Integer.parseInt(userdata.data.get("value")));
-		}
+		String type = userdata.data.get("element");
 		
-		Log.e("foo", "Unknown element of type '"+userdata.data.get("element")+"' in GameWorld.convertBody()");
-		return null;
-	}
-
-	private void setBotLeft() {
-		FXVector[] corners = this.getLandscape().elementStartPoints();
-		int FXmax_x = 0;
-		int FXmax_y = 0;
-		for (FXVector fxVector : corners) {
-			if (fxVector != null) {
-				if (fxVector.xFX > FXmax_x) {
-					FXmax_x = fxVector.xFX;
-				}
-				if (fxVector.yFX > FXmax_y) {
-					FXmax_y = fxVector.yFX;
-				}
-			}
+		if (type.equals("treasure")) {
+			addTreasure(new Treasure(b.positionFX(), Integer.parseInt(userdata.data.get("value"))), new PhysicsEventListener() {
+				public void eventTriggered(Event arg0, Object arg1) { }
+			});
 		}
-		max_x = FXmax_x >> 12;
-		max_y = FXmax_y >> 12;
+		else
+		if (type.equals("playerspawn")) {
+			spawnpoints_player.add(b.positionFX());
+		}
+		else
+		if (type.equals("treasurespawn")) {
+			spawnpoints_treasure.add(b.positionFX());
+		}
+		else
+			Log.e("foo", "Unknown element of type '"+userdata.data.get("element")+"' in GameWorld.convertBody()");
 	}
 
 	public void addPlayer(Player p) {
@@ -99,15 +89,22 @@ public class GameWorld extends World {
 	}
 
 	public void addTreasureRandomly(int treasureValue, PhysicsEventListener l) {
-		if (max_x == 0 && max_y == 0) {
+		/*if (max_x == 0 && max_y == 0) {
 			setBotLeft();
 		}
 		int x = rand.nextInt(max_x - (max_x/10));
 		x += max_x/20;
 		int y = rand.nextInt(max_y - (max_y/10));
-		y += max_y/20;
-		Treasure t = new Treasure(x, y, treasureValue);
-		this.addTreasure(t, l);
+		y += max_y/20;*/
+		
+		if (!spawnpoints_treasure.isEmpty()) {
+			
+			FXVector pos = this.spawnpoints_treasure.get(rand.nextInt(spawnpoints_treasure.size()));
+			Treasure t   = new Treasure(pos, treasureValue);
+			this.addTreasure(t, l);
+		} else {
+			Log.e("foo", "No treasure spawnpoints defined in map (GameWorld.addTreasureRandomly)");
+		}
 	}
 
 	public void applyPlayerGravities(int timestep, float[] acceleration) {

@@ -90,7 +90,7 @@ public class GameActivity extends Activity implements SensorEventListener,
 
 		try {
 			physics = new PhysicsController(this.getAssets().open(
-					"level/testWorld.phy"), p);
+					"level/large.phy"), p);
 
 			// add random treasure
 			physics.getWorld().addTreasureRandomly(100, this);
