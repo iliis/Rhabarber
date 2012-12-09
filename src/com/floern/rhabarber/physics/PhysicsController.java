@@ -32,7 +32,7 @@ public class PhysicsController {
 	
 	long last_tick;
 	
-	public float min_x, max_x, min_y, max_y; // size of landscape
+	public float min_x, max_x, min_y, max_y; // size of landscape in OpenGL coordinates
 	
 	
 	public PhysicsController(InputStream level, Player p) {
@@ -40,10 +40,6 @@ public class PhysicsController {
 		loadLevel(level);
 		world.addPlayer(p);
 		
-		// test treasure
-		world.addTreasure(new Treasure(300, 300, 42), new PhysicsEventListener() {
-			public void eventTriggered(Event arg0, Object arg1) { }
-		});
 
 		outline = new Vertexes();
 		outline.setMode(GLES10.GL_LINES); // disconnected bunch of lines

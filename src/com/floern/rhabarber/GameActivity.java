@@ -25,87 +25,98 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
+import at.emini.physics2D.Body;
+import at.emini.physics2D.Event;
+import at.emini.physics2D.PhysicsEventListener;
 import at.emini.physics2D.util.FXUtil;
 import at.emini.physics2D.util.FXVector;
-
 
 /* contains the game itself, starts open gl (which calls the physics and logic on every frame)
  * 
  */
-public class GameActivity extends Activity implements SensorEventListener {
+public class GameActivity extends Activity implements SensorEventListener,
+		PhysicsEventListener {
 
 	private GameGLSurfaceView surfaceView;
-	
+
 	private SensorManager sensorManager;
 	private boolean deviceIsLandscapeDefault;
-	
+
 	PhysicsController physics;
-	
+
 	private float[] acceleration = new float[3];
 	Player p;
 	boolean walk_left = false, walk_right = false;
 
-	
-	
-    
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		// avoid screen turning off
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        
-        // fullscreen
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+		// fullscreen
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 
 		// set View
-        surfaceView = new GameGLSurfaceView(this);
-        surfaceView.setRendererCallback(this);
-        setContentView(surfaceView);
-        
-        // setup sensor manager
-        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        
-        // check default device orientation
-        Display display = ((WindowManager)getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-        int orientation = (display.getWidth() <= display.getHeight()) ? 
-        						Configuration.ORIENTATION_PORTRAIT : Configuration.ORIENTATION_LANDSCAPE;
-        int rotation = display.getRotation();
-        deviceIsLandscapeDefault = // sensor vector is rotated on landscape-default devices (some tablets)
-        		(orientation==Configuration.ORIENTATION_LANDSCAPE && (rotation==Surface.ROTATION_0 || rotation==Surface.ROTATION_180)) ||
-                (orientation==Configuration.ORIENTATION_PORTRAIT && (rotation==Surface.ROTATION_90 || rotation==Surface.ROTATION_270));
-        
-        
-        // setup up the actual game
-        // TODO: nicely implement this loading of ressources
-        p = new Player(100,100,1,this.getResources().openRawResource(R.raw.player));
-        p.anim_running_left  = SkeletonKeyframe.loadSKAnimation(p.skeleton, this.getResources().openRawResource(R.raw.player_running_left));
-        p.anim_running_right = SkeletonKeyframe.loadSKAnimation(p.skeleton, this.getResources().openRawResource(R.raw.player_running_right));
-        p.anim_standing      = SkeletonKeyframe.loadSKAnimation(p.skeleton, this.getResources().openRawResource(R.raw.player_standing));
-        p.setActiveAnim(p.anim_running_right);
-        
-        try {
-			physics = new PhysicsController(this.getAssets().open("level/testWorld.phy"), p);
+		surfaceView = new GameGLSurfaceView(this);
+		surfaceView.setRendererCallback(this);
+		setContentView(surfaceView);
+
+		// setup sensor manager
+		sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+
+		// check default device orientation
+		Display display = ((WindowManager) getSystemService(Context.WINDOW_SERVICE))
+				.getDefaultDisplay();
+		int orientation = (display.getWidth() <= display.getHeight()) ? Configuration.ORIENTATION_PORTRAIT
+				: Configuration.ORIENTATION_LANDSCAPE;
+		int rotation = display.getRotation();
+		deviceIsLandscapeDefault = // sensor vector is rotated on
+									// landscape-default devices (some tablets)
+		(orientation == Configuration.ORIENTATION_LANDSCAPE && (rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180))
+				|| (orientation == Configuration.ORIENTATION_PORTRAIT && (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270));
+
+		// setup up the actual game
+		// TODO: nicely implement this loading of ressources
+		p = new Player(100, 100, 1, this.getResources().openRawResource(
+				R.raw.player));
+		p.anim_running_left = SkeletonKeyframe.loadSKAnimation(p.skeleton, this
+				.getResources().openRawResource(R.raw.player_running_left));
+		p.anim_running_right = SkeletonKeyframe
+				.loadSKAnimation(p.skeleton, this.getResources()
+						.openRawResource(R.raw.player_running_right));
+		p.anim_standing = SkeletonKeyframe.loadSKAnimation(p.skeleton, this
+				.getResources().openRawResource(R.raw.player_standing));
+		p.setActiveAnim(p.anim_running_right);
+
+		try {
+			physics = new PhysicsController(this.getAssets().open(
+					"level/testWorld.phy"), p);
+
+			// add random treasure
+			physics.getWorld().addTreasureRandomly(100, this);
+
 			surfaceView.renderer.readLevelSize(physics);
-			Log.d("bla","load successful");
+			Log.d("bla", "load successful");
 		} catch (IOException e) {
-			Log.d("bla","load failed");
+			Log.d("bla", "load failed");
 			e.printStackTrace();
 		}
-        //File f = new File("/mnt/sdcard/testworld.phy");
-        //physics = new PhysicsController(f);
+		// File f = new File("/mnt/sdcard/testworld.phy");
+		// physics = new PhysicsController(f);
 
 	}
-	
+
 	public void onDraw(GL10 gl) {
 		physics.tick();
 		physics.setAccel(acceleration);
 		if (walk_left != walk_right) {
 			// TODO: limit the max velocity or some such
-			
+
 			FXVector dir = new FXVector(p.getAxes()[1]);
-			if(walk_left) {
+			if (walk_left) {
 				dir.mult(-1);
 				p.applyAcceleration(dir, FXMath.floatToFX(10f));
 			} else
@@ -113,100 +124,130 @@ public class GameActivity extends Activity implements SensorEventListener {
 		}
 		physics.draw(gl);
 	}
-	
-	
+
 	@Override
-    public boolean onTouchEvent(MotionEvent ev) {
-    	if (ev != null) {
-    		walk_right = false;
-    		walk_left  = false;
-    		
-    		if((MotionEvent.ACTION_MASK & ev.getAction()) != MotionEvent.ACTION_UP) {
-	    		
-	    		for (int p = 0; p < ev.getPointerCount(); p++) {
-	    			if(ev.getX(p) > this.getWindow().getDecorView().getWidth()/2) {
-		    			walk_right = true;
-		    		} else {
-		    			walk_left  = true;
-		    		}
-	    		}
-    		}
-    		
-    		return true;
-    	}
-    	
-    	return super.onTouchEvent(ev);
-    }
-	
+	public boolean onTouchEvent(MotionEvent ev) {
+		if (ev != null) {
+			walk_right = false;
+			walk_left = false;
+
+			if ((MotionEvent.ACTION_MASK & ev.getAction()) != MotionEvent.ACTION_UP) {
+
+				for (int p = 0; p < ev.getPointerCount(); p++) {
+					if (ev.getX(p) > this.getWindow().getDecorView().getWidth() / 2) {
+						walk_right = true;
+					} else {
+						walk_left = true;
+					}
+				}
+			}
+
+			return true;
+		}
+
+		return super.onTouchEvent(ev);
+	}
 
 	/**
 	 * Called when sensor values have changed.
-	 * @param event SensorEvent
+	 * 
+	 * @param event
+	 *            SensorEvent
 	 */
-    @SuppressLint("FloatMath")
+	@SuppressLint("FloatMath")
 	public void onSensorChanged(SensorEvent event) {
-    	// some devices always report UNRELIABLE, making it unusable with this code:
-    	/*if (event.accuracy == SensorManager.SENSOR_STATUS_UNRELIABLE) {
-    		return; // sensor data unreliable
-    	}*/
-    	
-        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-        	// update acceleration values
-        	if (deviceIsLandscapeDefault) {
-        		// rotate X and Y
-        		acceleration[0] = event.values[1];
-        		acceleration[1] = -event.values[0];
-        		acceleration[2] = event.values[2];
-        	}
-        	else {
-        		System.arraycopy(event.values, 0, acceleration, 0, 3);
-        	}
-        }
-    }
+		// some devices always report UNRELIABLE, making it unusable with this
+		// code:
+		/*
+		 * if (event.accuracy == SensorManager.SENSOR_STATUS_UNRELIABLE) {
+		 * return; // sensor data unreliable }
+		 */
 
-    
-    /**
-     * Register sensor listener
-     */
-    public void sensorEnable() {
-        sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_GAME);
-    }
+		if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+			// update acceleration values
+			if (deviceIsLandscapeDefault) {
+				// rotate X and Y
+				acceleration[0] = event.values[1];
+				acceleration[1] = -event.values[0];
+				acceleration[2] = event.values[2];
+			} else {
+				System.arraycopy(event.values, 0, acceleration, 0, 3);
+			}
+		}
+	}
 
-    
-    /**
-     * Unregister sensor listener
-     */
-    public void sensorDisable() {
-    	sensorManager.unregisterListener(this);
-    }
+	/**
+	 * Register sensor listener
+	 */
+	public void sensorEnable() {
+		sensorManager.registerListener(this,
+				sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+				SensorManager.SENSOR_DELAY_GAME);
+	}
 
-    
-	
+	/**
+	 * Unregister sensor listener
+	 */
+	public void sensorDisable() {
+		sensorManager.unregisterListener(this);
+	}
+
 	public void onAccuracyChanged(Sensor sensor, int accuracy) {
 	}
 
+	@Override
+	protected void onResume() {
+		super.onResume();
+		surfaceView.onResume();
+		sensorEnable();
+	}
+
+	@Override
+	protected void onPause() {
+		sensorDisable();
+		surfaceView.onPause();
+		super.onPause();
+		System.gc();
+	}
+
+	@Override
+	protected void onDestroy() {
+		sensorDisable();
+		super.onDestroy();
+	}
 	
-    @Override
-    protected void onResume() {
-    	super.onResume();
-        surfaceView.onResume();
-    	sensorEnable();
-    }
+	
+	/*
+	 * How the heck do events work???
+	 * I have no idea how to get info about the colliding bodies :-/
+	 */
+	public void eventTriggered(Event e, Object triggerBody) {
+		if (e == null) {
+			Log.d("bla", "null event");
+			//never observed
+		} else {
+			if (triggerBody.equals(e.getTargetObject())) {
+				//never observed
+				Log.d("bla", "target equals trigger");
+			}
+			for (Player p : this.physics.getWorld().getPlayers()) {
+				Log.d("bla", "check for player collision");
+				if (triggerBody.equals(p)) {
+					Log.d("bla", "1st check: player " + p.getIdx()
+							+ " has collected a treasure");
+					//never observed
+				} else if (e.getTargetObject() != null) {
+					if (p.equals((e.getTargetObject()))) {
+						Log.d("bla", "2nd check: player " + p.getIdx()
+								+ " has collected a treasure");
+						//never observed
+					}
+				} else {
+					Log.d("bla", "null targetObject");
+					//this
+				}
 
-    
-    @Override
-    protected void onPause() {
-    	sensorDisable();
-    	surfaceView.onPause();
-    	super.onPause();
-    	System.gc();
-    }
-
-    
-    @Override
-    protected void onDestroy() {
-    	sensorDisable();
-    	super.onDestroy();
-    }
-
+			}
+		}
+	}
 }
