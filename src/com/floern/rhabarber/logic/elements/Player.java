@@ -129,8 +129,11 @@ public class Player extends MovableElement {
 	public void draw(GL10 gl) {
 		gl.glColor4f(1, 0.2f, 0, 1);
 		
-		skeleton.position = new Vector(positionFX().xAsFloat(), positionFX().yAsFloat()-4);
+		skeleton.position = new Vector(positionFX().xAsFloat(), positionFX().yAsFloat());
 		skeleton.rotation = FXMath.FX2toFloat(rotation2FX());
+		final float length = 6; // vertical displacement, as player.skt is not perfectly centered
+		skeleton.position.add(new Vector(FloatMath.sin(skeleton.rotation)*length, -FloatMath.cos(skeleton.rotation)*length));
+		
 		skeleton.draw(gl);
 	}
 }
