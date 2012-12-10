@@ -159,10 +159,9 @@ public class GameWorld extends World {
 			this.playerSpawnIterator = spawnpoints_player.iterator();
 		}
 		FXVector spawnPos = playerSpawnIterator.next();
-<<<<<<< HEAD
 		Player p = new Player(spawnPos, players.size(), gameActivity
 				.getResources().openRawResource(R.raw.player),
-				playerColors[colorIdx]);
+				playerColors[colorIdx],1000);
 		p.anim_running_left = SkeletonKeyframe.loadSKAnimation(
 				p.skeleton,
 				gameActivity.getResources().openRawResource(
@@ -175,12 +174,6 @@ public class GameWorld extends World {
 				p.skeleton,
 				gameActivity.getResources().openRawResource(
 						R.raw.player_standing));
-=======
-		Player p = new Player(spawnPos, players.size(), gameActivity.getResources().openRawResource(R.raw.player), Color.RED, WINNING_SCORE);
-		p.anim_running_left  = SkeletonKeyframe.loadSKAnimation(p.skeleton, gameActivity.getResources().openRawResource(R.raw.player_running_left));
-		p.anim_running_right = SkeletonKeyframe.loadSKAnimation(p.skeleton, gameActivity.getResources().openRawResource(R.raw.player_running_right));
-		p.anim_standing      = SkeletonKeyframe.loadSKAnimation(p.skeleton, gameActivity.getResources().openRawResource(R.raw.player_standing));
->>>>>>> branch 'master' of https://github.com/iliis/Rhabarber.git
 		p.setActiveAnim(p.anim_running_right);
 		addPlayer(p);
 		colorIdx++;
