@@ -314,9 +314,14 @@ public class GameServerService extends Service {
 		}
 		/**
 		 * Start the Game
+		 * @param gameMap map to play on
 		 */
-		public void initGame(String gameMap) {
-			GameServerService.this.initGame(gameMap);
+		public void initGame(final String gameMap) {
+			new Thread(new Runnable() {
+				public void run() {
+					GameServerService.this.initGame(gameMap);
+				}
+			}).start();
 		}
 		/**
 		 * Check whether the Server (not service) is running
