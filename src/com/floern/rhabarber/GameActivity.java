@@ -87,7 +87,7 @@ public class GameActivity extends Activity implements SensorEventListener,
 		p.setActiveAnim(p.anim_running_right);
 
 		try {
-			game = new GameWorld(this.getAssets().open(	"level/"+getIntent().getExtras().getString("level")), p);
+			game = new GameWorld(this.getAssets().open(	"level/"+getIntent().getExtras().getString("level")), p,this);
 
 			surfaceView.renderer.readLevelSize(game);
 			Log.d("bla", "load successful");
@@ -208,15 +208,19 @@ public class GameActivity extends Activity implements SensorEventListener,
 		super.onDestroy();
 	}
 	
-	private void onGameFinished(String[] scores)
+	public void onGameFinished(boolean isWinner)
 	{
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 	    builder.setTitle("Game finished!");
-	    builder.setItems(scores, new DialogInterface.OnClickListener() {
-	               public void onClick(DialogInterface dialog, int which) {
-	            	   //do nothing right now
-	           }
-	    });
+	    if(isWinner)
+	    {
+	    	builder.setMessage(R.string.winNotification);
+	    }
+	    else
+	    {
+	    	builder.setMessage(R.string.loseNotification);
+	    }
+	    builder.setNeutralButton(R.string.ok, null);
 	}
 	
 	
