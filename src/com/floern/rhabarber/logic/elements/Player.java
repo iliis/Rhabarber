@@ -165,9 +165,6 @@ public class Player extends MovableElement {
 		
 		// draw point bar (how much point a player has)
 		final float P = Math.min(1, Math.max(0, ((float) score) / WINNING_SCORE));
-		Log.d("foo", "score: "+Integer.toString(score));
-		Log.d("foo", "winning: "+Integer.toString(WINNING_SCORE));
-		Log.d("foo", "P = "+Float.toString(P));
 		final float L = 20;
 		
 		Vector left   = pos.plus( (new Vector(-L/2, -15)).rotCCW(skeleton.rotation) );

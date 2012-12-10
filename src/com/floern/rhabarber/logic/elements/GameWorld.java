@@ -104,9 +104,7 @@ public class GameWorld extends World {
 		final int N = getBodyCount();
 		for (int i = 0; i < N; i++) {
 			if (((GameBodyUserData) b[i].getUserData()).is_game_element) {
-				Log.d("foo", "removing a body");
 				removeBody(b[i]);
-
 				convertAndAddBody(b[i]);
 			}
 		}
