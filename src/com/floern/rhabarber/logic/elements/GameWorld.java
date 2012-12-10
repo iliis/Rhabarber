@@ -10,6 +10,7 @@ import com.floern.rhabarber.GameActivity;
 import com.floern.rhabarber.MainActivity;
 import com.floern.rhabarber.graphic.primitives.IGLPrimitive;
 import com.floern.rhabarber.graphic.primitives.Vertexes;
+import com.floern.rhabarber.network2.GameNetworkingProtocolConnection.Message;
 import com.floern.rhabarber.util.FXMath;
 import com.floern.rhabarber.util.GameBodyUserData;
 
@@ -231,6 +232,27 @@ public class GameWorld extends World {
 		for(Player p: getPlayers()) {
 			p.animate(((float) dt) / 1000000000);
 		}
+	}
+	
+	private void copyInputsFromAccumulator() {
+		// TODO
+		/*ClienStateAccumulator copy;
+		
+		synchronized(...) {
+			copy = original; // deep copy
+		}*/
+		
+		// do stuff with copy
+	}
+	
+	// server side
+	private void sendStateToClients() {
+		// TODO
+	}
+	
+	// client side
+	public void receiveStateFromServer(Message m) {
+		
 	}
 	
 	public void setAccel(float[] g) {

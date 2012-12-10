@@ -172,6 +172,14 @@ public class GameActivity extends Activity implements SensorEventListener,
 			}
 		}
 	}
+	
+	public void sendAccelerationToServer() {
+		// TODO
+	}
+	
+	public void sendUserInputToServer() {
+		// TODO
+	}
 
 	/**
 	 * Register sensor listener
