@@ -52,6 +52,7 @@ public class Player extends MovableElement {
 	private SkeletonKeyframe active_kf, next_kf;
 	private ListIterator<SkeletonKeyframe> kfIterator;
 	private float frame_age = 0;
+	private float aligned_speed = 0;
 
 	public Player(FXVector pos, int playerIdx, InputStream skeleton, int color, int winning_score) {
 		this(pos.xAsInt(), pos.yAsInt(), playerIdx, skeleton, color, winning_score);
@@ -88,10 +89,22 @@ public class Player extends MovableElement {
 			frame_age = 0;
 		}
 	}
+	
+	// update internal state, should only be called in server
+	public void update() {
+		this.aligned_speed = FXMath.FXtoFloat(this.velocityFX().dotFX(this.getAxes()[1]));
+	}
+	
+	public void setAlignedSpeed(float v) {
+		this.aligned_speed = v;
+	}
+	
+	public float getAlignedSpeed() {
+		return this.aligned_speed;
+	}
 
 	public void animate(float dt) {
-		final float aligned_speed = FXMath.FXtoFloat(this.velocityFX().dotFX(this.getAxes()[1]));
-		float speed_factor        = FloatMath.sqrt(aligned_speed>=0?aligned_speed:-aligned_speed) / ANIM_SPEED_FACTOR;
+		float speed_factor         = FloatMath.sqrt(aligned_speed>=0?aligned_speed:-aligned_speed) / ANIM_SPEED_FACTOR;
 		//Log.d("foo", Float.toString(aligned_speed) + "  //  " + Float.toString(speed_factor));
 		
 		if (aligned_speed > MOVING_THRESHOLD)

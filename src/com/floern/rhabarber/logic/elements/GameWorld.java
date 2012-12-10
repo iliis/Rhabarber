@@ -145,21 +145,26 @@ public class GameWorld extends World {
 		this.addBody(t);
 		this.treasures.add(t);
 	}
-
+	
 	public void addTreasureRandomly() {
-
+		Treasure t = new Treasure(new FXVector(), 0);
+		moveTreasureRandomly(t);
+		addTreasure(t);
+	}
+	
+	public void moveTreasureRandomly(Treasure t) {
 		if (!spawnpoints_treasure.isEmpty()) {
 
-			Body spawnpoint = this.spawnpoints_treasure.get(rand
-					.nextInt(spawnpoints_treasure.size()));
+			Body spawnpoint    = this.spawnpoints_treasure.get(rand.nextInt(spawnpoints_treasure.size()));
 			GameBodyUserData d = (GameBodyUserData) spawnpoint.getUserData();
 
-			addTreasure(new Treasure(spawnpoint.positionFX(),
-					Integer.parseInt(d.data.get("value"))));
+			t.setPositionFX(spawnpoint.positionFX());
+			t.setValue(Integer.parseInt(d.data.get("value")));
 		} else {
 			Log.e("foo",
 					"No treasure spawnpoints defined in map (GameWorld.addTreasureRandomly)");
 		}
+
 	}
 
 	public int addPlayer()
@@ -169,21 +174,10 @@ public class GameWorld extends World {
 			this.playerSpawnIterator = spawnpoints_player.iterator();
 		}
 		FXVector spawnPos = playerSpawnIterator.next();
-		Player p = new Player(spawnPos, players.size(), gameActivity
-				.getResources().openRawResource(R.raw.player),
-				playerColors[colorIdx],1000);
-		p.anim_running_left = SkeletonKeyframe.loadSKAnimation(
-				p.skeleton,
-				gameActivity.getResources().openRawResource(
-						R.raw.player_running_left));
-		p.anim_running_right = SkeletonKeyframe.loadSKAnimation(
-				p.skeleton,
-				gameActivity.getResources().openRawResource(
-						R.raw.player_running_right));
-		p.anim_standing = SkeletonKeyframe.loadSKAnimation(
-				p.skeleton,
-				gameActivity.getResources().openRawResource(
-						R.raw.player_standing));
+		Player p = new Player(spawnPos, players.size(), gameActivity.getResources().openRawResource(R.raw.player),	playerColors[colorIdx], 1000);
+		p.anim_running_left  = SkeletonKeyframe.loadSKAnimation(p.skeleton, gameActivity.getResources().openRawResource(R.raw.player_running_left));
+		p.anim_running_right = SkeletonKeyframe.loadSKAnimation(p.skeleton, gameActivity.getResources().openRawResource(R.raw.player_running_right));
+		p.anim_standing      = SkeletonKeyframe.loadSKAnimation(p.skeleton, gameActivity.getResources().openRawResource(R.raw.player_standing));
 		p.setActiveAnim(p.anim_running_right);
 		addPlayer(p);
 		colorIdx++;
@@ -241,8 +235,7 @@ public class GameWorld extends World {
 	}
 
 	private void onTreasureCollected(Player p, Treasure t) {
-		treasures.remove(t);
-		this.removeBody(t);
+		moveTreasureRandomly(t);
 		p.score += t.getValue();
 
 		if (p.score >= WINNING_SCORE)
@@ -261,16 +254,18 @@ public class GameWorld extends World {
 	public void tick() {
 		if (isServer) {
 			// what about overflows? (so far I hadn't any bugs)
-			long dt = System.nanoTime() - last_tick;
+			long dt  = System.nanoTime() - last_tick;
 			last_tick = System.nanoTime();
 
 			applyPlayerGravities(getTimestepFX(), acceleration);
 			super.tick(); // simulate physics
-			this.processGame();
-
+			
 			for (Player p : getPlayers()) {
+				p.update();
 				p.animate(((float) dt) / 1000000000); // convert ns to seconds
 			}
+			
+			this.processGame();
 		}
 		else
 		{
