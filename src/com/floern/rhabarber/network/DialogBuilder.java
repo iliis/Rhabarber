@@ -223,94 +223,62 @@ public class DialogBuilder {
 		return dialog;
 	}
 
-	public static Dialog createAllJoynErrorDialog(Activity activity,
+	public static Dialog createAllJoynErrorDialog(final Activity activity,
 			final NetworkController application) {
-		return (new DialogFragment() {
-			@Override
-			public Dialog onCreateDialog(Bundle savedInstanceState) {
-				// Use the Builder class for convenient dialog construction
-				AlertDialog.Builder builder = new AlertDialog.Builder(
-						getActivity());
-				builder.setMessage(application.getErrorString())
-						.setPositiveButton(R.string.ok,
-								new DialogInterface.OnClickListener() {
-									public void onClick(DialogInterface dialog,
-											int id) {
-										getDialog().cancel();
-									}
-								});
-				// Create the AlertDialog object and return it
-				return builder.create();
-			}
-		}).getDialog();
+		// Use the Builder class for convenient dialog construction
+		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+		builder.setMessage(application.getErrorString()).setPositiveButton(
+				R.string.ok, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+
+					}
+				});
+		// Create the AlertDialog object and return it
+		return builder.create();
 	}
 
-	public static Dialog createJoinDialog(Activity activity,
+	public static Dialog createJoinDialog(final Activity activity,
 			final NetworkController application) {
-		return (new DialogFragment() {
-			@Override
-			public Dialog onCreateDialog(Bundle savedInstanceState) {
-				AlertDialog.Builder builder = new AlertDialog.Builder(
-						getActivity());
-				// Get the layout inflater
-				LayoutInflater inflater = getActivity().getLayoutInflater();
 
-				// Inflate and set the layout for the dialog
-				// Pass null as the parent view because its going in the dialog
-				// layout
-				builder.setView(inflater.inflate(R.layout.dialog_join, null))
-				// Add action buttons
-						.setNegativeButton(R.string.cancel,
-								new DialogInterface.OnClickListener() {
-									public void onClick(DialogInterface dialog,
-											int id) {
-										getDialog().cancel();
-									}
-								});
-				return builder.create();
-			}
+		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+		// Get the layout inflater
+		LayoutInflater inflater = activity.getLayoutInflater();
 
-			@Override
-			public void onStart() {
-				super.onStart();
-
-			}
-
-			@Override
-			public void onCancel(DialogInterface dialog) {
-				super.onCancel(dialog);
-			}
-		}).getDialog();
+		// Inflate and set the layout for the dialog
+		// Pass null as the parent view because its going in the dialog
+		// layout
+		builder.setView(inflater.inflate(R.layout.dialog_join, null))
+		// Add action buttons
+				.setNegativeButton(R.string.cancel,
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								// TODO
+							}
+						});
+		return builder.create();
 	}
 
-	public static DialogFragment createQuitDialog(Activity activity,
+	public static Dialog createQuitDialog(final Activity activity,
 			final NetworkController application) {
-		return new DialogFragment() {
-			@Override
-			public Dialog onCreateDialog(Bundle savedInstanceState) {
-				// Use the Builder class for convenient dialog construction
-				AlertDialog.Builder builder = new AlertDialog.Builder(
-						getActivity());
-				builder.setMessage(R.string.dialog_quit_question)
-						.setPositiveButton(R.string.yes,
-								new DialogInterface.OnClickListener() {
-									public void onClick(DialogInterface dialog,
-											int id) {
-										application.quit();
-										getDialog().cancel();
-									}
-								})
-						.setNegativeButton(R.string.no,
-								new DialogInterface.OnClickListener() {
-									public void onClick(DialogInterface dialog,
-											int id) {
-										getDialog().cancel();
-									}
-								});
-				// Create the AlertDialog object and return it
-				return builder.create();
-			}
-		};
+
+		// Use the Builder class for convenient dialog construction
+		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+		builder.setMessage(R.string.dialog_quit_question)
+				.setPositiveButton(R.string.yes,
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								application.quit();
+							}
+						})
+				.setNegativeButton(R.string.no,
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								activity.finish();
+							}
+						});
+		// Create the AlertDialog object and return it
+		return builder.create();
+
 	}
 
 }

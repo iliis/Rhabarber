@@ -66,8 +66,11 @@ public class MenuActivity extends Activity implements Observer {
 							int position, long id) {
 						GameDescription selected = (GameDescription) parent
 								.getItemAtPosition(position);
-						Log.i(TAG,"useSetChannelName("+selected.getGameName()+")");
-						networkController.useSetChannelName(selected.getGameName());
+						Log.i(TAG,
+								"useSetChannelName(" + selected.getGameName()
+										+ ")");
+						networkController.useSetChannelName(selected
+								.getGameName());
 						networkController.useJoinChannel();
 					}
 				});
@@ -85,30 +88,28 @@ public class MenuActivity extends Activity implements Observer {
 				// Do nothing.
 			}
 		});
-		
+
 		// list all levels in asset/level/
-		String[] levels = new String[]{"no levels found"};
+		String[] levels = new String[] { "no levels found" };
 		try {
 			levels = this.getAssets().list("level");
 		} catch (IOException e) {
 			e.printStackTrace();
 			Log.e("Rhabarber", "Couldn't load levels from asset/level/");
-			Toast.makeText(this, "Couldn't find any levels.", TOAST_DURATION).show();
+			Toast.makeText(this, "Couldn't find any levels.", TOAST_DURATION)
+					.show();
 		}
 
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-				android.R.layout.simple_spinner_item,
-				levels);
+				android.R.layout.simple_spinner_item, levels);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		spinnerMap.setAdapter(adapter);
-		
 
 		textViewPlayerCount = (TextView) findViewById(R.id.textViewPlayerCount);
 
 		buttonStartGame = (Button) findViewById(R.id.buttonStartGame);
 		buttonStartGame.setEnabled(false);
-		
-		
+
 		// TODO delete test
 		ListView listView = (ListView) findViewById(R.id.listViewGameDescriptions);
 		// Assign adapter to ListView
@@ -207,6 +208,17 @@ public class MenuActivity extends Activity implements Observer {
 		super.onDestroy();
 	}
 
+	@Override
+	public void onBackPressed() {
+		AllJoynService.HostChannelState channelState = networkController
+				.hostGetChannelState();
+		if (channelState != AllJoynService.HostChannelState.IDLE) {
+			DialogBuilder.createQuitDialog(this, networkController).show();
+		} else {
+			this.finish();
+		}
+	}
+
 	static final int DIALOG_JOIN_ID = 1;
 	public static final int DIALOG_ALLJOYN_ERROR_ID = 3;
 
@@ -220,7 +232,8 @@ public class MenuActivity extends Activity implements Observer {
 		}
 			break;
 		case DIALOG_ALLJOYN_ERROR_ID: {
-			result = DialogBuilder.createAllJoynErrorDialog(this, networkController);
+			result = DialogBuilder.createAllJoynErrorDialog(this,
+					networkController);
 			result.show();
 		}
 			break;
@@ -309,9 +322,9 @@ public class MenuActivity extends Activity implements Observer {
 
 		if (channelState == AllJoynService.HostChannelState.IDLE) {
 			editTextGameName.setEnabled(true);
-			//if (editTextGameName.getTag() != null)
-			//	editTextGameName.setKeyListener((KeyListener) editTextGameName
-			//			.getTag());
+			// if (editTextGameName.getTag() != null)
+			// editTextGameName.setKeyListener((KeyListener) editTextGameName
+			// .getTag());
 
 			toggleButtonHost.setChecked(false);
 
@@ -319,16 +332,16 @@ public class MenuActivity extends Activity implements Observer {
 			buttonStartGame.setEnabled(false);
 		} else {
 			editTextGameName.setEnabled(false);
-			//if (editTextGameName.getKeyListener() != null)
-			//	editTextGameName.setTag(editTextGameName.getKeyListener());
-			//editTextGameName.setKeyListener(null);
+			// if (editTextGameName.getKeyListener() != null)
+			// editTextGameName.setTag(editTextGameName.getKeyListener());
+			// editTextGameName.setKeyListener(null);
 
 			editTextGameName.setText(networkController.hostGetChannelName());
 
 			toggleButtonHost.setChecked(true);
 
 			spinnerMap.setEnabled(false);
-			
+
 			buttonStartGame.setEnabled(true);
 		}
 	}
