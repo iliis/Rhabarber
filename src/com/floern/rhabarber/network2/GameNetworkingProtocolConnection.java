@@ -331,7 +331,10 @@ public class GameNetworkingProtocolConnection {
 		buf.putInt(map.length());
 		buf.put(stringdata);
 		
-		sendMessage(new Message(Message.TYPE_GAME_START, buf.array()));
+		buf.rewind();
+		byte[] arr = new byte[buf.remaining()];
+		buf.get(arr);
+		sendMessage(new Message(Message.TYPE_GAME_START, arr));
 	}
 	
 	/**
