@@ -14,19 +14,24 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Looper;
 import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import at.emini.physics2D.Event;
 import at.emini.physics2D.PhysicsEventListener;
 import at.emini.physics2D.util.FXVector;
@@ -208,19 +213,31 @@ public class GameActivity extends Activity implements SensorEventListener,
 		super.onDestroy();
 	}
 	
-	public void onGameFinished(boolean isWinner)
+	public void onGameFinished(final boolean isWinner)
 	{
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-	    builder.setTitle("Game finished!");
-	    if(isWinner)
-	    {
-	    	builder.setMessage(R.string.winNotification);
-	    }
-	    else
-	    {
-	    	builder.setMessage(R.string.loseNotification);
-	    }
-	    builder.setNeutralButton(R.string.ok, null);
+		runOnUiThread(new Runnable() {
+			public void run() {
+				Resources res = getResources();
+				AlertDialog builder = new AlertDialog.Builder(GameActivity.this).create();
+			    builder.setTitle("Game finished!");
+			    builder.setCanceledOnTouchOutside(false);
+			    if(isWinner)
+			    {
+			    	builder.setMessage(res.getString(R.string.winNotification));
+			    }
+			    else
+			    {
+			    	builder.setMessage(res.getString(R.string.loseNotification));
+			    }
+			    builder.setButton(Dialog.BUTTON_POSITIVE, res.getString(R.string.ok), new OnClickListener() {
+					
+					public void onClick(DialogInterface dialog, int which) {
+						finish();
+					}
+				});
+			    builder.show();
+			}
+		});
 	}
 	
 	
