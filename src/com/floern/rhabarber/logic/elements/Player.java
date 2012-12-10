@@ -8,6 +8,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 import com.floern.rhabarber.graphic.primitives.Skeleton;
 import com.floern.rhabarber.graphic.primitives.SkeletonKeyframe;
+import com.floern.rhabarber.graphic.primitives.Vertexes;
 import com.floern.rhabarber.util.FXMath;
 import com.floern.rhabarber.util.Vector;
 
@@ -33,8 +34,8 @@ public class Player extends MovableElement {
 	private int color;
 	
 	public int score;
-	
-	
+
+	private final int WINNING_SCORE;
 	public FXVector playerGravity;
 
 	// graphics properties (yeah, this may belong somewhere else...
@@ -52,12 +53,14 @@ public class Player extends MovableElement {
 	private ListIterator<SkeletonKeyframe> kfIterator;
 	private float frame_age = 0;
 
-	public Player(FXVector pos, int playerIdx, InputStream skeleton, int color) {
-		this(pos.xAsInt(), pos.yAsInt(), playerIdx, skeleton, color);
+	public Player(FXVector pos, int playerIdx, InputStream skeleton, int color, int winning_score) {
+		this(pos.xAsInt(), pos.yAsInt(), playerIdx, skeleton, color, winning_score);
 	}
 
-	public Player(int x, int y, int playerIdx, InputStream skeleton, int color) {
+	public Player(int x, int y, int playerIdx, InputStream skeleton, int color, int winning_score) {
 		super(x, y, Shape.createRectangle(hitBoxWidth, hitBoxHeight));
+		WINNING_SCORE = winning_score;
+		
 		this.score = 0;
 		this.color = color;
 		this.shape().setElasticity(elasticity);
@@ -136,11 +139,40 @@ public class Player extends MovableElement {
 	public void draw(GL10 gl) {
 		gl.glColor4f(1, 0.2f, 0, 1);
 		
-		skeleton.position = new Vector(positionFX().xAsFloat(), positionFX().yAsFloat());
+		
 		skeleton.rotation = FXMath.FX2toFloat(rotation2FX());
+		
 		final float length = 6; // vertical displacement, as player.skt is not perfectly centered
-		skeleton.position.add(new Vector(FloatMath.sin(skeleton.rotation)*length, -FloatMath.cos(skeleton.rotation)*length));
+		final Vector pos   = new Vector(positionFX().xAsFloat(), positionFX().yAsFloat());
+		final Vector delta = new Vector(FloatMath.sin(skeleton.rotation)*length, -FloatMath.cos(skeleton.rotation)*length);
+		skeleton.position = pos;
+		skeleton.position.add(delta);
 		
 		skeleton.draw(gl);
+		
+		// draw point bar (how much point a player has)
+		final float P = Math.min(1, Math.max(0, ((float) score) / WINNING_SCORE));
+		Log.d("foo", "score: "+Integer.toString(score));
+		Log.d("foo", "winning: "+Integer.toString(WINNING_SCORE));
+		Log.d("foo", "P = "+Float.toString(P));
+		final float L = 20;
+		
+		Vector left   = pos.plus( (new Vector(-L/2, -15)).rotCCW(skeleton.rotation) );
+		Vector right  = pos.plus( (new Vector( L/2, -15)).rotCCW(skeleton.rotation) );
+		Vector middle = left.plus( right.minus(left).normalized().times(P*16) ); 
+		
+		gl.glColor4f(0, 1, 0, 1);
+		Vertexes bar = new Vertexes();
+		bar.setThickness(10);
+		bar.addPoint(left);
+		bar.addPoint(middle);
+		bar.draw(gl);
+		
+		gl.glColor4f(1, 0, 0, 1);
+		bar = new Vertexes();
+		bar.setThickness(10);
+		bar.addPoint(middle);
+		bar.addPoint(right);
+		bar.draw(gl);
 	}
 }

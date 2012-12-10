@@ -41,8 +41,7 @@ import at.emini.physics2D.util.FXVector;
 /* contains the game itself, starts open gl (which calls the physics and logic on every frame)
  * 
  */
-public class GameActivity extends Activity implements SensorEventListener,
-		PhysicsEventListener {
+public class GameActivity extends Activity implements SensorEventListener {
 
 	private GameGLSurfaceView surfaceView;
 
@@ -239,7 +238,7 @@ public class GameActivity extends Activity implements SensorEventListener,
 	 * How the heck do events work???
 	 * I have no idea how to get info about the colliding bodies :-/
 	 */
-	public void eventTriggered(Event e, Object triggerBody) {
+	/*public void eventTriggered(Event e, Object triggerBody) {
 		if (e == null) {
 			Log.d("bla", "null event");
 			//never observed
@@ -267,5 +266,5 @@ public class GameActivity extends Activity implements SensorEventListener,
 
 			}
 		}
-	}
+	}*/
 }

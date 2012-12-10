@@ -88,6 +88,10 @@ public class Vertexes implements IGLPrimitive {
 		++length;
 	}
 	
+	public void addPoint(Vector pos) {
+		addPoint(pos.x, pos.y);
+	}
+	
 	public void removePoint() {
 		--length;
 	}
@@ -112,5 +116,7 @@ public class Vertexes implements IGLPrimitive {
 		this.mode = m;
 		return this;
 	}
+
+
 
 }
