@@ -223,9 +223,9 @@ public class DialogBuilder {
 		return dialog;
 	}
 
-	public static DialogFragment createAllJoynErrorDialog(Activity activity,
+	public static Dialog createAllJoynErrorDialog(Activity activity,
 			final NetworkController application) {
-		return new DialogFragment() {
+		return (new DialogFragment() {
 			@Override
 			public Dialog onCreateDialog(Bundle savedInstanceState) {
 				// Use the Builder class for convenient dialog construction
@@ -242,12 +242,12 @@ public class DialogBuilder {
 				// Create the AlertDialog object and return it
 				return builder.create();
 			}
-		};
+		}).getDialog();
 	}
 
-	public static DialogFragment createJoinDialog(Activity activity,
+	public static Dialog createJoinDialog(Activity activity,
 			final NetworkController application) {
-		return new DialogFragment() {
+		return (new DialogFragment() {
 			@Override
 			public Dialog onCreateDialog(Bundle savedInstanceState) {
 				AlertDialog.Builder builder = new AlertDialog.Builder(
@@ -280,7 +280,7 @@ public class DialogBuilder {
 			public void onCancel(DialogInterface dialog) {
 				super.onCancel(dialog);
 			}
-		};
+		}).getDialog();
 	}
 
 	public static DialogFragment createQuitDialog(Activity activity,

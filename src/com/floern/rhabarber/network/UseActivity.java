@@ -135,7 +135,7 @@ public class UseActivity extends Activity implements Observer {
 	        break;
         case DIALOG_ALLJOYN_ERROR_ID:
 	        { 
-	        	DialogBuilder.createAllJoynErrorDialog(this, mChatApplication);
+	        	DialogBuilder.createAllJoynErrorDialog(this, mChatApplication).show();
 	        }
 	        break;	        
         }
