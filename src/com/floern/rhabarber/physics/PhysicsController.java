@@ -4,13 +4,10 @@ import java.io.InputStream;
 import javax.microedition.khronos.opengles.GL10;
 
 import android.opengl.GLES10;
-import android.util.Log;
 import at.emini.physics2D.Body;
 import at.emini.physics2D.Event;
-import at.emini.physics2D.Landscape;
 import at.emini.physics2D.PhysicsEventListener;
 import at.emini.physics2D.World;
-import at.emini.physics2D.util.FXMatrix;
 import at.emini.physics2D.util.FXVector;
 import at.emini.physics2D.util.PhysicsFileReader;
 
@@ -19,8 +16,7 @@ import com.floern.rhabarber.graphic.primitives.Vertexes;
 import com.floern.rhabarber.logic.elements.GameWorld;
 import com.floern.rhabarber.logic.elements.Player;
 import com.floern.rhabarber.logic.elements.Treasure;
-import com.floern.rhabarber.util.FXMath;
-import com.floern.rhabarber.util.Vector;
+import com.floern.rhabarber.util.GameBodyUserData;
 
 public class PhysicsController {
 	
@@ -67,9 +63,10 @@ public class PhysicsController {
 	
 	private void loadLevel(InputStream level)
 	{
-		World tmp = World.loadWorld(new PhysicsFileReader(level));
-		this.world = new GameWorld();
-		world.setLandscape(tmp.getLandscape());
+		World tmp = World.loadWorld(new PhysicsFileReader(level), new GameBodyUserData());
+		this.world = new GameWorld(tmp);
+		//this.world = new GameWorld();
+		//world.setLandscape(tmp.getLandscape());
 	}
 	
 	//calculates next state of world
@@ -113,15 +110,10 @@ public class PhysicsController {
 			}
 			//else {
 				// draw shape
-				FXVector[] vertsFX = b[i].shape().getCorners();
-				FXVector pos = b[i].positionFX();
-				Vertexes verts = new Vertexes(); verts.setMode(GLES10.GL_LINE_LOOP);
-				FXMatrix rot = b[i].getRotationMatrix();
-				for (FXVector v: vertsFX) {
-					FXVector vr = rot.mult(v);
-					verts.addPoint(vr.xAsFloat()+pos.xAsFloat(), vr.yAsFloat()+pos.yAsFloat());
-				}
+				
+				Vertexes verts = new Vertexes(b[i]);
 				gl.glColor4f(1, 1, 1, 1);
+				verts.setMode(GLES10.GL_LINE_LOOP);
 				verts.draw(gl);
 			//}
 		}

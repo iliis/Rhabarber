@@ -14,7 +14,7 @@ import com.floern.rhabarber.util.Vector;
 
 
 
-public class Skeleton extends GLPrimitive {
+public class Skeleton implements IGLPrimitive {
 	
 	Bone rootBone = new Bone(0, 0, "root");
 	Map<String, Bone> allBones = new HashMap<String, Bone>();
@@ -61,7 +61,6 @@ public class Skeleton extends GLPrimitive {
 		return allBones.get(name);
 	}
 
-	@Override
 	public void draw(GL10 gl) {
 		LinkedList<Vector> vects = new LinkedList<Vector>();
 		rootBone.angle = this.rotation;
