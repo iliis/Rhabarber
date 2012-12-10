@@ -88,6 +88,7 @@ public class GameActivity extends Activity implements SensorEventListener {
 		try {
 			game = new GameWorld(this.getAssets().open(	"level/"+getIntent().getExtras().getString("level")),this);
 			playerIdx = game.addPlayer();
+			
 			surfaceView.renderer.readLevelSize(game);
 		} catch (IOException e) {
 			e.printStackTrace();

@@ -137,7 +137,7 @@ public class Player extends MovableElement {
 
 	
 	public void draw(GL10 gl) {
-		gl.glColor4f(1, 0.2f, 0, 1);
+		gl.glColor4f(Color.red(color), Color.green(color), Color.blue(color), 1);
 		
 		
 		skeleton.rotation = FXMath.FX2toFloat(rotation2FX());
