@@ -39,8 +39,7 @@ import at.emini.physics2D.util.FXVector;
 /* contains the game itself, starts open gl (which calls the physics and logic on every frame)
  * 
  */
-public class GameActivity extends Activity implements SensorEventListener,
-		PhysicsEventListener {
+public class GameActivity extends Activity implements SensorEventListener {
 
 	private GameGLSurfaceView surfaceView;
 
@@ -85,7 +84,9 @@ public class GameActivity extends Activity implements SensorEventListener,
 
 		// setup up the actual game
 		// TODO: nicely implement this loading of ressources
-		p = new Player(100, 100, 1, this.getResources().openRawResource(R.raw.player));
+		// TODO: change 1000 into GameWorld.WINNING_SCORE
+		// TODO: move this into GameWorld
+		p = new Player(100, 100, 1, this.getResources().openRawResource(R.raw.player), 1000);
 		p.anim_running_left  = SkeletonKeyframe.loadSKAnimation(p.skeleton, this.getResources().openRawResource(R.raw.player_running_left));
 		p.anim_running_right = SkeletonKeyframe.loadSKAnimation(p.skeleton, this.getResources().openRawResource(R.raw.player_running_right));
 		p.anim_standing      = SkeletonKeyframe.loadSKAnimation(p.skeleton, this.getResources().openRawResource(R.raw.player_standing));
@@ -246,7 +247,7 @@ public class GameActivity extends Activity implements SensorEventListener,
 	 * How the heck do events work???
 	 * I have no idea how to get info about the colliding bodies :-/
 	 */
-	public void eventTriggered(Event e, Object triggerBody) {
+	/*public void eventTriggered(Event e, Object triggerBody) {
 		if (e == null) {
 			Log.d("bla", "null event");
 			//never observed
@@ -274,5 +275,5 @@ public class GameActivity extends Activity implements SensorEventListener,
 
 			}
 		}
-	}
+	}*/
 }
