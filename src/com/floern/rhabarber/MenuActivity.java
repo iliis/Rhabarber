@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.app.Activity;
 import android.app.Dialog;
+import android.support.v4.app.DialogFragment;
 import android.text.method.KeyListener;
 import android.util.Log;
 import android.view.Menu;
@@ -211,20 +212,18 @@ public class MenuActivity extends Activity implements Observer {
 
 	protected Dialog onCreateDialog(int id) {
 		Log.i(TAG, "onCreateDialog()");
-		Dialog result = null;
+		DialogFragment result = null;
 		switch (id) {
 		case DIALOG_JOIN_ID: {
-			DialogBuilder builder = new DialogBuilder();
-			result = builder.createJoinDialog(this, networkController);
+			result = DialogBuilder.createJoinDialog(this, networkController);
 		}
 			break;
 		case DIALOG_ALLJOYN_ERROR_ID: {
-			DialogBuilder builder = new DialogBuilder();
-			result = builder.createAllJoynErrorDialog(this, networkController);
+			result = DialogBuilder.createAllJoynErrorDialog(this, networkController);
 		}
 			break;
 		}
-		return result;
+		return result.getDialog();
 	}
 
 	public synchronized void update(Observable o, Object arg) {

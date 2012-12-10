@@ -40,7 +40,6 @@ import android.util.Log;
 import java.util.List;
 
 import com.floern.rhabarber.R;
-import com.floern.rhabarber.network.dialogs.JoinDialog;
 
 public class DialogBuilder {
 	private static final String TAG = "Dialogs";
@@ -224,25 +223,26 @@ public class DialogBuilder {
 		return dialog;
 	}
 
-	public Dialog createAllJoynErrorDialog(Activity activity,
+	public static DialogFragment createAllJoynErrorDialog(Activity activity,
 			final NetworkController application) {
-		Log.i(TAG, "createAllJoynErrorDialog()");
-		final Dialog dialog = new Dialog(activity);
-		dialog.requestWindowFeature(dialog.getWindow().FEATURE_NO_TITLE);
-		dialog.setContentView(R.layout.alljoynerrordialog);
-
-		TextView errorText = (TextView) dialog
-				.findViewById(R.id.errorDescription);
-		errorText.setText(application.getErrorString());
-
-		Button yes = (Button) dialog.findViewById(R.id.errorOk);
-		yes.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View view) {
-				dialog.cancel();
+		return new DialogFragment() {
+			@Override
+			public Dialog onCreateDialog(Bundle savedInstanceState) {
+				// Use the Builder class for convenient dialog construction
+				AlertDialog.Builder builder = new AlertDialog.Builder(
+						getActivity());
+				builder.setMessage(application.getErrorString())
+						.setPositiveButton(R.string.ok,
+								new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface dialog,
+											int id) {
+										getDialog().cancel();
+									}
+								});
+				// Create the AlertDialog object and return it
+				return builder.create();
 			}
-		});
-
-		return dialog;
+		};
 	}
 
 	public static DialogFragment createJoinDialog(Activity activity,
