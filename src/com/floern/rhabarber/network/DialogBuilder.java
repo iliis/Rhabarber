@@ -252,7 +252,8 @@ public class DialogBuilder {
 				.setNegativeButton(R.string.cancel,
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
-								// TODO
+								application.useLeaveChannel();
+								application.useSetChannelName("Not set");
 							}
 						});
 		return builder.create();
