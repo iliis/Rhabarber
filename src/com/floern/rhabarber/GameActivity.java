@@ -221,6 +221,7 @@ public class GameActivity extends Activity implements SensorEventListener,
 				AlertDialog builder = new AlertDialog.Builder(GameActivity.this).create();
 			    builder.setTitle("Game finished!");
 			    builder.setCanceledOnTouchOutside(false);
+			    builder.setCancelable(false);
 			    if(isWinner)
 			    {
 			    	builder.setMessage(res.getString(R.string.winNotification));
