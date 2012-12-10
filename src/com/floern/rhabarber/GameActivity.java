@@ -92,7 +92,7 @@ public class GameActivity extends Activity implements SensorEventListener,
 		p.setActiveAnim(p.anim_running_right);
 
 		try {
-			game = new GameWorld(this.getAssets().open(	"level/"+getIntent().getExtras().getString("level")), p,this);
+			game = new GameWorld(this.getAssets().open(	"level/"+getIntent().getExtras().getString("level")), p,this,true);
 
 			surfaceView.renderer.readLevelSize(game);
 			Log.d("bla", "load successful");
