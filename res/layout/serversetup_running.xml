@@ -75,6 +75,14 @@
 		android:layout_height="fill_parent"
 		android:layout_weight="1"
 		android:orientation="vertical">
+		
+	    <Spinner
+			android:id="@+id/spinner_map"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="10dp"
+			android:layout_marginLeft="10dp"
+			android:layout_marginRight="10dp" />
 	
 		<RelativeLayout
 			android:id="@+id/lay_join_self"
@@ -98,6 +106,8 @@
 				android:layout_height="wrap_content"
 				android:layout_alignRight="@+id/btn_join_self"
 				android:layout_marginRight="10dp"
+				android:focusable="false"
+				android:clickable="false"
 				android:checked="false" />
 
 		</RelativeLayout>

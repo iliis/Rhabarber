@@ -60,14 +60,25 @@ public class ClientNetworkingLogic {
 					userList.add(new UserInfo(user, 0));
 				registerEventListener.onUserListChange(userList);
 			}
+			else if (message.type == Message.TYPE_IDLE) {
+				// idle received, ignore
+			}
+			else if (message.type == Message.TYPE_GAME_START) {
+				// init game
+				// TODO: detailed event handling
+				String map = GameNetworkingProtocolConnection.parseStartGameMessage(message, new Integer(0));
+				updateEventListener.onInitGame(map);
+			}
 			else {
-				Log.i("onReceive()", "Mistimed Message received, Type: "+message.type);
+				Log.i("onReceive()", "Mistimed/unknown Message received, Type: "+message.type+"; Hex: "+message.hexDump());
 			}
 		}
 		public void onConnectionError(Exception e) {
+			stopAvoidTimeout();
 			registerEventListener.onNetworkingError(e.getMessage());
 		}
 		public void onConnectionClosed() {
+			stopAvoidTimeout();
 			registerEventListener.onNetworkingError("Connection closed");
 		}
 	};
@@ -92,7 +103,7 @@ public class ClientNetworkingLogic {
 					Thread.sleep(timeToWait - timeElapsedSinceLastSend);
 				}
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				//e.printStackTrace();
 			}
 		}
 	};
@@ -149,6 +160,15 @@ public class ClientNetworkingLogic {
 	}
 	
 	
+	/**
+	 * Send an unregister message and close the connection
+	 */
+	public void unregisterAtServer() {
+		serverConnection.sendUnregisterMessage();
+		serverConnection.disconnect();
+	}
+	
+	
 	
 	/**
 	 * Callback for register events
@@ -175,6 +195,11 @@ public class ClientNetworkingLogic {
 	 * Callback for game updates events
 	 */
 	public static interface GameUpdateEventListener {
+		/**
+		 * Game has to be initialized
+		 * @param gameMap map to play on
+		 */
+		void onInitGame(final String gameMap);
 		/**
 		 * User was registered
 		 */

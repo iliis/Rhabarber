@@ -1,6 +1,7 @@
 package com.floern.rhabarber.network2;
 
 import java.io.IOException;
+import java.net.SocketException;
 import java.util.ArrayList;
 
 import com.floern.rhabarber.network2.GameNetworkingProtocolConnection.*;
@@ -128,24 +129,31 @@ public class GameServerService extends Service {
 				// set message listener
 				newUser.setIncomingMessageListener(new IncomingMessageListener() {
 					public void onTimeout() {
-						// TODO: remove client
+						handleRemovedUser(newUser);
 					}
 					public void onReceive(Message message) {
-						if (message.type == GameNetworkingProtocolConnection.Message.TYPE_REGISTRATION_REQUEST) {
+						if (message.type == Message.TYPE_REGISTRATION_REQUEST) {
 							Log.i("onReceive()", "Registration request received");
 							handleClientRegistration(newUser);
 						}
-						else if (message.type == GameNetworkingProtocolConnection.Message.TYPE_IDLE) {
+						else if (message.type == Message.TYPE_IDLE) {
 							Log.i("onReceive()", "Idle received");
 							// send idle response
 							newUser.sendIdleMessage();
 						}
+						else if (message.type == Message.TYPE_UNREGISTER) {
+							Log.i("onReceive()", "Unregister message received");
+							// disconnect
+							newUser.disconnect();
+							// remove user out of the game
+							handleRemovedUser(newUser);
+						}
 						else {
-							Log.i("onReceive()", "Mistimed Message received, Type: "+message.type);
+							Log.i("onReceive()", "Mistimed/unknown Message received, Type: "+message.type+" Hex: "+message.hexDump());
 						}
 					}
 					public void onConnectionClosed() {
-						// TODO: close connection; remove client
+						handleRemovedUser(newUser);
 					}
 					public void onConnectionError(Exception e) {
 						Log.w("IncomingMessageListener", "onConnectionError(): " + e.getMessage());
@@ -153,6 +161,8 @@ public class GameServerService extends Service {
 				});
 				newUser.startReceiver();
 			}
+		} catch (SocketException e) {
+			//e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -195,6 +205,44 @@ public class GameServerService extends Service {
 	}
 	
 	
+	
+	/**
+	 * Start the Game
+	 * @param map to play on
+	 */
+	private void initGame(String gameMap) {
+		// send user list to clients
+		// TODO: start game logic
+		for (GameNetworkingProtocolConnection client : clientConnections) {
+			client.sendStartGameMessage(-1, gameMap);
+		}
+	}
+	
+	
+	
+	/**
+	 * A user disconnected
+	 * @param user user who disconnected
+	 */
+	public void handleRemovedUser(GameNetworkingProtocolConnection user) {
+		// remove user from list
+		clientConnections.remove(user);
+		
+		ArrayList<UserInfo> currentUsers = new ArrayList<UserInfo>(clientConnections.size());
+		for (GameNetworkingProtocolConnection client : clientConnections) {
+			currentUsers.add(new UserInfo(client.targetIP, client.targetPort));
+		}
+		if (userRegisteredListener != null)
+			userRegisteredListener.onUserListChanged(currentUsers);
+		
+		// send user list to clients
+		for (GameNetworkingProtocolConnection client : clientConnections) {
+			client.sendUserList(clientConnections);
+		}
+	}
+	
+	
+	
 	/**
 	 * Shutdown server, close all Sockets and end Threads.
 	 * If it's already stopped nothing happens.
@@ -210,6 +258,10 @@ public class GameServerService extends Service {
 			// end threads
 			if (clientListenerThread != null) {
 				clientListenerThread.interrupt();
+			}
+			// disconnect all users
+			for (GameNetworkingProtocolConnection user : clientConnections) {
+				user.disconnect();
 			}
 		}
 		// stop multicast advertiser
@@ -261,6 +313,12 @@ public class GameServerService extends Service {
 			GameServerService.this.userRegisteredListener = listener;
 		}
 		/**
+		 * Start the Game
+		 */
+		public void initGame(String gameMap) {
+			GameServerService.this.initGame(gameMap);
+		}
+		/**
 		 * Check whether the Server (not service) is running
 		 */
 		public boolean isRunning() {
@@ -282,7 +340,7 @@ public class GameServerService extends Service {
 	 */
 	public static interface UserListEventListener {
 		/**
-		 * A user was registered
+		 * A user was registered or removed
 		 * @param userList List of users
 		 */
 		void onUserListChanged(ArrayList<UserInfo> userList);

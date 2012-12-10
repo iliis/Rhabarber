@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import com.floern.rhabarber.network2.ClientNetworkingLogic;
 import com.floern.rhabarber.network2.ClientNetworkingLogic.GameRegisterEventListener;
+import com.floern.rhabarber.network2.ClientNetworkingLogic.GameUpdateEventListener;
 import com.floern.rhabarber.network2.GameServerService;
 import com.floern.rhabarber.network2.GameServerService.UserInfo;
 import com.floern.rhabarber.network2.NetworkUtils;
@@ -14,6 +15,7 @@ import com.floern.rhabarber.network2.UiUtils;
 import com.floern.rhabarber.network2.UserListAdapter;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -61,7 +63,9 @@ public class ServerJoinActivity extends Activity {
 				runOnUiThread(new Runnable() {
 					public void run() {
 						userList = newUserList;
-			            userListView.setAdapter(new UserListAdapter(ServerJoinActivity.this, userList));
+						if (userListView != null) {
+							userListView.setAdapter(new UserListAdapter(ServerJoinActivity.this, userList));
+						}
 					}
 				});
 			}
@@ -80,6 +84,24 @@ public class ServerJoinActivity extends Activity {
 			});
 		}
 	};
+	
+	/** Game state update eventlistener */
+	private final GameUpdateEventListener gameUpdateEventListener = new GameUpdateEventListener() {
+		// TODO: duplicate code in ServerJoinAvctivity and ServerSetupActivity
+		public void onInitGame(final String gameMap) {
+			// init game
+			runOnUiThread(new Runnable() {
+				public void run() {
+					networkingLogic.stopAvoidTimeout();
+					startGameActivity(gameMap);
+				}
+			});
+		}
+		public void onPlayerDataUpdate() {
+			// TODO example method for receiving game state updates
+		}
+	};
+	
 	
 	
     /** onCreate */
@@ -113,6 +135,7 @@ public class ServerJoinActivity extends Activity {
     	final int serverPortF = serverPort; // need final here
     	
     	new Thread(new Runnable() {
+    		// TODO: partial duplicate code in ServerJoinAvctivity and ServerSetupActivity
 			public void run() {
 				// validate IP (may require networking)
 		    	if (!NetworkUtils.validateNetAddress(serverIP)) {
@@ -123,7 +146,7 @@ public class ServerJoinActivity extends Activity {
 		    	stopDiscoverServer();
 		    	
 		    	// start client-side game networking logic
-		    	networkingLogic = new ClientNetworkingLogic(serverIP, serverPortF, registerEventListener, null); // TODO: define listeners
+		    	networkingLogic = new ClientNetworkingLogic(serverIP, serverPortF, registerEventListener, gameUpdateEventListener);
 		    	
 		    	if (networkingLogic.connectionEstablished()) {
 			    	// register
@@ -134,6 +157,34 @@ public class ServerJoinActivity extends Activity {
 			}
 		}).start();
     }
+    
+
+    
+    /**
+     * OnClick method unjoin a server
+     */
+    public void onLeaveGame(View v) {
+    	// unregister
+    	networkingLogic.stopAvoidTimeout();
+    	networkingLogic.unregisterAtServer();
+    	
+    	setUiNotRegistered();
+    }
+    
+    
+    
+    /**
+     * Game init, start Game's Activity
+     * @param gameMap 
+     */
+    public void startGameActivity(String gameMap) {
+		// TODO: duplicate code in ServerJoinAvctivity and ServerSetupActivity
+    	Intent i = new Intent(this, GameActivity.class);
+    	GameActivity.clientNetworkingLogic = networkingLogic;
+    	i.putExtra("level", gameMap);
+    	startActivity(i);
+    }
+    
     
     
     /**
