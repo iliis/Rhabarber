@@ -7,7 +7,6 @@ import com.floern.rhabarber.GameActivity;
 import com.floern.rhabarber.logic.elements.GameWorld;
 import android.opengl.GLES10;
 import android.opengl.GLSurfaceView;
-import android.util.Log;
 
 public class GameRenderer implements GLSurfaceView.Renderer {
 	

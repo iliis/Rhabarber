@@ -22,7 +22,10 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.Configuration;
 import at.emini.physics2D.Event;
 import at.emini.physics2D.PhysicsEventListener;
@@ -65,34 +68,26 @@ public class GameActivity extends Activity implements SensorEventListener,
 		sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
 		// check default device orientation
-		Display display = ((WindowManager) getSystemService(Context.WINDOW_SERVICE))
-				.getDefaultDisplay();
-		int orientation = (display.getWidth() <= display.getHeight()) ? Configuration.ORIENTATION_PORTRAIT
+		Display display = ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+		int orientation = (display.getWidth() <= display.getHeight()) ?
+				  Configuration.ORIENTATION_PORTRAIT
 				: Configuration.ORIENTATION_LANDSCAPE;
+		
+		// sensor vector is rotated on landscape-default devices (some tablets)
 		int rotation = display.getRotation();
-		deviceIsLandscapeDefault = // sensor vector is rotated on
-									// landscape-default devices (some tablets)
-		(orientation == Configuration.ORIENTATION_LANDSCAPE && (rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180))
-				|| (orientation == Configuration.ORIENTATION_PORTRAIT && (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270));
+		deviceIsLandscapeDefault = (orientation == Configuration.ORIENTATION_LANDSCAPE && (rotation == Surface.ROTATION_0  || rotation == Surface.ROTATION_180))
+				                || (orientation == Configuration.ORIENTATION_PORTRAIT &&  (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270));
 
 		// setup up the actual game
 		// TODO: nicely implement this loading of ressources
-		p = new Player(100, 100, 1, this.getResources().openRawResource(
-				R.raw.player));
-		p.anim_running_left = SkeletonKeyframe.loadSKAnimation(p.skeleton, this
-				.getResources().openRawResource(R.raw.player_running_left));
-		p.anim_running_right = SkeletonKeyframe
-				.loadSKAnimation(p.skeleton, this.getResources()
-						.openRawResource(R.raw.player_running_right));
-		p.anim_standing = SkeletonKeyframe.loadSKAnimation(p.skeleton, this
-				.getResources().openRawResource(R.raw.player_standing));
+		p = new Player(100, 100, 1, this.getResources().openRawResource(R.raw.player));
+		p.anim_running_left  = SkeletonKeyframe.loadSKAnimation(p.skeleton, this.getResources().openRawResource(R.raw.player_running_left));
+		p.anim_running_right = SkeletonKeyframe.loadSKAnimation(p.skeleton, this.getResources().openRawResource(R.raw.player_running_right));
+		p.anim_standing      = SkeletonKeyframe.loadSKAnimation(p.skeleton, this.getResources().openRawResource(R.raw.player_standing));
 		p.setActiveAnim(p.anim_running_right);
 
 		try {
-			game = new GameWorld(this.getAssets().open(	"level/"+getIntent().getExtras().getString("level")), p);
-
-			// add random treasure
-			game.addTreasureRandomly(100, this);
+			game = new GameWorld(this.getAssets().open(	"level/"+getIntent().getExtras().getString("level")), p,this);
 
 			surfaceView.renderer.readLevelSize(game);
 			Log.d("bla", "load successful");
@@ -211,6 +206,21 @@ public class GameActivity extends Activity implements SensorEventListener,
 	protected void onDestroy() {
 		sensorDisable();
 		super.onDestroy();
+	}
+	
+	public void onGameFinished(boolean isWinner)
+	{
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+	    builder.setTitle("Game finished!");
+	    if(isWinner)
+	    {
+	    	builder.setMessage(R.string.winNotification);
+	    }
+	    else
+	    {
+	    	builder.setMessage(R.string.loseNotification);
+	    }
+	    builder.setNeutralButton(R.string.ok, null);
 	}
 	
 	

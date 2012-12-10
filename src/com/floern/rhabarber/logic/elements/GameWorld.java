@@ -6,14 +6,20 @@ import java.util.Random;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import com.floern.rhabarber.GameActivity;
+import com.floern.rhabarber.MainActivity;
 import com.floern.rhabarber.graphic.primitives.IGLPrimitive;
 import com.floern.rhabarber.graphic.primitives.Vertexes;
 import com.floern.rhabarber.util.FXMath;
 import com.floern.rhabarber.util.GameBodyUserData;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.opengl.GLES10;
 import android.util.Log;
 import at.emini.physics2D.Body;
+import at.emini.physics2D.Contact;
 import at.emini.physics2D.Event;
 import at.emini.physics2D.PhysicsEventListener;
 import at.emini.physics2D.World;
@@ -24,11 +30,13 @@ public class GameWorld extends World {
 
 	// separate list of players for easier retrieval of players
 		// more than 4 players are probably not feasible anyway
-	private ArrayList<Player> players = new ArrayList<Player>(4);
+	private ArrayList<Player>   players   = new ArrayList<Player>(4);
+	private ArrayList<Treasure> treasures = new ArrayList<Treasure>(2);
 	private Random rand = new Random();
+	private GameActivity gameActivity;
 	
 	private ArrayList<FXVector> spawnpoints_player   = new ArrayList<FXVector>();
-	private ArrayList<FXVector> spawnpoints_treasure = new ArrayList<FXVector>();
+	private ArrayList<Body>     spawnpoints_treasure = new ArrayList<Body>();
 	
 	public final float G = 100; // gravity
 	
@@ -40,16 +48,16 @@ public class GameWorld extends World {
 	
 	public float min_x, max_x, min_y, max_y; // size of landscape
 	
+	
+	//maybe push to phy file? yeah, later...
+	private static final int WINNING_SCORE = 1000;
+	
 
-	public GameWorld(InputStream level, Player p) {
-
+	public GameWorld(InputStream level, Player p, GameActivity gameActivity) {
+		this.gameActivity = gameActivity;
 		loadLevel(level);
 		addPlayer(p);
-		
-		// test treasure
-		addTreasure(new Treasure(300, 300, 42), new PhysicsEventListener() {
-			public void eventTriggered(Event arg0, Object arg1) { }
-		});
+		addTreasureRandomly(); // inital treasue (only one, maybe change that later)
 
 		outline = new Vertexes();
 		outline.setMode(GLES10.GL_LINES); // disconnected bunch of lines
@@ -70,7 +78,7 @@ public class GameWorld extends World {
 		last_tick = System.nanoTime();
 	}
 	
-	
+	// call this once, as old data is not deleted!
 	private void loadLevel(InputStream level)
 	{
 		this.addWorld(World.loadWorld(new PhysicsFileReader(level), new GameBodyUserData()));
@@ -102,9 +110,7 @@ public class GameWorld extends World {
 		String type = userdata.data.get("element");
 		
 		if (type.equals("treasure")) {
-			addTreasure(new Treasure(b.positionFX(), Integer.parseInt(userdata.data.get("value"))), new PhysicsEventListener() {
-				public void eventTriggered(Event arg0, Object arg1) { }
-			});
+			addTreasure(new Treasure(b.positionFX(), Integer.parseInt(userdata.data.get("value"))));
 		}
 		else
 		if (type.equals("playerspawn")) {
@@ -112,7 +118,7 @@ public class GameWorld extends World {
 		}
 		else
 		if (type.equals("treasurespawn")) {
-			spawnpoints_treasure.add(b.positionFX());
+			spawnpoints_treasure.add(b);
 		}
 		else
 			Log.e("foo", "Unknown element of type '"+userdata.data.get("element")+"' in GameWorld.convertBody()");
@@ -123,28 +129,19 @@ public class GameWorld extends World {
 		players.add(p);
 	}
 
-	public void addTreasure(Treasure t, PhysicsEventListener l) {
+	public void addTreasure(Treasure t) {
 		this.addBody(t);
-		Event collectedEvent = Event.createBodyEvent(t, t.shape(),
-				Event.TYPE_BODY_COLLISION, 1, 1, 1, 1);
-		this.addEvent(collectedEvent);
-		this.setPhysicsEventListener(l);
+		this.treasures.add(t);
 	}
 
-	public void addTreasureRandomly(int treasureValue, PhysicsEventListener l) {
-		/*if (max_x == 0 && max_y == 0) {
-			setBotLeft();
-		}
-		int x = rand.nextInt(max_x - (max_x/10));
-		x += max_x/20;
-		int y = rand.nextInt(max_y - (max_y/10));
-		y += max_y/20;*/
+	public void addTreasureRandomly() {
 		
 		if (!spawnpoints_treasure.isEmpty()) {
 			
-			FXVector pos = this.spawnpoints_treasure.get(rand.nextInt(spawnpoints_treasure.size()));
-			Treasure t   = new Treasure(pos, treasureValue);
-			this.addTreasure(t, l);
+			Body spawnpoint = this.spawnpoints_treasure.get(rand.nextInt(spawnpoints_treasure.size()));
+			GameBodyUserData d = (GameBodyUserData) spawnpoint.getUserData();
+			
+			addTreasure(new Treasure(spawnpoint.positionFX(), Integer.parseInt(d.data.get("value"))));
 		} else {
 			Log.e("foo", "No treasure spawnpoints defined in map (GameWorld.addTreasureRandomly)");
 		}
@@ -177,7 +174,45 @@ public class GameWorld extends World {
 		return players;
 	}
 	
+	private void processGame()
+	{
+		//rhabarberbarbarabar
+		checkTreasureCollected();
+	}
 	
+	private void checkTreasureCollected()
+	{
+		for(Treasure t: treasures) {
+			Contact[] contacts = getContactsForBody(t);
+			for(Contact c: contacts) {
+				if(c != null) {
+					if(c.body1() != null && c.body1() instanceof Player)
+						onTreasureCollected((Player) c.body1(), t);
+					else if(c.body2() != null && c.body2() instanceof Player)
+						onTreasureCollected((Player) c.body2(), t);
+				}
+			}
+		}
+	}
+	
+	
+	private void onTreasureCollected(Player p, Treasure t)
+	{
+		treasures.remove(t);
+		this.removeBody(t);
+		p.score += t.getValue();
+		
+		if(p.score >= WINNING_SCORE)
+			onGameFinished(p);
+		else
+			addTreasureRandomly();
+	}
+	
+
+	private void onGameFinished(Player winner)
+	{
+		gameActivity.onGameFinished(true);
+	}
 	
 	
 	
@@ -190,7 +225,8 @@ public class GameWorld extends World {
 		last_tick = System.nanoTime();
 		
 		applyPlayerGravities(getTimestepFX(), acceleration);
-		super.tick();
+		super.tick(); // simulate physics
+		this.processGame();
 		
 		for(Player p: getPlayers()) {
 			p.animate(((float) dt) / 1000000000);
