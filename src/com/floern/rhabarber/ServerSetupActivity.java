@@ -80,7 +80,7 @@ public class ServerSetupActivity extends Activity {
 	protected void onStart() {
 		super.onStart();
 		// get IP address
-		deviceAddress = NetworkUtils.getLocalHostName();
+		deviceAddress = NetworkUtils.getLocalIPAddress();
 		// set layout
 		if (!GameServerService.isRunning(this)) {
 			setUiServerOffline(GameServerService.SERVER_PORT);

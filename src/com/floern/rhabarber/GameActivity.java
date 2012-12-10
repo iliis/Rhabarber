@@ -151,7 +151,6 @@ public class GameActivity extends Activity implements SensorEventListener,
 	 * @param event
 	 *            SensorEvent
 	 */
-	@SuppressLint("FloatMath")
 	public void onSensorChanged(SensorEvent event) {
 		// some devices always report UNRELIABLE, making it unusable with this
 		// code:
@@ -164,13 +163,21 @@ public class GameActivity extends Activity implements SensorEventListener,
 			// update acceleration values
 			if (deviceIsLandscapeDefault) {
 				// rotate X and Y
-				acceleration[0] = event.values[1];
+				acceleration[0] =  event.values[1];
 				acceleration[1] = -event.values[0];
-				acceleration[2] = event.values[2];
+				acceleration[2] =  event.values[2];
 			} else {
 				System.arraycopy(event.values, 0, acceleration, 0, 3);
 			}
 		}
+	}
+	
+	public void sendAccelerationToServer() {
+		// TODO
+	}
+	
+	public void sendUserInputToServer() {
+		// TODO
 	}
 
 	/**
