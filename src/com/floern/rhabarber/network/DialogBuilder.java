@@ -44,8 +44,7 @@ import com.floern.rhabarber.R;
 public class DialogBuilder {
 	private static final String TAG = "Dialogs";
 
-	public static Dialog createJoinDialog(final Activity activity,
-			final NetworkController application) {
+	public static Dialog createJoinDialog(final Activity activity) {
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 		// Get the layout inflater
@@ -65,8 +64,7 @@ public class DialogBuilder {
 		return builder.create();
 	}
 
-	public static Dialog createQuitDialog(final Activity activity,
-			final NetworkController application) {
+	public static Dialog createQuitDialog(final Activity activity) {
 
 		// Use the Builder class for convenient dialog construction
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);

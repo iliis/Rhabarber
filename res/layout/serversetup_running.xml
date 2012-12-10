@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:baselineAligned="false"
+	android:orientation="horizontal" >
+
+	<RelativeLayout
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:layout_weight="1">
+		
+		<TextView
+			android:id="@+id/text_waitforusers"
+			android:layout_alignParentTop="true"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="10dp"
+			android:layout_marginLeft="10dp"
+			android:layout_marginRight="10dp"
+			android:textAppearance="?android:attr/textAppearanceMedium"
+			android:text="Waiting for Users to join..." />
+		
+		<TextView
+			android:id="@+id/text_ipaddress"
+			android:layout_below="@+id/text_waitforusers"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="10dp"
+			android:layout_marginLeft="10dp"
+			android:layout_marginRight="10dp"
+			android:textAppearance="?android:attr/textAppearanceMedium"
+			android:text="" />
+	
+		<TextView
+			android:id="@+id/text_serverport"
+			android:layout_below="@+id/text_ipaddress"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="10dp"
+			android:layout_marginLeft="10dp"
+			android:layout_marginRight="10dp"
+			android:textAppearance="?android:attr/textAppearanceMedium"
+			android:text="" />
+		
+		<ListView
+			android:id="@+id/list_userlist"
+			android:layout_below="@+id/text_serverport"
+			android:layout_alignParentBottom="true"
+			android:layout_marginTop="10dp"
+			android:layout_marginBottom="10dp"
+			android:layout_marginLeft="10dp"
+			android:layout_marginRight="10dp"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content" />
+		
+		<TextView
+			android:id="@+id/emptylist_userlist"
+			android:layout_below="@+id/text_serverport"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="10dp"
+			android:layout_marginLeft="10dp"
+			android:layout_marginRight="10dp"
+			android:layout_marginBottom="10dp"
+			android:textAppearance="?android:attr/textAppearanceMedium"
+			android:textColor="#999999"
+			android:textStyle="italic"
+			android:text="No User joined" />
+		
+	</RelativeLayout>
+	
+	<LinearLayout
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:layout_weight="1"
+		android:orientation="vertical">
+	
+		<RelativeLayout
+			android:id="@+id/lay_join_self"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="10dp"
+			android:layout_marginLeft="10dp"
+			android:layout_marginRight="10dp">
+			
+			<Button
+				android:id="@+id/btn_join_self"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+		   		android:textAppearance="?android:attr/textAppearanceMedium"
+				android:text="Join self"
+				android:onClick="onJoinSelf" />
+			
+			<CheckBox
+				android:id="@+id/chbox_join_self"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_alignRight="@+id/btn_join_self"
+				android:layout_marginRight="10dp"
+				android:checked="false" />
+
+		</RelativeLayout>
+		
+			
+		<!--ToggleButton
+			android:id="@+id/btn_join_self"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="10dp"
+			android:layout_marginLeft="10dp"
+			android:layout_marginRight="10dp"
+			android:textOn="Join self"
+			android:textOff="Join self"
+			android:onClick="onJoinSelf" /-->
+	
+		<Button
+			android:id="@+id/btn_start_game"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="10dp"
+			android:layout_marginLeft="10dp"
+			android:layout_marginRight="10dp"
+			android:textAppearance="?android:attr/textAppearanceMedium"
+			android:text="Start Game"
+			android:onClick="onStartGame" />
+	
+		<Button
+			android:id="@+id/btn_stop_server"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="10dp"
+			android:layout_marginBottom="10dp"
+			android:layout_marginLeft="10dp"
+			android:layout_marginRight="10dp"
+			android:textAppearance="?android:attr/textAppearanceMedium"
+			android:text="Stop Server"
+			android:onClick="onStopServer" />
+	
+	</LinearLayout>
+
+</LinearLayout>

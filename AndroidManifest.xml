@@ -26,8 +26,7 @@
     <application
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@android:style/Theme.Black"
-        android:name=".network.NetworkController">
+        android:theme="@android:style/Theme.Black">
          
         <activity
             android:name=".MainActivity"
@@ -39,11 +38,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
         <activity
             android:name="com.floern.rhabarber.sensorgltest.SensorTestOpenGLActivity"
             android:configChanges="keyboard|keyboardHidden"
             android:label="SensorTestOpenGl"
             android:screenOrientation="landscape" />
+        
         <activity
             android:name=".GameActivity"
             android:label="@string/title_activity_game"
@@ -52,17 +53,13 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.floern.rhabarber.MainActivity" />
         </activity>
-        <activity
-            android:name=".MenuActivity"
-            android:label="@string/title_activity_menu"
-            android:screenOrientation="landscape" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.floern.rhabarber.MainActivity" />
-        </activity>
         
-        <service
-            android:name=".network.AllJoynService">
-        </service>
+        
+        <activity android:label="@string/app_name" android:name=".ServerSetupActivity"  android:screenOrientation="landscape" />
+        
+        <activity android:label="@string/app_name" android:name=".ServerJoinActivity"  android:screenOrientation="landscape" />
+        
+        <service android:name="com.floern.rhabarber.network2.GameServerService" android:exported="false" />
+        
     </application>
 </manifest>

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:baselineAligned="false"
+	android:orientation="horizontal" >
+
+	<RelativeLayout
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:layout_weight="1">
+	
+		<TextView
+			android:id="@+id/text_serverlist"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_alignParentTop="true"
+			android:layout_marginTop="10dp"
+			android:layout_marginLeft="10dp"
+			android:layout_marginRight="10dp"
+			android:textAppearance="?android:attr/textAppearanceMedium"
+			android:text="Discovered Servers" />
+	
+		<ListView
+			android:id="@+id/list_serverlist"
+			android:layout_below="@+id/text_serverlist"
+			android:layout_marginTop="10dp"
+			android:layout_marginLeft="10dp"
+			android:layout_marginRight="10dp"
+			android:layout_marginBottom="10dp"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content" />
+		
+		<TextView
+			android:id="@+id/emptylist_serverlist"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_below="@+id/text_serverlist"
+			android:layout_marginTop="10dp"
+			android:layout_marginLeft="10dp"
+			android:layout_marginRight="10dp"
+			android:layout_marginBottom="10dp"
+			android:textAppearance="?android:attr/textAppearanceMedium"
+			android:textColor="#999999"
+			android:textStyle="italic"
+			android:text="No Server found" />
+		
+	</RelativeLayout>
+
+	<RelativeLayout
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:layout_weight="1">
+	
+		<EditText
+			android:id="@+id/input_serverip"
+			android:layout_alignParentTop="true"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="10dp"
+			android:layout_marginLeft="10dp"
+			android:layout_marginRight="10dp"
+			android:maxLines="1"
+			android:hint="Server IP" />
+	
+		<EditText
+			android:id="@+id/input_serverport"
+			android:layout_below="@+id/input_serverip"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="10dp"
+			android:layout_marginLeft="10dp"
+			android:layout_marginRight="10dp"
+			android:inputType="number"
+			android:maxLength="5"
+			android:maxLines="1"
+			android:hint="Server Port" />
+	
+		<Button
+			android:id="@+id/btn_join"
+			android:layout_alignParentBottom="true"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="10dp"
+			android:layout_marginBottom="10dp"
+			android:layout_marginLeft="10dp"
+			android:layout_marginRight="10dp"
+			android:textAppearance="?android:attr/textAppearanceMedium"
+			android:text="Join Server"
+			android:onClick="onClickJoinServer" />
+	
+	</RelativeLayout>
+
+</LinearLayout>

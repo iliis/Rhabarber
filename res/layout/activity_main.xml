@@ -13,7 +13,7 @@
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:layout_marginTop="10dp"
-        android:weightSum="3" >
+        android:weightSum="4" >
 
         <Button
             android:id="@+id/button2"
@@ -31,13 +31,21 @@
             android:onClick="startGameActivity"
             android:text="start game" />
 
-        <Button
-            android:id="@+id/button3"
+		<Button
+			android:id="@+id/btn_join_server"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:onClick="showMenu"
-            android:text="Show menu" />
+			android:text="Join Server"
+			android:onClick="onClickJoinServer" />
+	
+		<Button
+			android:id="@+id/btn_setup_server"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+			android:text="Setup Server"
+			android:onClick="onClickSetupServer" />
 
     </LinearLayout>
 

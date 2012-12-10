@@ -58,9 +58,19 @@ public class MainActivity extends Activity {
     	
     }
     
-    public void showMenu(View v) {
-    	startActivity(new Intent(this, MenuActivity.class));
+    
+
+    
+    public void onClickJoinServer(View v){
+    	Intent i = new Intent(this, ServerJoinActivity.class);
+    	startActivity(i);
     }
+    
+    public void onClickSetupServer(View v){
+    	Intent i = new Intent(this, ServerSetupActivity.class);
+    	startActivity(i);
+    }
+    
     
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

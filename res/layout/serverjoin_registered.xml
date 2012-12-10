@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:baselineAligned="false"
+	android:orientation="horizontal" >
+
+	<RelativeLayout
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:layout_weight="1">
+	
+		<TextView
+			android:id="@+id/text_userlist"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_alignParentTop="true"
+			android:layout_marginTop="10dp"
+			android:layout_marginLeft="10dp"
+			android:layout_marginRight="10dp"
+			android:textAppearance="?android:attr/textAppearanceMedium"
+			android:text="User List" />
+		
+		<ListView
+			android:id="@+id/list_userlist"
+			android:layout_below="@+id/text_userlist"
+			android:layout_alignParentBottom="true"
+			android:layout_marginTop="10dp"
+			android:layout_marginBottom="10dp"
+			android:layout_marginLeft="10dp"
+			android:layout_marginRight="10dp"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content" />
+		
+	</RelativeLayout>
+	
+	<RelativeLayout
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:layout_weight="1"
+		android:orientation="vertical">
+	
+		<TextView
+			android:id="@+id/text_waiting"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_alignParentTop="true"
+			android:layout_marginTop="10dp"
+			android:layout_marginLeft="10dp"
+			android:layout_marginRight="10dp"
+			android:textAppearance="?android:attr/textAppearanceMedium"
+			android:text="Waiting for Game Start..." />
+	
+		<Button
+			android:id="@+id/btn_leave_game"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_alignParentBottom="true"
+			android:layout_marginTop="10dp"
+			android:layout_marginBottom="10dp"
+			android:layout_marginLeft="10dp"
+			android:layout_marginRight="10dp"
+			android:textAppearance="?android:attr/textAppearanceMedium"
+			android:text="Leave Game"
+			android:onClick="onLeaveGame" />
+	
+	</RelativeLayout>
+
+</LinearLayout>
