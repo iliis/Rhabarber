@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <resources>
 
     <string name="app_name">Rhabarber</string>
@@ -22,4 +23,34 @@
 	<string name="menu_quit">Quit game</string>
 	<string name="name_invalid">The name must not be empty</string>
 	<string name="refresh">Refresh</string>
+	<string name="cancel">Cancel</string>
+	<string name="dialog_quit_question">Stop hosting game?</string>
+	<string name="yes">Yes</string>
+	<string name="no">No</string>
+=======
+<resources>
+
+    <string name="app_name">Rhabarber</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_main">Rhabarber</string>
+    <string name="title_activity_physics_test">PhysicsTestActivity</string>
+    <string name="title_activity_game">GameActivity</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_menu">Menu</string>
+    <string name="idle">idle</string>
+	<string name="advertised">advertised</string>
+	<string name="toggle_button_host_channel">Advertise game</string>
+	<string name="empty_string"></string>
+	<string name="subtitle_join">Join an existing game</string>
+	<string name="subtitle_host">Host a new game</string>
+	<string name="game_name_hint">Enter a game name</string>
+	<string name="player_count">players</string>
+	<string name="map_prompt">Choose map...</string>
+	<string name="joined">have joined</string>
+	<string name="default_map">Default Map</string>
+	<string name="start_game">Start game</string>
+	<string name="menu_quit">Quit game</string>
+	<string name="name_invalid">The name must not be empty</string>
+	<string name="refresh">Refresh</string>
+>>>>>>> branch 'master' of https://github.com/iliis/Rhabarber.git
 </resources>
