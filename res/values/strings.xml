@@ -27,5 +27,7 @@
 	<string name="yes">Yes</string>
 	<string name="no">No</string>
 	<string name="ok">OK</string>
+	<string name="winNotification">You have won the game. Congratulations!</string>
+	<string name="loseNotification">You have lost the game.</string>
 	
 </resources>

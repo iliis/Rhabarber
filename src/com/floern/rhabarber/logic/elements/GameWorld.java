@@ -33,6 +33,7 @@ public class GameWorld extends World {
 	private ArrayList<Player>   players   = new ArrayList<Player>(4);
 	private ArrayList<Treasure> treasures = new ArrayList<Treasure>(2);
 	private Random rand = new Random();
+	private GameActivity gameActivity;
 	
 	private ArrayList<FXVector> spawnpoints_player   = new ArrayList<FXVector>();
 	private ArrayList<Body>     spawnpoints_treasure = new ArrayList<Body>();
@@ -52,8 +53,8 @@ public class GameWorld extends World {
 	private static final int WINNING_SCORE = 1000;
 	
 
-	public GameWorld(InputStream level, Player p) {
-
+	public GameWorld(InputStream level, Player p, GameActivity gameActivity) {
+		this.gameActivity = gameActivity;
 		loadLevel(level);
 		addPlayer(p);
 		addTreasureRandomly(); // inital treasue (only one, maybe change that later)
@@ -207,7 +208,7 @@ public class GameWorld extends World {
 
 	private void onGameFinished(Player winner)
 	{
-		
+		gameActivity.onGameFinished(true);
 	}
 	
 	
