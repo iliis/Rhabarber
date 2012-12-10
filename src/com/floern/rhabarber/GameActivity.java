@@ -6,6 +6,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 import com.floern.rhabarber.graphic.GameGLSurfaceView;
 import com.floern.rhabarber.graphic.primitives.SkeletonKeyframe;
+import com.floern.rhabarber.logic.elements.GameWorld;
 import com.floern.rhabarber.logic.elements.Player;
 import com.floern.rhabarber.physics.PhysicsController;
 import com.floern.rhabarber.util.FXMath;
@@ -39,7 +40,7 @@ public class GameActivity extends Activity implements SensorEventListener,
 	private SensorManager sensorManager;
 	private boolean deviceIsLandscapeDefault;
 
-	PhysicsController physics;
+	GameWorld game;
 
 	private float[] acceleration = new float[3];
 	Player p;
@@ -89,13 +90,12 @@ public class GameActivity extends Activity implements SensorEventListener,
 		p.setActiveAnim(p.anim_running_right);
 
 		try {
-			physics = new PhysicsController(this.getAssets().open(
-					"level/"+getIntent().getExtras().getString("level")), p);
+			game = new GameWorld(this.getAssets().open(	"level/"+getIntent().getExtras().getString("level")), p);
 
 			// add random treasure
-			physics.getWorld().addTreasureRandomly(100, this);
+			game.addTreasureRandomly(100, this);
 
-			surfaceView.renderer.readLevelSize(physics);
+			surfaceView.renderer.readLevelSize(game);
 			Log.d("bla", "load successful");
 		} catch (IOException e) {
 			Log.d("bla", "load failed");
@@ -107,8 +107,8 @@ public class GameActivity extends Activity implements SensorEventListener,
 	}
 
 	public void onDraw(GL10 gl) {
-		physics.tick();
-		physics.setAccel(acceleration);
+		game.tick();
+		game.setAccel(acceleration);
 		if (walk_left != walk_right) {
 			
 			// TODO: limit the max velocity or some such
@@ -120,14 +120,14 @@ public class GameActivity extends Activity implements SensorEventListener,
 			} else
 				p.applyAcceleration(dir, FXMath.floatToFX(10f));
 		}
-		physics.draw(gl);
+		game.draw(gl);
 	}
 
 	@Override
 	public boolean onTouchEvent(MotionEvent ev) {
 		if (ev != null) {
 			walk_right = false;
-			walk_left = false;
+			walk_left  = false;
 
 			if ((MotionEvent.ACTION_MASK & ev.getAction()) != MotionEvent.ACTION_UP) {
 
@@ -228,7 +228,7 @@ public class GameActivity extends Activity implements SensorEventListener,
 				//never observed
 				Log.d("bla", "target equals trigger");
 			}
-			for (Player p : this.physics.getWorld().getPlayers()) {
+			for (Player p : this.game.getPlayers()) {
 				Log.d("bla", "check for player collision");
 				if (triggerBody.equals(p)) {
 					Log.d("bla", "1st check: player " + p.getIdx()
