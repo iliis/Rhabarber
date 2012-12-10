@@ -28,7 +28,7 @@ import android.widget.ToggleButton;
 
 import com.floern.rhabarber.network.*;
 
-public class MenuActivity extends Activity implements Observer {
+public class MenuActivity extends Activity{
 	public static final String TAG = "Menu";
 
 	private static final int TOAST_DURATION = Toast.LENGTH_SHORT;
@@ -69,12 +69,8 @@ public class MenuActivity extends Activity implements Observer {
 							int position, long id) {
 						GameDescription selected = (GameDescription) parent
 								.getItemAtPosition(position);
-						Log.i(TAG,
-								"useSetChannelName(" + selected.getGameName()
-										+ ")");
-						networkController.useSetChannelName(selected
-								.getGameName());
-						networkController.useJoinChannel();
+						
+						// TODO join channel
 						
 						joinDialog = DialogBuilder.createJoinDialog(MenuActivity.this, networkController);
 						joinDialog.show();
@@ -116,7 +112,6 @@ public class MenuActivity extends Activity implements Observer {
 		buttonStartGame = (Button) findViewById(R.id.buttonStartGame);
 		buttonStartGame.setEnabled(false);
 
-		// TODO delete test
 		ListView listView = (ListView) findViewById(R.id.listViewGameDescriptions);
 		// Assign adapter to ListView
 		listViewAdapter = new MyArrayAdapter(this, gameDescriptions);
@@ -129,20 +124,6 @@ public class MenuActivity extends Activity implements Observer {
 		 * required services are running.
 		 */
 		networkController = (NetworkController) getApplication();
-		networkController.checkin();
-
-		/*
-		 * Call down into the model to get its current state. Since the model
-		 * outlives its Activities, this may actually be a lot of state and not
-		 * just empty.
-		 */
-		updateChannelState();
-
-		/*
-		 * Now that we're all ready to go, we are ready to accept notifications
-		 * from other components.
-		 */
-		networkController.addObserver(this);
 	}
 
 	@Override
@@ -159,7 +140,7 @@ public class MenuActivity extends Activity implements Observer {
 			// TODO
 			return true;
 		case R.id.menu_quit:
-			networkController.quit();
+			// TODO
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
@@ -180,259 +161,23 @@ public class MenuActivity extends Activity implements Observer {
 				// update game description object
 				this.hostGameDescription.setGameName(name);
 
-				// update name in application object
-				networkController.hostSetChannelName(hostGameDescription
-						.getStringRepresentation());
-				networkController.hostInitChannel();
-				networkController.hostStartChannel();
+				// TODO start hosting
 			}
 
 		} else {
 			Log.i(TAG, "onClickHostGame() - Stop hosting game");
 
-			networkController.hostStopChannel();
+			// TODO stop hosting
 		}
-		updateChannelState();
-	}
-
-	public void onClickRefresh(View v) {
-		Message message = mHandler
-				.obtainMessage(HANDLE_CHANNEL_LIST_CHANGED_EVENT);
-		mHandler.sendMessage(message);
-	}
-
-	public void onClickStartGame(View v) {
-		Log.i(TAG, "onClickStartGame()");
-
-		updateChannelState();
 	}
 
 	public void onDestroy() {
 		Log.i(TAG, "onDestroy()");
 		networkController = (NetworkController) getApplication();
-		networkController.deleteObserver(this);
 		super.onDestroy();
 	}
 
-	@Override
-	public void onBackPressed() {
-		AllJoynService.HostChannelState channelState = networkController
-				.hostGetChannelState();
-		if (channelState != AllJoynService.HostChannelState.IDLE) {
-			DialogBuilder.createQuitDialog(this, networkController).show();
-		} else {
-			this.finish();
-		}
-	}
 
-	static final int DIALOG_JOIN_ID = 1;
-	public static final int DIALOG_ALLJOYN_ERROR_ID = 3;
 
-	protected Dialog onCreateDialog(int id) {
-		Log.i(TAG, "onCreateDialog()");
-		Dialog result = null;
-		switch (id) {
-		case DIALOG_JOIN_ID: {
-			result = DialogBuilder.createJoinDialog(this, networkController);
-			result.show();
-		}
-			break;
-		case DIALOG_ALLJOYN_ERROR_ID: {
-			result = DialogBuilder.createAllJoynErrorDialog(this,
-					networkController);
-			result.show();
-		}
-			break;
-		}
-		return result;
-	}
-
-	public synchronized void update(Observable o, Object arg) {
-		Log.i(TAG, "update(" + arg + ")");
-		String qualifier = (String) arg;
-
-		if (qualifier.equals(NetworkController.APPLICATION_QUIT_EVENT)) {
-			Message message = mHandler
-					.obtainMessage(HANDLE_APPLICATION_QUIT_EVENT);
-			mHandler.sendMessage(message);
-		}
-
-		if (qualifier
-				.equals(NetworkController.HOST_CHANNEL_STATE_CHANGED_EVENT)) {
-			Message message = mHandler
-					.obtainMessage(HANDLE_CHANNEL_STATE_CHANGED_EVENT);
-			mHandler.sendMessage(message);
-		}
-
-		if (qualifier.equals(NetworkController.ALLJOYN_ERROR_EVENT)) {
-			Message message = mHandler
-					.obtainMessage(HANDLE_ALLJOYN_ERROR_EVENT);
-			mHandler.sendMessage(message);
-		}
-		
-		 if (qualifier.equals(NetworkController.USE_CHANNEL_STATE_CHANGED_EVENT)) {
-	            Message message = mHandler.obtainMessage(HANDLE_JOIN_STATE_CHANGED_EVENT);
-	            mHandler.sendMessage(message);
-	        }
-
-		if (qualifier.equals(NetworkController.USE_JOIN_CHANNEL_EVENT)) {
-			Message message = mHandler
-					.obtainMessage(HANDLE_JOIN_STATE_CHANGED_EVENT);
-			mHandler.sendMessage(message);
-		}
-
-		if (qualifier.equals(NetworkController.USE_LEAVE_CHANNEL_EVENT)) {
-			Message message = mHandler
-					.obtainMessage(HANDLE_JOIN_STATE_CHANGED_EVENT);
-			mHandler.sendMessage(message);
-		}
-		
-	}
-
-	private void updateChannelList() {
-		listViewAdapter.clear();
-		List<String> channels = networkController.getFoundChannels();
-		for (String channel : channels) {
-			int lastDot = channel.lastIndexOf('.');
-			if (lastDot < 0) {
-				continue;
-			}
-			listViewAdapter.add(new GameDescription(channel
-					.substring(lastDot + 1)));
-		}
-		listViewAdapter.notifyDataSetChanged();
-	}
-
-	private void updateChannelState() {
-		AllJoynService.HostChannelState channelState = networkController
-				.hostGetChannelState();
-		Log.i(TAG, "updateChannelState - channelState = " + channelState);
-
-		switch (channelState) {
-		case IDLE:
-			toggleButtonHost.setText("Idle");
-			break;
-		case NAMED:
-			toggleButtonHost.setText("Named");
-			break;
-		case BOUND:
-			toggleButtonHost.setText("Bound");
-			break;
-		case ADVERTISED:
-			toggleButtonHost.setText("Advertised");
-			break;
-		case CONNECTED:
-			toggleButtonHost.setText("Connected");
-			textViewPlayerCount.setText(this.hostGameDescription
-					.getPlayerCount()
-					+ getResources().getString(R.string.player_count));
-			break;
-		default:
-			toggleButtonHost.setText("Unknown");
-			break;
-		}
-
-		if (channelState == AllJoynService.HostChannelState.IDLE) {
-			editTextGameName.setEnabled(true);
-			// if (editTextGameName.getTag() != null)
-			// editTextGameName.setKeyListener((KeyListener) editTextGameName
-			// .getTag());
-
-			toggleButtonHost.setChecked(false);
-
-			spinnerMap.setEnabled(true);
-			buttonStartGame.setEnabled(false);
-		} else {
-			editTextGameName.setEnabled(false);
-			// if (editTextGameName.getKeyListener() != null)
-			// editTextGameName.setTag(editTextGameName.getKeyListener());
-			// editTextGameName.setKeyListener(null);
-
-			editTextGameName.setText(networkController.hostGetChannelName());
-
-			toggleButtonHost.setChecked(true);
-
-			spinnerMap.setEnabled(false);
-
-			buttonStartGame.setEnabled(true);
-		}
-	}
-	
-	  private void updateJoinState() {
-	        Log.i(TAG, "updateJoinState()");
-	    	AllJoynService.UseChannelState channelState = networkController.useGetChannelState();
-	    	String name = networkController.useGetChannelName();
-	        
-	        switch (channelState) {
-	        case IDLE:
-	            if(joinDialog !=null){
-	            	joinDialog.dismiss();
-	            	Toast.makeText(this, "Join failed", TOAST_DURATION)
-					.show();
-	            }
-	            break;
-	        case JOINED:
-	        	Toast.makeText(this, "Join succeeded", TOAST_DURATION)
-				.show();
-	        	
-	        	TextView textViewJoinDialog = (TextView) joinDialog.findViewById(R.id.textViewJoinDialog);
-	        	textViewJoinDialog.setText("Waiting for other players...");
-	            break;	
-	        }
-	    }
-
-	private void alljoynError() {
-		if(joinDialog !=null){
-			joinDialog.dismiss();
-		}
-		if (networkController.getErrorModule() == NetworkController.Module.GENERAL
-				|| networkController.getErrorModule() == NetworkController.Module.USE) {
-			showDialog(DIALOG_ALLJOYN_ERROR_ID);
-		}
-	}
-
-	private static final int HANDLE_APPLICATION_QUIT_EVENT = 0;
-	private static final int HANDLE_CHANNEL_STATE_CHANGED_EVENT = 1;
-	private static final int HANDLE_ALLJOYN_ERROR_EVENT = 2;
-	private static final int HANDLE_CHANNEL_LIST_CHANGED_EVENT = 3;
-	private static final int HANDLE_JOIN_STATE_CHANGED_EVENT = 4;
-
-	private Handler mHandler = new Handler() {
-		public void handleMessage(Message msg) {
-			switch (msg.what) {
-			case HANDLE_APPLICATION_QUIT_EVENT: {
-				Log.i(TAG,
-						"mHandler.handleMessage(): HANDLE_APPLICATION_QUIT_EVENT");
-				finish();
-			}
-				break;
-			case HANDLE_CHANNEL_STATE_CHANGED_EVENT: {
-				Log.i(TAG,
-						"mHandler.handleMessage(): HANDLE_CHANNEL_STATE_CHANGED_EVENT");
-				updateChannelState();
-			}
-				break;
-			case HANDLE_CHANNEL_LIST_CHANGED_EVENT: {
-				Log.i(TAG,
-						"mHandler.handleMessage(): HANDLE_CHANNEL_LIST_CHANGED_EVENT");
-				updateChannelList();
-			}
-				break;
-			case HANDLE_ALLJOYN_ERROR_EVENT: {
-				Log.i(TAG,
-						"mHandler.handleMessage(): HANDLE_ALLJOYN_ERROR_EVENT");
-				alljoynError();
-			}
-				break;
-			case HANDLE_JOIN_STATE_CHANGED_EVENT: {
-				Log.i(TAG,
-						"mHandler.handleMessage(): HANDLE_JOIN_STATE_CHANGED_EVENT");
-				updateJoinState();
-			}
-				break;
-			default:
-				break;
-			}
-		}
-	};
+	  
 }
