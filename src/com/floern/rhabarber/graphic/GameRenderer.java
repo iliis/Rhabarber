@@ -4,6 +4,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import com.floern.rhabarber.GameActivity;
+import com.floern.rhabarber.logic.elements.GameWorld;
 import com.floern.rhabarber.physics.PhysicsController;
 
 import android.opengl.GLES10;
@@ -38,11 +39,11 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 		render_callback = a;
 	}
 	
-	public void readLevelSize(PhysicsController l) {
-		world_min_x = l.min_x;
-		world_max_x = l.max_x;
-		world_min_y = l.min_y;
-		world_max_y = l.max_y;
+	public void readLevelSize(GameWorld game) {
+		world_min_x = game.min_x;
+		world_max_x = game.max_x;
+		world_min_y = game.min_y;
+		world_max_y = game.max_y;
 	}
 	
 
