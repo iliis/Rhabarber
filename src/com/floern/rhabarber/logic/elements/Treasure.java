@@ -54,7 +54,11 @@ public class Treasure extends MovableElement {
 	public void draw(GL10 gl) {
 		Vertexes verts = new Vertexes(starVertices.toArray(new FXVector[starVertices.size()]), positionFX(), getRotationMatrix());
 		
-		gl.glColor4f(1, .8f, 0, 1);
+		if (value < 0) // bad treasure -> draw red
+			gl.glColor4f(1, .1f, 0, 1);
+		else // good treasure -> draw yellow
+			gl.glColor4f(1, .9f, 0, 1);
+		
 		verts.setMode(GLES10.GL_LINE_LOOP);
 		verts.setThickness(2);
 		verts.draw(gl);
