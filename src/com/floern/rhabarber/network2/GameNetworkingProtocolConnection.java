@@ -9,6 +9,8 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.List;
 
+import android.util.Log;
+
 /**
  * Protocol to handle the Communication between the Game Server and a Client/User
  */
@@ -68,6 +70,7 @@ public class GameNetworkingProtocolConnection {
 				try {
 					while (true) {
 						Message msg = read();
+						Log.d("received message", msg.hexDump());
 						receiveCallback.onReceive(msg);
 					}
 				} catch (IncompatibleProtocolVersionException e) {
@@ -78,6 +81,10 @@ public class GameNetworkingProtocolConnection {
 					e.printStackTrace();
 					disconnect();
 					receiveCallback.onTimeout();
+				} catch (SocketException e) {
+					//e.printStackTrace();
+					disconnect();
+					receiveCallback.onConnectionError(e);
 				} catch (IOException e) {
 					e.printStackTrace();
 					disconnect();
@@ -210,6 +217,15 @@ public class GameNetworkingProtocolConnection {
 	
 	
 	/**
+	 * Send Message: Unregister at server
+	 */
+	public void sendUnregisterMessage() {
+		Message unregisterMessage = new Message(Message.TYPE_UNREGISTER, null);
+		sendMessage(unregisterMessage);
+	}
+	
+	
+	/**
 	 * Send Message: User List
 	 * @param userlist List of all registered Users
 	 */
@@ -226,10 +242,21 @@ public class GameNetworkingProtocolConnection {
 	
 	
 	/**
+	 * Send Message: Init Game
+	 * @param map to play on
+	 */
+	public void sendInitGameMessage(String gameMap) {
+		Message initGameMessage = new Message(Message.TYPE_GAME_INIT, gameMap.getBytes());
+		sendMessage(initGameMessage);
+	}
+	
+	
+	/**
 	 * Send a Message
 	 * @param msg
 	 */
 	private void sendMessage(Message msg) {
+		Log.d("sendMessage()", msg.hexDump());
 		try {
 			outputStream.write(msg.getBytes());
 			outputStream.flush();
@@ -361,7 +388,7 @@ public class GameNetworkingProtocolConnection {
 			try {
 				clientListenerSocket.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+				//e.printStackTrace();
 			}
 		}
 		

@@ -84,13 +84,13 @@ public class ServerAdvertisingListener {
 								Log.d("ClientNetworkingLogic", "Server at " + packet.getAddress().getHostAddress() + ":" + port);
 							} catch (InterruptedIOException e) {
 								// catch timeout
-								e.printStackTrace();
+								//e.printStackTrace();
 							}
 						}
 						serverDiscoverySocket.leaveGroup(group);
 						serverDiscoverySocket.close();
 					} catch (IOException e) {
-						e.printStackTrace();
+						//e.printStackTrace();
 					}
 				}
 			}).start();

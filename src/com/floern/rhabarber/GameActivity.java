@@ -8,6 +8,7 @@ import com.floern.rhabarber.graphic.GameGLSurfaceView;
 import com.floern.rhabarber.graphic.primitives.SkeletonKeyframe;
 import com.floern.rhabarber.logic.elements.GameWorld;
 import com.floern.rhabarber.logic.elements.Player;
+import com.floern.rhabarber.network2.ClientNetworkingLogic;
 import com.floern.rhabarber.util.FXMath;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -42,6 +43,8 @@ import at.emini.physics2D.util.FXVector;
 public class GameActivity extends Activity implements SensorEventListener,
 		PhysicsEventListener {
 
+	public static ClientNetworkingLogic clientNetworkingLogic = null;
+	
 	private GameGLSurfaceView surfaceView;
 
 	private SensorManager sensorManager;
@@ -57,6 +60,9 @@ public class GameActivity extends Activity implements SensorEventListener,
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		// TODO: load 'clientNetworkingLogic' into a private field and set the static field 'clientNetworkingLogic' to null
+		
+		
 		// avoid screen turning off
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 

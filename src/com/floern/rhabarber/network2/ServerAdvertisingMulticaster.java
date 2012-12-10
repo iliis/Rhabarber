@@ -71,7 +71,7 @@ public class ServerAdvertisingMulticaster {
 						socket.leaveGroup(group);
 						socket.close();
 					} catch (IOException e) {
-						e.printStackTrace();
+						//e.printStackTrace();
 						isMulticasting = false;
 					}
 					Log.d("ServerAdvertisingMulticaster", "Multicast Thread exited");
