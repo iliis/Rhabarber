@@ -184,10 +184,12 @@ public class GameWorld extends World {
 		for(Treasure t: treasures) {
 			Contact[] contacts = getContactsForBody(t);
 			for(Contact c: contacts) {
-				if(c.body1() instanceof Player)
-					onTreasureCollected((Player) c.body1(), t);
-				else if(c.body2() instanceof Player)
-					onTreasureCollected((Player) c.body2(), t);
+				if(c != null) {
+					if(c.body1() != null && c.body1() instanceof Player)
+						onTreasureCollected((Player) c.body1(), t);
+					else if(c.body2() != null && c.body2() instanceof Player)
+						onTreasureCollected((Player) c.body2(), t);
+				}
 			}
 		}
 	}
@@ -196,6 +198,7 @@ public class GameWorld extends World {
 	private void onTreasureCollected(Player p, Treasure t)
 	{
 		treasures.remove(t);
+		this.removeBody(t);
 		p.score += t.getValue();
 		
 		if(p.score >= WINNING_SCORE)
