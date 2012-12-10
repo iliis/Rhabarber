@@ -46,6 +46,9 @@ public class MenuActivity extends Activity implements Observer {
 	private TextView textViewPlayerCount;
 	private ListView listViewGameDescriptions;
 	private Spinner spinnerMap;
+	
+	// Dialogs
+	private Dialog joinDialog = null;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -72,6 +75,9 @@ public class MenuActivity extends Activity implements Observer {
 						networkController.useSetChannelName(selected
 								.getGameName());
 						networkController.useJoinChannel();
+						
+						joinDialog = DialogBuilder.createJoinDialog(MenuActivity.this, networkController);
+						joinDialog.show();
 					}
 				});
 
@@ -263,18 +269,24 @@ public class MenuActivity extends Activity implements Observer {
 					.obtainMessage(HANDLE_ALLJOYN_ERROR_EVENT);
 			mHandler.sendMessage(message);
 		}
+		
+		 if (qualifier.equals(NetworkController.USE_CHANNEL_STATE_CHANGED_EVENT)) {
+	            Message message = mHandler.obtainMessage(HANDLE_JOIN_STATE_CHANGED_EVENT);
+	            mHandler.sendMessage(message);
+	        }
 
 		if (qualifier.equals(NetworkController.USE_JOIN_CHANNEL_EVENT)) {
 			Message message = mHandler
-					.obtainMessage(HANDLE_CHANNEL_STATE_CHANGED_EVENT);
+					.obtainMessage(HANDLE_JOIN_STATE_CHANGED_EVENT);
 			mHandler.sendMessage(message);
 		}
 
 		if (qualifier.equals(NetworkController.USE_LEAVE_CHANNEL_EVENT)) {
 			Message message = mHandler
-					.obtainMessage(HANDLE_CHANNEL_LIST_CHANGED_EVENT);
+					.obtainMessage(HANDLE_JOIN_STATE_CHANGED_EVENT);
 			mHandler.sendMessage(message);
 		}
+		
 	}
 
 	private void updateChannelList() {
@@ -345,8 +357,34 @@ public class MenuActivity extends Activity implements Observer {
 			buttonStartGame.setEnabled(true);
 		}
 	}
+	
+	  private void updateJoinState() {
+	        Log.i(TAG, "updateJoinState()");
+	    	AllJoynService.UseChannelState channelState = networkController.useGetChannelState();
+	    	String name = networkController.useGetChannelName();
+	        
+	        switch (channelState) {
+	        case IDLE:
+	            if(joinDialog !=null){
+	            	joinDialog.dismiss();
+	            	Toast.makeText(this, "Join failed", TOAST_DURATION)
+					.show();
+	            }
+	            break;
+	        case JOINED:
+	        	Toast.makeText(this, "Join succeeded", TOAST_DURATION)
+				.show();
+	        	
+	        	TextView textViewJoinDialog = (TextView) joinDialog.findViewById(R.id.textViewJoinDialog);
+	        	textViewJoinDialog.setText("Waiting for other players...");
+	            break;	
+	        }
+	    }
 
 	private void alljoynError() {
+		if(joinDialog !=null){
+			joinDialog.dismiss();
+		}
 		if (networkController.getErrorModule() == NetworkController.Module.GENERAL
 				|| networkController.getErrorModule() == NetworkController.Module.USE) {
 			showDialog(DIALOG_ALLJOYN_ERROR_ID);
@@ -357,6 +395,7 @@ public class MenuActivity extends Activity implements Observer {
 	private static final int HANDLE_CHANNEL_STATE_CHANGED_EVENT = 1;
 	private static final int HANDLE_ALLJOYN_ERROR_EVENT = 2;
 	private static final int HANDLE_CHANNEL_LIST_CHANGED_EVENT = 3;
+	private static final int HANDLE_JOIN_STATE_CHANGED_EVENT = 4;
 
 	private Handler mHandler = new Handler() {
 		public void handleMessage(Message msg) {
@@ -383,6 +422,12 @@ public class MenuActivity extends Activity implements Observer {
 				Log.i(TAG,
 						"mHandler.handleMessage(): HANDLE_ALLJOYN_ERROR_EVENT");
 				alljoynError();
+			}
+				break;
+			case HANDLE_JOIN_STATE_CHANGED_EVENT: {
+				Log.i(TAG,
+						"mHandler.handleMessage(): HANDLE_JOIN_STATE_CHANGED_EVENT");
+				updateJoinState();
 			}
 				break;
 			default:
