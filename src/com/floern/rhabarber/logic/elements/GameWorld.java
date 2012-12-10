@@ -40,6 +40,10 @@ public class GameWorld extends World {
 	
 	public float min_x, max_x, min_y, max_y; // size of landscape
 	
+	
+	//maybe push to phy file?
+	private static final int WINNING_SCORE = 1000;
+	
 
 	public GameWorld(InputStream level, Player p) {
 
@@ -132,13 +136,6 @@ public class GameWorld extends World {
 	}
 
 	public void addTreasureRandomly(int treasureValue, PhysicsEventListener l) {
-		/*if (max_x == 0 && max_y == 0) {
-			setBotLeft();
-		}
-		int x = rand.nextInt(max_x - (max_x/10));
-		x += max_x/20;
-		int y = rand.nextInt(max_y - (max_y/10));
-		y += max_y/20;*/
 		
 		if (!spawnpoints_treasure.isEmpty()) {
 			
@@ -177,7 +174,26 @@ public class GameWorld extends World {
 		return players;
 	}
 	
+	private void processGame()
+	{
+		//rhabarber
+	}
 	
+	private void checkTreasureCollected()
+	{
+		
+	}
+	
+	
+	private void onTreasureCollected(Player p, Treasure t)
+	{
+		
+	}
+	
+	private void onGameFinished()
+	{
+		
+	}
 	
 	
 	
