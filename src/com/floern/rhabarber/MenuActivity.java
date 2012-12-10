@@ -307,26 +307,27 @@ public class MenuActivity extends Activity implements Observer {
 		}
 
 		if (channelState == AllJoynService.HostChannelState.IDLE) {
-			EditText editTextGameName = (EditText) findViewById(R.id.editTextGameName);
-			if (editTextGameName.getTag() != null)
-				editTextGameName.setKeyListener((KeyListener) editTextGameName
-						.getTag());
+			editTextGameName.setEnabled(true);
+			//if (editTextGameName.getTag() != null)
+			//	editTextGameName.setKeyListener((KeyListener) editTextGameName
+			//			.getTag());
 
 			toggleButtonHost.setChecked(false);
 
-			spinnerMap.setClickable(true);
+			spinnerMap.setEnabled(true);
 			buttonStartGame.setEnabled(false);
 		} else {
-			EditText editTextGameName = (EditText) findViewById(R.id.editTextGameName);
-			if (editTextGameName.getKeyListener() != null)
-				editTextGameName.setTag(editTextGameName.getKeyListener());
-			editTextGameName.setKeyListener(null);
+			editTextGameName.setEnabled(false);
+			//if (editTextGameName.getKeyListener() != null)
+			//	editTextGameName.setTag(editTextGameName.getKeyListener());
+			//editTextGameName.setKeyListener(null);
 
 			editTextGameName.setText(networkController.hostGetChannelName());
 
 			toggleButtonHost.setChecked(true);
 
-			spinnerMap.setClickable(false);
+			spinnerMap.setEnabled(false);
+			
 			buttonStartGame.setEnabled(true);
 		}
 	}
