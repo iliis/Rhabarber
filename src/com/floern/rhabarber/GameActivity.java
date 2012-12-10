@@ -22,7 +22,10 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.Configuration;
 import at.emini.physics2D.Event;
 import at.emini.physics2D.PhysicsEventListener;
@@ -211,6 +214,17 @@ public class GameActivity extends Activity implements SensorEventListener,
 	protected void onDestroy() {
 		sensorDisable();
 		super.onDestroy();
+	}
+	
+	private void onGameFinished(String[] scores)
+	{
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+	    builder.setTitle("Game finished!");
+	    builder.setItems(scores, new DialogInterface.OnClickListener() {
+	               public void onClick(DialogInterface dialog, int which) {
+	            	   //do nothing right now
+	           }
+	    });
 	}
 	
 	

@@ -29,6 +29,8 @@ public class Player extends MovableElement {
 
 	// defines playernumber
 	private int playerIdx;
+	
+	public int score;
 
 	public FXVector playerGravity;
 
@@ -53,6 +55,7 @@ public class Player extends MovableElement {
 
 	public Player(int x, int y, int playerIdx, InputStream skeleton) {
 		super(x, y, Shape.createRectangle(hitBoxWidth, hitBoxHeight));
+		this.score = 0;
 		this.shape().setElasticity(elasticity);
 		this.shape().setMass(mass);
 		this.shape().setFriction(friction);

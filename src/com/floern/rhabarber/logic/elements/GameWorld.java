@@ -6,11 +6,16 @@ import java.util.Random;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import com.floern.rhabarber.GameActivity;
+import com.floern.rhabarber.MainActivity;
 import com.floern.rhabarber.graphic.primitives.IGLPrimitive;
 import com.floern.rhabarber.graphic.primitives.Vertexes;
 import com.floern.rhabarber.util.FXMath;
 import com.floern.rhabarber.util.GameBodyUserData;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.opengl.GLES10;
 import android.util.Log;
 import at.emini.physics2D.Body;
@@ -190,10 +195,7 @@ public class GameWorld extends World {
 		
 	}
 	
-	private void onGameFinished()
-	{
-		
-	}
+
 	
 	
 	
