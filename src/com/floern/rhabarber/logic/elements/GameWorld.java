@@ -238,8 +238,6 @@ public class GameWorld extends World {
 
 		if (p.score >= WINNING_SCORE)
 			onGameFinished(p);
-		else
-			addTreasureRandomly();
 	}
 
 	private void onGameFinished(Player winner) {
