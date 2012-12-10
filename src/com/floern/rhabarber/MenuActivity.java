@@ -62,10 +62,10 @@ public class MenuActivity extends Activity implements Observer {
 				.setOnItemClickListener(new ListView.OnItemClickListener() {
 					public void onItemClick(AdapterView<?> parent, View view,
 							int position, long id) {
-						String name = parent
-								.getItemAtPosition(position).toString();
-						Log.i(TAG,"useSetChannelName("+name+")");
-						networkController.useSetChannelName(name);
+						GameDescription selected = (GameDescription) parent
+								.getItemAtPosition(position);
+						Log.i(TAG,"useSetChannelName("+selected.getGameName()+")");
+						networkController.useSetChannelName(selected.getGameName());
 						networkController.useJoinChannel();
 					}
 				});

@@ -22,4 +22,8 @@
 	<string name="menu_quit">Quit game</string>
 	<string name="name_invalid">The name must not be empty</string>
 	<string name="refresh">Refresh</string>
+	<string name="cancel">Cancel</string>
+	<string name="dialog_quit_question">Stop hosting game?</string>
+	<string name="yes">Yes</string>
+	<string name="no">No</string>
 </resources>
