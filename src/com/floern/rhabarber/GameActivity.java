@@ -9,6 +9,8 @@ import com.floern.rhabarber.graphic.primitives.SkeletonKeyframe;
 import com.floern.rhabarber.logic.elements.GameWorld;
 import com.floern.rhabarber.logic.elements.Player;
 import com.floern.rhabarber.util.FXMath;
+
+import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -50,7 +52,7 @@ public class GameActivity extends Activity implements SensorEventListener,
 	GameWorld game;
 
 	private float[] acceleration = new float[3];
-	Player p;
+	private int playerIdx;
 	boolean walk_left = false, walk_right = false;
 
 	@Override
@@ -84,20 +86,12 @@ public class GameActivity extends Activity implements SensorEventListener,
 				                || (orientation == Configuration.ORIENTATION_PORTRAIT &&  (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270));
 
 		// setup up the actual game
-		// TODO: nicely implement this loading of ressources
-		p = new Player(100, 100, 1, this.getResources().openRawResource(R.raw.player));
-		p.anim_running_left  = SkeletonKeyframe.loadSKAnimation(p.skeleton, this.getResources().openRawResource(R.raw.player_running_left));
-		p.anim_running_right = SkeletonKeyframe.loadSKAnimation(p.skeleton, this.getResources().openRawResource(R.raw.player_running_right));
-		p.anim_standing      = SkeletonKeyframe.loadSKAnimation(p.skeleton, this.getResources().openRawResource(R.raw.player_standing));
-		p.setActiveAnim(p.anim_running_right);
-
 		try {
-			game = new GameWorld(this.getAssets().open(	"level/"+getIntent().getExtras().getString("level")), p,this);
-
+			game = new GameWorld(this.getAssets().open(	"level/"+getIntent().getExtras().getString("level")),this);
+			playerIdx = game.addPlayer();
+			
 			surfaceView.renderer.readLevelSize(game);
-			Log.d("bla", "load successful");
 		} catch (IOException e) {
-			Log.d("bla", "load failed");
 			e.printStackTrace();
 		}
 		// File f = new File("/mnt/sdcard/testworld.phy");
@@ -112,12 +106,12 @@ public class GameActivity extends Activity implements SensorEventListener,
 			
 			// TODO: limit the max velocity or some such
 
-			FXVector dir = new FXVector(p.getAxes()[1]);
+			FXVector dir = new FXVector(game.getPlayers().get(playerIdx).getAxes()[1]);
 			if (walk_left) {
 				dir.mult(-1);
-				p.applyAcceleration(dir, FXMath.floatToFX(10f));
+				game.getPlayers().get(playerIdx).applyAcceleration(dir, FXMath.floatToFX(10f));
 			} else
-				p.applyAcceleration(dir, FXMath.floatToFX(10f));
+				game.getPlayers().get(playerIdx).applyAcceleration(dir, FXMath.floatToFX(10f));
 		}
 		game.draw(gl);
 	}
@@ -213,7 +207,7 @@ public class GameActivity extends Activity implements SensorEventListener,
 		super.onDestroy();
 	}
 	
-	public void onGameFinished(final boolean isWinner)
+	public void onGameFinished(final int winIdx)
 	{
 		runOnUiThread(new Runnable() {
 			public void run() {
@@ -222,7 +216,7 @@ public class GameActivity extends Activity implements SensorEventListener,
 			    builder.setTitle("Game finished!");
 			    builder.setCanceledOnTouchOutside(false);
 			    builder.setCancelable(false);
-			    if(isWinner)
+			    if(winIdx == playerIdx)
 			    {
 			    	builder.setMessage(res.getString(R.string.winNotification));
 			    }

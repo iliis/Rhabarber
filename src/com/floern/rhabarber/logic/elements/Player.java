@@ -11,6 +11,7 @@ import com.floern.rhabarber.graphic.primitives.SkeletonKeyframe;
 import com.floern.rhabarber.util.FXMath;
 import com.floern.rhabarber.util.Vector;
 
+import android.graphics.Color;
 import android.util.FloatMath;
 import android.util.Log;
 import at.emini.physics2D.Shape;
@@ -29,9 +30,11 @@ public class Player extends MovableElement {
 
 	// defines playernumber
 	private int playerIdx;
+	private int color;
 	
 	public int score;
-
+	
+	
 	public FXVector playerGravity;
 
 	// graphics properties (yeah, this may belong somewhere else...
@@ -49,13 +52,14 @@ public class Player extends MovableElement {
 	private ListIterator<SkeletonKeyframe> kfIterator;
 	private float frame_age = 0;
 
-	public Player(FXVector pos, int playerIdx, InputStream skeleton) {
-		this(pos.xFX, pos.yFX, playerIdx, skeleton);
+	public Player(FXVector pos, int playerIdx, InputStream skeleton, int color) {
+		this(pos.xAsInt(), pos.yAsInt(), playerIdx, skeleton, color);
 	}
 
-	public Player(int x, int y, int playerIdx, InputStream skeleton) {
+	public Player(int x, int y, int playerIdx, InputStream skeleton, int color) {
 		super(x, y, Shape.createRectangle(hitBoxWidth, hitBoxHeight));
 		this.score = 0;
+		this.color = color;
 		this.shape().setElasticity(elasticity);
 		this.shape().setMass(mass);
 		this.shape().setFriction(friction);
