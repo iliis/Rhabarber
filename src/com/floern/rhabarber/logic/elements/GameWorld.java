@@ -8,24 +8,17 @@ import java.util.Random;
 import javax.microedition.khronos.opengles.GL10;
 
 import com.floern.rhabarber.GameActivity;
-import com.floern.rhabarber.MainActivity;
 import com.floern.rhabarber.R;
 import com.floern.rhabarber.graphic.primitives.IGLPrimitive;
 import com.floern.rhabarber.graphic.primitives.SkeletonKeyframe;
 import com.floern.rhabarber.graphic.primitives.Vertexes;
 import com.floern.rhabarber.util.FXMath;
 import com.floern.rhabarber.util.GameBodyUserData;
-
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Color;
 import android.opengl.GLES10;
 import android.util.Log;
 import at.emini.physics2D.Body;
 import at.emini.physics2D.Contact;
-import at.emini.physics2D.Event;
-import at.emini.physics2D.PhysicsEventListener;
 import at.emini.physics2D.World;
 import at.emini.physics2D.util.FXVector;
 import at.emini.physics2D.util.PhysicsFileReader;
@@ -42,6 +35,10 @@ public class GameWorld extends World {
 	private ArrayList<FXVector> spawnpoints_player = new ArrayList<FXVector>();
 	private Iterator<FXVector> playerSpawnIterator;
 	private ArrayList<Body> spawnpoints_treasure = new ArrayList<Body>();
+
+	private static final int[] playerColors = { Color.RED, Color.BLUE,
+			Color.GREEN, Color.YELLOW, Color.MAGENTA, Color.GRAY };
+	private int colorIdx = 0;
 
 	public final float G = 100; // gravity
 
@@ -158,17 +155,31 @@ public class GameWorld extends World {
 	public int addPlayer()
 	// return index of added player
 	{
-		if(!playerSpawnIterator.hasNext())
-		{
+		if (!playerSpawnIterator.hasNext()) {
 			this.playerSpawnIterator = spawnpoints_player.iterator();
 		}
 		FXVector spawnPos = playerSpawnIterator.next();
-		Player p = new Player(spawnPos, players.size(), gameActivity.getResources().openRawResource(R.raw.player), Color.RED);
-		p.anim_running_left  = SkeletonKeyframe.loadSKAnimation(p.skeleton, gameActivity.getResources().openRawResource(R.raw.player_running_left));
-		p.anim_running_right = SkeletonKeyframe.loadSKAnimation(p.skeleton, gameActivity.getResources().openRawResource(R.raw.player_running_right));
-		p.anim_standing      = SkeletonKeyframe.loadSKAnimation(p.skeleton, gameActivity.getResources().openRawResource(R.raw.player_standing));
+		Player p = new Player(spawnPos, players.size(), gameActivity
+				.getResources().openRawResource(R.raw.player),
+				playerColors[colorIdx]);
+		p.anim_running_left = SkeletonKeyframe.loadSKAnimation(
+				p.skeleton,
+				gameActivity.getResources().openRawResource(
+						R.raw.player_running_left));
+		p.anim_running_right = SkeletonKeyframe.loadSKAnimation(
+				p.skeleton,
+				gameActivity.getResources().openRawResource(
+						R.raw.player_running_right));
+		p.anim_standing = SkeletonKeyframe.loadSKAnimation(
+				p.skeleton,
+				gameActivity.getResources().openRawResource(
+						R.raw.player_standing));
 		p.setActiveAnim(p.anim_running_right);
 		addPlayer(p);
+		colorIdx++;
+		if (colorIdx >= playerColors.length) {
+			colorIdx = 0;
+		}
 		return p.getIdx();
 	}
 
