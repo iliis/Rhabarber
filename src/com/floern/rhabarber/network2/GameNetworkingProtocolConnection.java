@@ -7,7 +7,17 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.List;
+
+import at.emini.physics2D.Body;
+import at.emini.physics2D.util.FXVector;
+
+import com.floern.rhabarber.logic.elements.GameWorld;
+import com.floern.rhabarber.logic.elements.Player;
+import com.floern.rhabarber.util.DynamicFloatBuffer;
 
 import android.util.Log;
 
@@ -58,10 +68,10 @@ public class GameNetworkingProtocolConnection {
 		
 		// setup streams
 		outputStream = socket.getOutputStream();
-		inputStream = socket.getInputStream();
+		inputStream  = socket.getInputStream();
 		
 		// get client info
-		targetIP = socket.getInetAddress().getHostAddress();
+		targetIP   = socket.getInetAddress().getHostAddress();
 		targetPort = socket.getPort();
 		
 		// input listener/reader thread
@@ -240,14 +250,98 @@ public class GameNetworkingProtocolConnection {
 		sendMessage(userlistMessage);
 	}
 	
+	/**
+	 * Send Message: Acceleration data from client
+	 * @param playerIdx Index of player sending the data
+	 * @param accel Raw data from Sensor
+	 */
+	public void sendAccelerationData(int playerIdx, ClientStateAccumulator.Acceleration accel) {
+		ByteBuffer buf = ByteBuffer.allocateDirect(4*4); // 3 floats and one int, each 4 bytes
+		buf.putInt(playerIdx);
+		buf.putFloat(accel.x);
+		buf.putFloat(accel.y);
+		buf.putFloat(accel.y);
+		
+		Message accelMessage = new Message(Message.TYPE_CLIENT_ACCELERATION, buf.array());
+		sendMessage(accelMessage);
+	}
 	
 	/**
-	 * Send Message: Init Game
-	 * @param map to play on
+	 * Send Message: Input data from client (for moving the player around)
+	 * @param input walking direction
 	 */
-	public void sendInitGameMessage(String gameMap) {
-		Message initGameMessage = new Message(Message.TYPE_GAME_INIT, gameMap.getBytes());
-		sendMessage(initGameMessage);
+	public void sendUserInputData(int playerIdx, ClientStateAccumulator.UserInputWalk input) {
+		ByteBuffer buf = ByteBuffer.allocateDirect(4+1); // one int with 4 bytes, one enum
+		buf.putInt(playerIdx);
+		
+		switch(input) {
+		case LEFT:
+			buf.put((byte) 0x00); break;
+		case RIGHT:
+			buf.put((byte) 0x01); break;
+		case NONE:
+			buf.put((byte) 0x02); break;
+		default:
+			return; // TODO: add throw Error or so
+		}
+		
+		sendMessage(new Message(Message.TYPE_CLIENT_INPUT, buf.array()));
+	}
+	
+	/**
+	 * Send the current state of the world to a client. This includes the following:
+	 * - ID, positionFX, RotationFX of all Bodies (inclusive Players and Treasures)
+	 * - ID, score, velocity (for animation) of all Players
+	 * @param bodies
+	 * @param players
+	 */
+	public void sendServerState(Body[] bodies, List<Player> players) {
+		ByteBuffer buf = ByteBuffer.allocateDirect(2*4	// number of bodies, number of players
+							+ 4*4*(bodies.length)		// for each body: id (int), position (2 ints FX), rotation (1 int 2FX)
+							+ 4*3*(players.size()));	// for each player: id (int), score (int), velocity (float)
+		buf.putInt(bodies.length);
+		buf.putInt(players.size());
+		
+		for(Body b: bodies) {
+			buf.putInt(b.getId());
+			buf.putInt(b.positionFX().xFX);
+			buf.putInt(b.positionFX().yFX);
+			buf.putInt(b.rotation2FX());
+		}
+		
+		for(Player p: players) {
+			buf.putInt(p.getIdx());
+			buf.putInt(p.score);
+			buf.putFloat(p.getAlignedSpeed());
+		}
+		
+		sendMessage(new Message(Message.TYPE_SERVER_GAMESTATE, buf.array()));
+	}
+	
+	/**
+	 * Starts a new game and tells the client which data to load
+	 * @param playerIdx ID the client gets assigned
+	 * @param map Level to load (which contains everything necessary to initialize a shared world)
+	 */
+	public void sendStartGameMessage(int playerIdx, String map) {
+		byte[] stringdata = map.getBytes();
+		ByteBuffer buf = ByteBuffer.allocateDirect(4+4+stringdata.length); // index, string length, string
+		
+		buf.putInt(playerIdx);
+		buf.putInt(map.length());
+		buf.put(stringdata);
+		
+		sendMessage(new Message(Message.TYPE_GAME_START, buf.array()));
+	}
+	
+	/**
+	 * Ends a game and tells the clients who has won.
+	 * @param winnerIdx Id of winning player (-1 if aborted)
+	 */
+	public void sendEndGameMessage(int winnerIdx) {
+		ByteBuffer buf = ByteBuffer.allocateDirect(4);
+		buf.putInt(winnerIdx);
+		sendMessage(new Message(Message.TYPE_GAME_END, buf.array()));
 	}
 	
 	
@@ -335,11 +429,7 @@ public class GameNetworkingProtocolConnection {
 	}
 	
 	
-	/**
-	 * Get port number out of the message (type TYPE_SERVERINFOBROADCAST)
-	 * @param message Binary message data
-	 * @return Server's port number, or 0 on error
-	 */
+	
 	public static String[] parseUserListMessage(Message msg) {
 		// wrong message type
 		if (msg.type != Message.TYPE_USERLIST)
@@ -349,6 +439,94 @@ public class GameNetworkingProtocolConnection {
 		return userList;
 	}
 	
+	
+	public static ClientStateAccumulator.Acceleration parseAccelerationMessage(Message msg, Integer playerIdxOut) {
+		// wrong message type?
+		if (msg.type != Message.TYPE_CLIENT_ACCELERATION)
+			return null;
+		
+		ByteBuffer b = ByteBuffer.wrap(msg.payload);
+		playerIdxOut = b.getInt();
+		
+		ClientStateAccumulator.Acceleration a = new ClientStateAccumulator.Acceleration();
+		
+		a.x = b.getFloat();
+		a.y = b.getFloat();
+		a.z = b.getFloat();
+		
+		return a;
+	}
+	
+	public static ClientStateAccumulator.UserInputWalk parseUserInputMessage(Message msg, Integer playerIdxOut) {
+		IntBuffer ibuf = ByteBuffer.wrap(msg.payload).asIntBuffer();
+		playerIdxOut = ibuf.get();
+		
+		switch(msg.payload[4]) {
+		case 0x00:
+			return ClientStateAccumulator.UserInputWalk.LEFT;
+		case 0x01:
+			return ClientStateAccumulator.UserInputWalk.RIGHT;
+		case 0x02:
+			return ClientStateAccumulator.UserInputWalk.NONE;
+		default:
+			return ClientStateAccumulator.UserInputWalk.NONE; // TODO: throw error or so
+		}
+	}
+	
+	/**
+	 * Updates the state of client's world to the one from the server
+	 * @param m Message from server.
+	 * @param w GameWorld of client, will be updated with data from message
+	 */
+	public void receiveServerState(Message m, GameWorld w) {
+		// number of bodies, number of players
+		// for each body: id (int), position (2 ints FX), rotation (1 int 2FX)
+		// for each player: id (int), score (int), velocity (float)
+		
+		ByteBuffer buf = ByteBuffer.wrap(m.payload);
+		int body_count   = buf.getInt();
+		int player_count = buf.getInt();
+		
+		for(; body_count > 0; --body_count) {
+			int id = buf.getInt();
+			int x  = buf.getInt(),
+				y  = buf.getInt(),
+				a  = buf.getInt();
+			
+			Body b = w.getBodies()[id];
+			b.setPositionFX(new FXVector(x, y));
+			b.setRotation2FX(a);
+		}
+		
+		for(; player_count > 0; --player_count) {
+			int id    = buf.getInt();
+			int score = buf.getInt();
+			float speed = buf.getFloat();
+			
+			Player p = w.getPlayers().get(id); // assuming player IDs correspond to position in array (should be the case accoring to GameWorld.AddPlayer())
+			p.score = score;
+			p.setAlignedSpeed(speed);
+		}
+	}
+	
+	/**
+	 * Start a new game.
+	 * @param msg The message from the server.
+	 * @param playerIdxOut The index this client got assigned from the server.
+	 * @return The filename of the map to load
+	 */
+	public static String parseStartGameMessage(Message msg, Integer playerIdxOut) {
+		ByteBuffer buf   = ByteBuffer.wrap(msg.payload);
+		
+		playerIdxOut    = buf.getInt();
+		int stringsize = buf.getInt();
+		
+		byte[] strbuf = new byte[stringsize];
+		buf.get(strbuf);
+		String s = new String(strbuf);
+		
+		return s;
+	}
 
 	
 	
@@ -445,10 +623,14 @@ public class GameNetworkingProtocolConnection {
 			TYPE_UNREGISTER = ++i,
 			TYPE_IDLE = ++i,
 			TYPE_USERLIST = ++i,
-			TYPE_GAME_INIT = ++i,
+			
+			// client --> server
+			TYPE_CLIENT_ACCELERATION = ++i,
+			TYPE_CLIENT_INPUT = ++i,
+			
+			// server --> client
 			TYPE_GAME_START = ++i,
-			TYPE_SENSOR_PITCH = ++i,
-			TYPE_PLAYERS_STATE = ++i,
+			TYPE_SERVER_GAMESTATE = ++i,
 			TYPE_GAME_END = ++i
 			;
 		

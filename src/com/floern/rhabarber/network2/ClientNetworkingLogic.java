@@ -63,9 +63,11 @@ public class ClientNetworkingLogic {
 			else if (message.type == Message.TYPE_IDLE) {
 				// idle received, ignore
 			}
-			else if (message.type == Message.TYPE_GAME_INIT) {
+			else if (message.type == Message.TYPE_GAME_START) {
 				// init game
-				updateEventListener.onInitGame(new String(message.payload));
+				// TODO: detailed event handling
+				String map = GameNetworkingProtocolConnection.parseStartGameMessage(message, new Integer(0));
+				updateEventListener.onInitGame(map);
 			}
 			else {
 				Log.i("onReceive()", "Mistimed/unknown Message received, Type: "+message.type+"; Hex: "+message.hexDump());

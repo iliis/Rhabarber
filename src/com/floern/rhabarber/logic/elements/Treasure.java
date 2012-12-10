@@ -79,5 +79,9 @@ public class Treasure extends MovableElement {
 			currAngle += angleStep;
 		}
 	}};
+
+	public void setValue(int v) {
+		value = v;
+	}
 	
 }
