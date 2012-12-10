@@ -212,18 +212,20 @@ public class MenuActivity extends Activity implements Observer {
 
 	protected Dialog onCreateDialog(int id) {
 		Log.i(TAG, "onCreateDialog()");
-		DialogFragment result = null;
+		Dialog result = null;
 		switch (id) {
 		case DIALOG_JOIN_ID: {
 			result = DialogBuilder.createJoinDialog(this, networkController);
+			result.show();
 		}
 			break;
 		case DIALOG_ALLJOYN_ERROR_ID: {
 			result = DialogBuilder.createAllJoynErrorDialog(this, networkController);
+			result.show();
 		}
 			break;
 		}
-		return result.getDialog();
+		return result;
 	}
 
 	public synchronized void update(Observable o, Object arg) {
