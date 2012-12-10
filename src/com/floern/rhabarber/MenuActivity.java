@@ -1,5 +1,6 @@
 package com.floern.rhabarber;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -88,12 +89,21 @@ public class MenuActivity extends Activity implements Observer {
 
 		buttonStartGame = (Button) findViewById(R.id.buttonStartGame);
 		buttonStartGame.setEnabled(false);
+		
+		String[] levels = new String[]{"no levels found"};
+		try {
+			levels = this.getAssets().list("level");
+			Log.d("Rhabarber", "found levels: "+Integer.toString(levels.length));
+		} catch (IOException e) {
+			e.printStackTrace();
+			Log.e("Rhabarber", "Couldn't load levels from asset/level/");
+		}
 
 		// TODO delete test
 		ListView listView = (ListView) findViewById(R.id.listViewGameDescriptions);
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
 				android.R.layout.simple_spinner_item,
-				new String[] { "Test Map" });
+				levels);
 		spinnerMap.setAdapter(adapter);
 
 		// Assign adapter to ListView
