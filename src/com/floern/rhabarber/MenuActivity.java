@@ -84,12 +84,8 @@ public class MenuActivity extends Activity implements Observer {
 				// Do nothing.
 			}
 		});
-
-		textViewPlayerCount = (TextView) findViewById(R.id.textViewPlayerCount);
-
-		buttonStartGame = (Button) findViewById(R.id.buttonStartGame);
-		buttonStartGame.setEnabled(false);
 		
+		// list all levels in asset/level/
 		String[] levels = new String[]{"no levels found"};
 		try {
 			levels = this.getAssets().list("level");
@@ -99,13 +95,21 @@ public class MenuActivity extends Activity implements Observer {
 			Log.e("Rhabarber", "Couldn't load levels from asset/level/");
 		}
 
-		// TODO delete test
-		ListView listView = (ListView) findViewById(R.id.listViewGameDescriptions);
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
 				android.R.layout.simple_spinner_item,
 				levels);
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		spinnerMap.setAdapter(adapter);
+		
 
+		textViewPlayerCount = (TextView) findViewById(R.id.textViewPlayerCount);
+
+		buttonStartGame = (Button) findViewById(R.id.buttonStartGame);
+		buttonStartGame.setEnabled(false);
+		
+		
+		// TODO delete test
+		ListView listView = (ListView) findViewById(R.id.listViewGameDescriptions);
 		// Assign adapter to ListView
 		listViewAdapter = new MyArrayAdapter(this, gameDescriptions);
 		listView.setAdapter(listViewAdapter);
