@@ -318,6 +318,16 @@ public class GameNetworkingProtocolConnection {
 		sendMessage(new Message(Message.TYPE_GAME_START, buf.array()));
 	}
 	
+	/**
+	 * Ends a game and tells the clients who has won.
+	 * @param winnerIdx Id of winning player (-1 if aborted)
+	 */
+	public void sendEndGameMessage(int winnerIdx) {
+		ByteBuffer buf = ByteBuffer.allocateDirect(4);
+		buf.putInt(winnerIdx);
+		sendMessage(new Message(Message.TYPE_GAME_END, buf.array()));
+	}
+	
 	
 	/**
 	 * Send a Message
@@ -596,18 +606,15 @@ public class GameNetworkingProtocolConnection {
 			TYPE_UNREGISTER = ++i,
 			TYPE_IDLE = ++i,
 			TYPE_USERLIST = ++i,
-			TYPE_GAME_INIT = ++i,
-			TYPE_GAME_START = ++i,
-			TYPE_SENSOR_PITCH = ++i,
-			TYPE_PLAYERS_STATE = ++i,
-			TYPE_GAME_END = ++i,
 			
 			// client --> server
 			TYPE_CLIENT_ACCELERATION = ++i,
 			TYPE_CLIENT_INPUT = ++i,
 			
 			// server --> client
-			TYPE_SERVER_GAMESTATE = ++i
+			TYPE_GAME_START = ++i,
+			TYPE_SERVER_GAMESTATE = ++i,
+			TYPE_GAME_END = ++i
 			;
 		
 		/** Empty payload byte array */
