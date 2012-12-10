@@ -8,7 +8,6 @@ import com.floern.rhabarber.graphic.GameGLSurfaceView;
 import com.floern.rhabarber.graphic.primitives.SkeletonKeyframe;
 import com.floern.rhabarber.logic.elements.GameWorld;
 import com.floern.rhabarber.logic.elements.Player;
-import com.floern.rhabarber.physics.PhysicsController;
 import com.floern.rhabarber.util.FXMath;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;

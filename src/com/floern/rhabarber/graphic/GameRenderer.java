@@ -5,8 +5,6 @@ import javax.microedition.khronos.opengles.GL10;
 
 import com.floern.rhabarber.GameActivity;
 import com.floern.rhabarber.logic.elements.GameWorld;
-import com.floern.rhabarber.physics.PhysicsController;
-
 import android.opengl.GLES10;
 import android.opengl.GLSurfaceView;
 import android.util.Log;
@@ -81,11 +79,8 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 						-1f, 1f);
 		}
 		
-		
-		
 		gl.glMatrixMode(GL10.GL_MODELVIEW);
 		gl.glLoadIdentity();
-		
 	}
 	
 	public void onDrawFrame(GL10 gl) {
