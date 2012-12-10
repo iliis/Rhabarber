@@ -90,10 +90,10 @@ public class MenuActivity extends Activity implements Observer {
 		String[] levels = new String[]{"no levels found"};
 		try {
 			levels = this.getAssets().list("level");
-			Log.d("Rhabarber", "found levels: "+Integer.toString(levels.length));
 		} catch (IOException e) {
 			e.printStackTrace();
 			Log.e("Rhabarber", "Couldn't load levels from asset/level/");
+			Toast.makeText(this, "Couldn't find any levels.", TOAST_DURATION).show();
 		}
 
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
