@@ -9,6 +9,7 @@ import com.floern.rhabarber.graphic.primitives.SkeletonKeyframe;
 import com.floern.rhabarber.logic.elements.GameWorld;
 import com.floern.rhabarber.logic.elements.Player;
 import com.floern.rhabarber.network2.ClientNetworkingLogic;
+import com.floern.rhabarber.network2.ClientStateAccumulator;
 import com.floern.rhabarber.util.FXMath;
 
 import android.graphics.Color;
@@ -44,6 +45,7 @@ import at.emini.physics2D.util.FXVector;
  */
 public class GameActivity extends Activity implements SensorEventListener {
 
+	// connection with server
 	public static ClientNetworkingLogic clientNetworkingLogic = null;
 	
 	private GameGLSurfaceView surfaceView;
@@ -55,6 +57,7 @@ public class GameActivity extends Activity implements SensorEventListener {
 
 	private float[] acceleration = new float[3];
 	private int playerIdx;
+	private boolean isserver = true;
 	boolean walk_left = false, walk_right = false;
 
 	@Override
@@ -88,19 +91,22 @@ public class GameActivity extends Activity implements SensorEventListener {
 		// sensor vector is rotated on landscape-default devices (some tablets)
 		int rotation = display.getRotation();
 		deviceIsLandscapeDefault = (orientation == Configuration.ORIENTATION_LANDSCAPE && (rotation == Surface.ROTATION_0  || rotation == Surface.ROTATION_180))
-				                || (orientation == Configuration.ORIENTATION_PORTRAIT &&  (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270));
+				                || (orientation == Configuration.ORIENTATION_PORTRAIT  && (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270));
 
 		// setup up the actual game
 		try {
-			game = new GameWorld(this.getAssets().open(	"level/"+getIntent().getExtras().getString("level")), this,true);
-			playerIdx = game.addPlayer();
+			isserver   = getIntent().getExtras().getBoolean("isserver");
+			playerIdx  = getIntent().getExtras().getInt("playerIdx");
+			game = new GameWorld(this.getAssets().open(	"level/"+getIntent().getExtras().getString("level")), this,isserver, playerIdx);
+			Log.d("foo", "starting a game");
+			Log.d("foo", "isserver = "+isserver);
+			Log.d("foo", "playerIdx = "+playerIdx);
+			//playerIdx = game.addPlayer();
 			
 			surfaceView.renderer.readLevelSize(game);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		// File f = new File("/mnt/sdcard/testworld.phy");
-		// physics = new PhysicsController(f);
 
 	}
 
@@ -109,14 +115,10 @@ public class GameActivity extends Activity implements SensorEventListener {
 		game.setAccel(acceleration);
 		if (walk_left != walk_right) {
 			
-			// TODO: limit the max velocity or some such
-
-			FXVector dir = new FXVector(game.getPlayers().get(playerIdx).getAxes()[1]);
 			if (walk_left) {
-				dir.mult(-1);
-				game.getPlayers().get(playerIdx).applyAcceleration(dir, FXMath.floatToFX(10f));
+				game.walk(ClientStateAccumulator.UserInputWalk.LEFT);
 			} else
-				game.getPlayers().get(playerIdx).applyAcceleration(dir, FXMath.floatToFX(10f));
+				game.walk(ClientStateAccumulator.UserInputWalk.RIGHT);
 		}
 		game.draw(gl);
 	}
@@ -175,8 +177,9 @@ public class GameActivity extends Activity implements SensorEventListener {
 		// TODO
 	}
 	
-	public void sendUserInputToServer() {
+	public void sendUserInputToServer(ClientStateAccumulator.UserInputWalk i) {
 		// TODO
+		
 	}
 
 	/**

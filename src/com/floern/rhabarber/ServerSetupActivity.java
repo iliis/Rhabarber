@@ -56,6 +56,11 @@ public class ServerSetupActivity extends Activity {
 						Log.d("UserListEventListener", "userListView updated");
 						userListView.setAdapter(new UserListAdapter(ServerSetupActivity.this, userList));
 						userListView.invalidate();
+						
+						if (userList.isEmpty())
+							ServerSetupActivity.this.showEmptyUserlistText();
+						else
+							ServerSetupActivity.this.hideEmpyUserlistText();
 					}
 				}
 			});
@@ -114,12 +119,12 @@ public class ServerSetupActivity extends Activity {
 	/** Game state update eventlistener */
 	private final GameUpdateEventListener gameUpdateEventListener = new GameUpdateEventListener() {
 		// TODO: duplicate code in ServerJoinAvctivity and ServerSetupActivity
-		public void onInitGame(final String gameMap) {
+		public void onInitGame(final String gameMap, final int playerIdx) {
 			// init game
 			runOnUiThread(new Runnable() {
 				public void run() {
 					networkingLogic.stopAvoidTimeout();
-					startGameActivity(gameMap);
+					startGameActivity(gameMap, playerIdx);
 				}
 			});
 		}
@@ -128,7 +133,13 @@ public class ServerSetupActivity extends Activity {
 		}
 	};
 	
+	public void hideEmpyUserlistText() {
+		findViewById(R.id.emptylist_userlist).setVisibility(View.INVISIBLE);
+	}
 	
+	public void showEmptyUserlistText() {
+		findViewById(R.id.emptylist_userlist).setVisibility(View.VISIBLE);;
+	}
 	
 	
 	/** onCreate */
@@ -257,12 +268,15 @@ public class ServerSetupActivity extends Activity {
     /**
      * Game init, start Game's Activity
      * @param gameMap 
+     * @param playerIdx 
      */
-    public void startGameActivity(String gameMap) {
+    public void startGameActivity(String gameMap, int playerIdx) {
 		// TODO: duplicate code in ServerJoinAvctivity and ServerSetupActivity
     	Intent i = new Intent(this, GameActivity.class);
     	GameActivity.clientNetworkingLogic = networkingLogic;
     	i.putExtra("level", gameMap);
+    	i.putExtra("playerIdx", playerIdx);
+    	i.putExtra("isserver", true);
     	startActivity(i);
     }
 	

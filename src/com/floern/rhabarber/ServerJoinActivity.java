@@ -88,12 +88,12 @@ public class ServerJoinActivity extends Activity {
 	/** Game state update eventlistener */
 	private final GameUpdateEventListener gameUpdateEventListener = new GameUpdateEventListener() {
 		// TODO: duplicate code in ServerJoinAvctivity and ServerSetupActivity
-		public void onInitGame(final String gameMap) {
+		public void onInitGame(final String gameMap, final int playerIdx) {
 			// init game
 			runOnUiThread(new Runnable() {
 				public void run() {
 					networkingLogic.stopAvoidTimeout();
-					startGameActivity(gameMap);
+					startGameActivity(gameMap, playerIdx);
 				}
 			});
 		}
@@ -176,12 +176,15 @@ public class ServerJoinActivity extends Activity {
     /**
      * Game init, start Game's Activity
      * @param gameMap 
+     * @param playerIdx
      */
-    public void startGameActivity(String gameMap) {
+    public void startGameActivity(String gameMap, int playerIdx) {
 		// TODO: duplicate code in ServerJoinAvctivity and ServerSetupActivity
     	Intent i = new Intent(this, GameActivity.class);
     	GameActivity.clientNetworkingLogic = networkingLogic;
     	i.putExtra("level", gameMap);
+    	i.putExtra("playerIdx", playerIdx);
+    	i.putExtra("isserver", false);
     	startActivity(i);
     }
     

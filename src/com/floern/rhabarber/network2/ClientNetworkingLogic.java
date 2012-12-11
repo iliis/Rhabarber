@@ -66,8 +66,12 @@ public class ClientNetworkingLogic {
 			else if (message.type == Message.TYPE_GAME_START) {
 				// init game
 				// TODO: detailed event handling
-				String map = GameNetworkingProtocolConnection.parseStartGameMessage(message, new Integer(0));
-				updateEventListener.onInitGame(map);
+				Integer playerIdx = new Integer(-1);
+				String map = GameNetworkingProtocolConnection.parseStartGameMessage(message, playerIdx);
+				updateEventListener.onInitGame(map, playerIdx);
+			}
+			else if (message.type == Message.TYPE_SERVER_GAMESTATE) {
+				// TODO
 			}
 			else {
 				Log.i("onReceive()", "Mistimed/unknown Message received, Type: "+message.type+"; Hex: "+message.hexDump());
@@ -198,8 +202,9 @@ public class ClientNetworkingLogic {
 		/**
 		 * Game has to be initialized
 		 * @param gameMap map to play on
+		 * @param playerIdx ID of this client (assigned by server)
 		 */
-		void onInitGame(final String gameMap);
+		void onInitGame(final String gameMap, final int playerIdx);
 		/**
 		 * User was registered
 		 */

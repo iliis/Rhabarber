@@ -22,7 +22,7 @@ public class UserListAdapter extends ArrayAdapter<UserInfo> {
 	public UserListAdapter(Context context, List<UserInfo> objects) {
 		super(context, LIST_ITEM_LAYOUT, objects);
 		this.context = context;
-		this.data = objects;
+		this.data    = objects;
 	}
 	
 	@Override
@@ -32,8 +32,8 @@ public class UserListAdapter extends ArrayAdapter<UserInfo> {
 			viewToUse = ((Activity)context).getLayoutInflater().inflate(LIST_ITEM_LAYOUT, parent, false);
 		}
 		// update view
-		UserInfo user = data.get(pos);
-		TextView text_left = ((TextView) viewToUse.findViewById(R.id.text_left));
+		UserInfo user       = data.get(pos);
+		TextView text_left  = ((TextView) viewToUse.findViewById(R.id.text_left));
 		TextView text_right = ((TextView) viewToUse.findViewById(R.id.text_right));
 		text_left.setText(user.ip);
 		text_right.setText(user.port > 0 ? Integer.toString(user.port) : "");

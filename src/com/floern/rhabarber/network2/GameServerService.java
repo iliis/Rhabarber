@@ -213,8 +213,9 @@ public class GameServerService extends Service {
 	private void initGame(String gameMap) {
 		// send user list to clients
 		// TODO: start game logic
+		int i = 0;
 		for (GameNetworkingProtocolConnection client : clientConnections) {
-			client.sendStartGameMessage(-1, gameMap);
+			client.sendStartGameMessage(i++, gameMap);
 		}
 	}
 	

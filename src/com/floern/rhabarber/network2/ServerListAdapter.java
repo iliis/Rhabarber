@@ -22,7 +22,7 @@ public class ServerListAdapter extends ArrayAdapter<ServerInfo> {
 	public ServerListAdapter(Context context, ArrayList<ServerInfo> objects) {
 		super(context, LIST_ITEM_LAYOUT, objects);
 		this.context = context;
-		this.data = objects;
+		this.data    = objects;
 	}
 	
 	@Override
@@ -32,8 +32,8 @@ public class ServerListAdapter extends ArrayAdapter<ServerInfo> {
 			viewToUse = ((Activity)context).getLayoutInflater().inflate(LIST_ITEM_LAYOUT, parent, false);
 		}
 		// update view
-		ServerInfo server = data.get(pos);
-		TextView text_left = ((TextView) viewToUse.findViewById(R.id.text_left));
+		ServerInfo server   = data.get(pos);
+		TextView text_left  = ((TextView) viewToUse.findViewById(R.id.text_left));
 		TextView text_right = ((TextView) viewToUse.findViewById(R.id.text_right));
 		text_left.setText(server.address);
 		text_right.setText(Integer.toString(server.port));

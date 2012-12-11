@@ -29,22 +29,29 @@ public class GameWorld extends World {
 
 	// separate list of players for easier retrieval of players
 	// more than 4 players are probably not feasible anyway
-	private ArrayList<Player> players = new ArrayList<Player>(4);
+	private ArrayList<Player>   players   = new ArrayList<Player>(4);
 	private ArrayList<Treasure> treasures = new ArrayList<Treasure>(2);
 	private Random rand = new Random();
 	private GameActivity gameActivity;
 
 	private boolean isServer;
+	private int playerIdx = -1; // ID of the player on this device
 
 	// TODO get this from network
 	private ClientStateAccumulator stateAccumulator = null;
 
-	private ArrayList<FXVector> spawnpoints_player = new ArrayList<FXVector>();
-	private Iterator<FXVector> playerSpawnIterator;
-	private ArrayList<Body> spawnpoints_treasure = new ArrayList<Body>();
+	private ArrayList<FXVector> spawnpoints_player   = new ArrayList<FXVector>();
+	private Iterator<FXVector>  playerSpawnIterator;
+	private ArrayList<Body>     spawnpoints_treasure = new ArrayList<Body>();
 
-	private static final int[] playerColors = { Color.RED, Color.BLUE,
-			Color.GREEN, Color.YELLOW, Color.MAGENTA, Color.GRAY };
+	private static final int[] playerColors = {
+		Color.RED,
+		Color.BLUE,
+		Color.GREEN,
+		Color.YELLOW,
+		Color.MAGENTA,
+		Color.GRAY
+	};
 	private int colorIdx = 0;
 
 
@@ -60,12 +67,18 @@ public class GameWorld extends World {
 	// maybe push to phy file? yeah, later...
 	private static final int WINNING_SCORE = 1000;
 
-	public GameWorld(InputStream level, GameActivity gameActivity, boolean isServer) {
+	public GameWorld(InputStream level, GameActivity gameActivity, boolean isServer, int playerIdx) {
 		this.gameActivity = gameActivity;
+		this.playerIdx    = playerIdx;
+		this.isServer     = isServer;
 		loadLevel(level);
-		this.isServer = isServer;
-		addTreasureRandomly(); // inital treasue (only one, maybe change that
+		// TODO: only do this on server, communicate it with clients
+		//addTreasureRandomly(); // inital treasue (only one, maybe change that
 								// later)
+		
+		if (this.isServer) {
+			stateAccumulator = new ClientStateAccumulator();
+		}
 
 		outline = new Vertexes();
 		outline.setMode(GLES10.GL_LINES); // disconnected bunch of lines
@@ -252,6 +265,8 @@ public class GameWorld extends World {
 			// what about overflows? (so far I hadn't any bugs)
 			long dt  = System.nanoTime() - last_tick;
 			last_tick = System.nanoTime();
+			
+			copyInputsFromAccumulator();
 
 			applyPlayerGravities(getTimestepFX(), acceleration);
 			super.tick(); // simulate physics
@@ -262,6 +277,7 @@ public class GameWorld extends World {
 			}
 			
 			this.processGame();
+			this.sendStateToClients();
 		}
 		else
 		{
@@ -269,15 +285,14 @@ public class GameWorld extends World {
 		}
 	}
 
+	// server side
 	private void copyInputsFromAccumulator() {
-		// TODO
-		/*
-		 * ClienStateAccumulator copy=
-		 * 
-		 * synchronized(...) { copy = original; // deep copy }
-		 */
+		ClientStateAccumulator copy;
+		synchronized(stateAccumulator) {
+			copy = stateAccumulator.copy();
+		}
 
-		// do stuff with copy
+		// TODO stuff with copy
 	}
 
 	// server side
@@ -292,6 +307,25 @@ public class GameWorld extends World {
 
 	public void setAccel(float[] g) {
 		this.acceleration = g;
+	}
+	
+	public void walk(ClientStateAccumulator.UserInputWalk direction) {
+		// TODO: limit the max velocity or some such
+		
+		if (playerIdx >= 0) {
+			
+			if (this.isServer) {
+				FXVector dir = new FXVector(players.get(playerIdx).getAxes()[1]);
+				if (direction == ClientStateAccumulator.UserInputWalk.LEFT) {
+					dir.mult(-1);
+					players.get(playerIdx).applyAcceleration(dir, FXMath.floatToFX(10f));
+				} else if (direction == ClientStateAccumulator.UserInputWalk.RIGHT)
+					players.get(playerIdx).applyAcceleration(dir, FXMath.floatToFX(10f));
+			} else{
+				// send UserInputMessage
+				
+			}
+		}
 	}
 
 	public void draw(GL10 gl) {
