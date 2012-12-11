@@ -256,13 +256,14 @@ public class GameNetworkingProtocolConnection {
 	 * @param accel Raw data from Sensor
 	 */
 	public void sendAccelerationData(int playerIdx, ClientStateAccumulator.Acceleration accel) {
-		ByteBuffer buf = ByteBuffer.allocateDirect(4*4); // 3 floats and one int, each 4 bytes
+		byte[] arr = new byte[4*4]; // 3 floats and one int, each 4 bytes
+		ByteBuffer buf = ByteBuffer.wrap(arr);
 		buf.putInt(playerIdx);
 		buf.putFloat(accel.x);
 		buf.putFloat(accel.y);
 		buf.putFloat(accel.y);
 		
-		Message accelMessage = new Message(Message.TYPE_CLIENT_ACCELERATION, buf.array());
+		Message accelMessage = new Message(Message.TYPE_CLIENT_ACCELERATION, arr);
 		sendMessage(accelMessage);
 	}
 	
@@ -271,7 +272,8 @@ public class GameNetworkingProtocolConnection {
 	 * @param input walking direction
 	 */
 	public void sendUserInputData(int playerIdx, ClientStateAccumulator.UserInputWalk input) {
-		ByteBuffer buf = ByteBuffer.allocateDirect(4+1); // one int with 4 bytes, one enum
+		byte[] arr = new byte[4+1]; // one int with 4 bytes, one enum
+		ByteBuffer buf = ByteBuffer.wrap(arr);
 		buf.putInt(playerIdx);
 		
 		switch(input) {
@@ -285,7 +287,7 @@ public class GameNetworkingProtocolConnection {
 			return; // TODO: add throw Error or so
 		}
 		
-		sendMessage(new Message(Message.TYPE_CLIENT_INPUT, buf.array()));
+		sendMessage(new Message(Message.TYPE_CLIENT_INPUT, arr));
 	}
 	
 	/**
@@ -296,9 +298,10 @@ public class GameNetworkingProtocolConnection {
 	 * @param players
 	 */
 	public void sendServerState(Body[] bodies, List<Player> players) {
-		ByteBuffer buf = ByteBuffer.allocateDirect(2*4	// number of bodies, number of players
+		byte[] arr = new byte[2*4	// number of bodies, number of players
 							+ 4*4*(bodies.length)		// for each body: id (int), position (2 ints FX), rotation (1 int 2FX)
-							+ 4*3*(players.size()));	// for each player: id (int), score (int), velocity (float)
+							+ 4*3*(players.size())];	// for each player: id (int), score (int), velocity (float)
+		ByteBuffer buf = ByteBuffer.wrap(arr);
 		buf.putInt(bodies.length);
 		buf.putInt(players.size());
 		
@@ -315,7 +318,7 @@ public class GameNetworkingProtocolConnection {
 			buf.putFloat(p.getAlignedSpeed());
 		}
 		
-		sendMessage(new Message(Message.TYPE_SERVER_GAMESTATE, buf.array()));
+		sendMessage(new Message(Message.TYPE_SERVER_GAMESTATE, arr));
 	}
 	
 	/**
@@ -325,15 +328,13 @@ public class GameNetworkingProtocolConnection {
 	 */
 	public void sendStartGameMessage(int playerIdx, String map) {
 		byte[] stringdata = map.getBytes();
-		ByteBuffer buf = ByteBuffer.allocateDirect(4+4+stringdata.length); // index, string length, string
+		byte[] arr = new byte[4+4+stringdata.length]; // index, string length, string
+		ByteBuffer buf = ByteBuffer.wrap(arr);
 		
 		buf.putInt(playerIdx);
 		buf.putInt(map.length());
 		buf.put(stringdata);
 		
-		buf.rewind();
-		byte[] arr = new byte[buf.remaining()];
-		buf.get(arr);
 		sendMessage(new Message(Message.TYPE_GAME_START, arr));
 	}
 	
@@ -342,9 +343,10 @@ public class GameNetworkingProtocolConnection {
 	 * @param winnerIdx Id of winning player (-1 if aborted)
 	 */
 	public void sendEndGameMessage(int winnerIdx) {
-		ByteBuffer buf = ByteBuffer.allocateDirect(4);
+		byte[] arr = new byte[4];
+		ByteBuffer buf = ByteBuffer.wrap(arr);
 		buf.putInt(winnerIdx);
-		sendMessage(new Message(Message.TYPE_GAME_END, buf.array()));
+		sendMessage(new Message(Message.TYPE_GAME_END, arr));
 	}
 	
 	
