@@ -56,11 +56,6 @@ public class ServerSetupActivity extends Activity {
 						Log.d("UserListEventListener", "userListView updated");
 						userListView.setAdapter(new UserListAdapter(ServerSetupActivity.this, userList));
 						userListView.invalidate();
-						
-						if (userList.isEmpty())
-							ServerSetupActivity.this.showEmptyUserlistText();
-						else
-							ServerSetupActivity.this.hideEmpyUserlistText();
 					}
 				}
 			});
@@ -133,13 +128,6 @@ public class ServerSetupActivity extends Activity {
 		}
 	};
 	
-	public void hideEmpyUserlistText() {
-		findViewById(R.id.emptylist_userlist).setVisibility(View.INVISIBLE);
-	}
-	
-	public void showEmptyUserlistText() {
-		findViewById(R.id.emptylist_userlist).setVisibility(View.VISIBLE);;
-	}
 	
 	
 	/** onCreate */
@@ -304,7 +292,8 @@ public class ServerSetupActivity extends Activity {
 		// get user listview
 		userListView = (ListView) findViewById(R.id.list_userlist);
 		userListView.setAdapter(new UserListAdapter(this, userList));
-
+		userListView.setEmptyView(findViewById(R.id.emptylist_userlist));
+		
 		// set map chooser list values
 		Spinner mapChooser = (Spinner) findViewById(R.id.spinner_map);
 		String[] levels;
