@@ -27,7 +27,20 @@ public class ClientStateAccumulator {
 			
 			a.x = this.x;
 			a.y = this.y;
-			a.z = this.y;
+			a.z = this.z;
+			
+			return a;
+		}
+	}
+	
+	public static class Position {
+		public float x,y;
+		
+		public Position copy() {
+			Position a = new Position();
+			
+			a.x = this.x;
+			a.y = this.y;
 			
 			return a;
 		}
@@ -35,6 +48,7 @@ public class ClientStateAccumulator {
 	
 	public ArrayList<UserInputWalk> inputs = new ArrayList<UserInputWalk>();
 	public ArrayList<Acceleration>  accels = new ArrayList<Acceleration>();
+	public ArrayList<Position> positions = new ArrayList<Position>();
 	
 	/**
 	 * Receives a message and stores it in accumulator for later retrieval
@@ -70,6 +84,9 @@ public class ClientStateAccumulator {
 		
 		for(Acceleration a: accels)
 			c.accels.add(a.copy());
+		
+		for(Position p: positions)
+			c.positions.add(p.copy());
 		
 		return c;
 	}
