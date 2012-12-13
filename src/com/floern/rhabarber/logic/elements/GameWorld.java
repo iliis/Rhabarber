@@ -13,6 +13,7 @@ import com.floern.rhabarber.graphic.primitives.IGLPrimitive;
 import com.floern.rhabarber.graphic.primitives.SkeletonKeyframe;
 import com.floern.rhabarber.graphic.primitives.Vertexes;
 import com.floern.rhabarber.network2.ClientStateAccumulator;
+import com.floern.rhabarber.network2.ClientStateAccumulator.Acceleration;
 import com.floern.rhabarber.network2.GameNetworkingProtocolConnection.Message;
 import com.floern.rhabarber.util.FXMath;
 import com.floern.rhabarber.util.GameBodyUserData;
@@ -29,7 +30,7 @@ public class GameWorld extends World {
 
 	// separate list of players for easier retrieval of players
 	// more than 4 players are probably not feasible anyway
-	private ArrayList<Player>   players   = new ArrayList<Player>(4);
+	private ArrayList<Player> players = new ArrayList<Player>(4);
 	private ArrayList<Treasure> treasures = new ArrayList<Treasure>(2);
 	private Random rand = new Random();
 	private GameActivity gameActivity;
@@ -39,26 +40,21 @@ public class GameWorld extends World {
 
 	// TODO get this from network
 	private ClientStateAccumulator stateAccumulator = null;
+	private FXVector sharedGravity;
 
-	private ArrayList<FXVector> spawnpoints_player   = new ArrayList<FXVector>();
-	private Iterator<FXVector>  playerSpawnIterator;
-	private ArrayList<Body>     spawnpoints_treasure = new ArrayList<Body>();
+	private ArrayList<FXVector> spawnpoints_player = new ArrayList<FXVector>();
+	private Iterator<FXVector> playerSpawnIterator;
+	private ArrayList<Body> spawnpoints_treasure = new ArrayList<Body>();
 
-	private static final int[] playerColors = {
-		Color.RED,
-		Color.BLUE,
-		Color.GREEN,
-		Color.YELLOW,
-		Color.MAGENTA,
-		Color.GRAY
-	};
+	private static final int[] playerColors = { Color.RED, Color.BLUE,
+			Color.GREEN, Color.YELLOW, Color.MAGENTA, Color.GRAY };
 	private int colorIdx = 0;
-
 
 	public final float G = 100; // gravity
 
 	Vertexes outline;
 	private float[] acceleration = new float[3];
+	private float[] positions = new float[3];
 
 	long last_tick;
 
@@ -67,15 +63,16 @@ public class GameWorld extends World {
 	// maybe push to phy file? yeah, later...
 	private static final int WINNING_SCORE = 1000;
 
-	public GameWorld(InputStream level, GameActivity gameActivity, boolean isServer, int playerIdx) {
+	public GameWorld(InputStream level, GameActivity gameActivity,
+			boolean isServer, int playerIdx) {
 		this.gameActivity = gameActivity;
-		this.playerIdx    = playerIdx;
-		this.isServer     = isServer;
+		this.playerIdx = playerIdx;
+		this.isServer = isServer;
 		loadLevel(level);
 		// TODO: only do this on server, communicate it with clients
-		//addTreasureRandomly(); // inital treasue (only one, maybe change that
-								// later)
-		
+		// addTreasureRandomly(); // inital treasue (only one, maybe change that
+		// later)
+
 		if (this.isServer) {
 			stateAccumulator = new ClientStateAccumulator();
 		}
@@ -97,7 +94,7 @@ public class GameWorld extends World {
 			max_y = Math.max(Math.max(A.yAsFloat(), B.yAsFloat()), max_y);
 		}
 		this.playerSpawnIterator = spawnpoints_player.iterator();
-
+		this.sharedGravity = this.getGravity();
 		last_tick = System.nanoTime();
 	}
 
@@ -156,17 +153,18 @@ public class GameWorld extends World {
 		this.addBody(t);
 		this.treasures.add(t);
 	}
-	
+
 	public void addTreasureRandomly() {
 		Treasure t = new Treasure(new FXVector(), 0);
 		moveTreasureRandomly(t);
 		addTreasure(t);
 	}
-	
+
 	public void moveTreasureRandomly(Treasure t) {
 		if (!spawnpoints_treasure.isEmpty()) {
 
-			Body spawnpoint    = this.spawnpoints_treasure.get(rand.nextInt(spawnpoints_treasure.size()));
+			Body spawnpoint = this.spawnpoints_treasure.get(rand
+					.nextInt(spawnpoints_treasure.size()));
 			GameBodyUserData d = (GameBodyUserData) spawnpoint.getUserData();
 
 			t.setPositionFX(spawnpoint.positionFX());
@@ -185,10 +183,21 @@ public class GameWorld extends World {
 			this.playerSpawnIterator = spawnpoints_player.iterator();
 		}
 		FXVector spawnPos = playerSpawnIterator.next();
-		Player p = new Player(spawnPos, players.size(), gameActivity.getResources().openRawResource(R.raw.player),	playerColors[colorIdx], 1000);
-		p.anim_running_left  = SkeletonKeyframe.loadSKAnimation(p.skeleton, gameActivity.getResources().openRawResource(R.raw.player_running_left));
-		p.anim_running_right = SkeletonKeyframe.loadSKAnimation(p.skeleton, gameActivity.getResources().openRawResource(R.raw.player_running_right));
-		p.anim_standing      = SkeletonKeyframe.loadSKAnimation(p.skeleton, gameActivity.getResources().openRawResource(R.raw.player_standing));
+		Player p = new Player(spawnPos, players.size(), gameActivity
+				.getResources().openRawResource(R.raw.player),
+				playerColors[colorIdx], 1000);
+		p.anim_running_left = SkeletonKeyframe.loadSKAnimation(
+				p.skeleton,
+				gameActivity.getResources().openRawResource(
+						R.raw.player_running_left));
+		p.anim_running_right = SkeletonKeyframe.loadSKAnimation(
+				p.skeleton,
+				gameActivity.getResources().openRawResource(
+						R.raw.player_running_right));
+		p.anim_standing = SkeletonKeyframe.loadSKAnimation(
+				p.skeleton,
+				gameActivity.getResources().openRawResource(
+						R.raw.player_standing));
 		p.setActiveAnim(p.anim_running_right);
 		addPlayer(p);
 		colorIdx++;
@@ -200,23 +209,11 @@ public class GameWorld extends World {
 	}
 
 	public void applyPlayerGravities(int timestep, float[] acceleration) {
-		// shared gravity is normal (global) gravity and players are just not
-		// affected by normal gravity
-		FXVector sharedGravity = new FXVector(
-				FXMath.floatToFX(acceleration[1]),
-				FXMath.floatToFX(acceleration[0]));
-
-		// as of
-		// https://trello.com/card/gemeinsame-gravitation-normalisieren/50a0c9d75e0399ad5e0201ca/20
-		sharedGravity.normalize();
-		sharedGravity.multFX(FXMath.floatToFX(G));
-
+		// pushed sharedGravity calculation to copyInputsFromAccumulator because
+		// there the individual player gravities get handled anyway
 		for (Player p : players) {
-			// TODO: change when distributed gravity is ready
-			p.playerGravity = sharedGravity;
 			p.applyAcceleration(p.playerGravity, timestep);
 			p.setRotationFromGravity();
-			// sharedGravity.add(p.playerGravity);
 		}
 
 		setGravity(sharedGravity);
@@ -263,36 +260,56 @@ public class GameWorld extends World {
 	public void tick() {
 		if (isServer) {
 			// what about overflows? (so far I hadn't any bugs)
-			long dt  = System.nanoTime() - last_tick;
+			long dt = System.nanoTime() - last_tick;
 			last_tick = System.nanoTime();
-			
+
 			copyInputsFromAccumulator();
 
 			applyPlayerGravities(getTimestepFX(), acceleration);
 			super.tick(); // simulate physics
-			
+
 			for (Player p : getPlayers()) {
 				p.update();
 				p.animate(((float) dt) / 1000000000); // convert ns to seconds
 			}
-			
+
 			this.processGame();
 			this.sendStateToClients();
-		}
-		else
-		{
-			//TODO client stuff
+		} else {
+			// TODO client stuff
 		}
 	}
 
 	// server side
 	private void copyInputsFromAccumulator() {
 		ClientStateAccumulator copy;
-		synchronized(stateAccumulator) {
+		synchronized (stateAccumulator) {
 			copy = stateAccumulator.copy();
 		}
 
-		// TODO stuff with copy
+		Iterator<Player> playerIt = players.iterator();
+		Iterator<Acceleration> accelsIt = copy.accels.iterator();
+
+		// shared gravity is normal (global) gravity and players are just not
+		// affected by normal gravity
+		// as of
+		// https://trello.com/card/gemeinsame-gravitation-normalisieren/50a0c9d75e0399ad5e0201ca/20
+		sharedGravity.mult(0);
+		
+		//TODO add playerindex to clientAccumulator so the values get matched to the right player...
+		while (playerIt.hasNext() && accelsIt.hasNext()) {
+			Player p = playerIt.next();
+			Acceleration a = accelsIt.next();
+			p.playerGravity = new FXVector(FXMath.floatToFX(a.x),
+					FXMath.floatToFX(a.y));
+			p.playerGravity.normalize();
+			p.playerGravity.multFX(FXMath.floatToFX(G));
+
+			sharedGravity.add(p.playerGravity);
+		}
+
+		sharedGravity.normalize();
+		sharedGravity.multFX(FXMath.floatToFX(G));
 	}
 
 	// server side
@@ -308,22 +325,24 @@ public class GameWorld extends World {
 	public void setAccel(float[] g) {
 		this.acceleration = g;
 	}
-	
+
 	public void walk(ClientStateAccumulator.UserInputWalk direction) {
 		// TODO: limit the max velocity or some such
-		
+
 		if (playerIdx >= 0) {
-			
+
 			if (this.isServer) {
 				FXVector dir = new FXVector(players.get(playerIdx).getAxes()[1]);
 				if (direction == ClientStateAccumulator.UserInputWalk.LEFT) {
 					dir.mult(-1);
-					players.get(playerIdx).applyAcceleration(dir, FXMath.floatToFX(10f));
+					players.get(playerIdx).applyAcceleration(dir,
+							FXMath.floatToFX(10f));
 				} else if (direction == ClientStateAccumulator.UserInputWalk.RIGHT)
-					players.get(playerIdx).applyAcceleration(dir, FXMath.floatToFX(10f));
-			} else{
+					players.get(playerIdx).applyAcceleration(dir,
+							FXMath.floatToFX(10f));
+			} else {
 				// send UserInputMessage
-				
+
 			}
 		}
 	}
