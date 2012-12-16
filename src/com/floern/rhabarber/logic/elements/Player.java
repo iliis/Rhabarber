@@ -183,7 +183,7 @@ public class Player extends MovableElement {
 		
 		// draw point bar (how much point a player has)
 		final float P = Math.min(0.9999f, Math.max(0.0001f, ((float) score) / WINNING_SCORE));
-		final float L = 20;
+		final float L = (is_local_player?40:20);
 		
 		Vector left   = pos.plus( (new Vector(-L/2, -15)).rotCCW(skeleton.rotation) );
 		Vector right  = pos.plus( (new Vector( L/2, -15)).rotCCW(skeleton.rotation) );
@@ -191,14 +191,14 @@ public class Player extends MovableElement {
 		
 		gl.glColor4f(0, 1, 0, 1);
 		Vertexes bar = new Vertexes();
-		bar.setThickness(10);
+		bar.setThickness(is_local_player?15:5);
 		bar.addPoint(left);
 		bar.addPoint(middle);
 		bar.draw(gl);
 		
 		gl.glColor4f(1, 0, 0, 1);
 		bar = new Vertexes();
-		bar.setThickness(10);
+		bar.setThickness(is_local_player?15:5);
 		bar.addPoint(middle);
 		bar.addPoint(right);
 		bar.draw(gl);

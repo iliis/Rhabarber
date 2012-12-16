@@ -102,7 +102,7 @@ public class GameActivity extends Activity implements SensorEventListener {
 		try {
 			isserver   = getIntent().getExtras().getBoolean("isserver");
 			playerIdx  = getIntent().getExtras().getInt("playerIdx");
-			game = new GameWorld(this.getAssets().open(	"level/"+getIntent().getExtras().getString("level")), this, this.getResources(), isserver, playerIdx);
+			game = new GameWorld(this.getAssets().open(	"level/"+getIntent().getExtras().getString("level")), this.getResources(), isserver, playerIdx);
 			Log.d("foo", "starting a game");
 			Log.d("foo", "isserver = "+isserver);
 			Log.d("foo", "playerIdx = "+playerIdx);
@@ -132,6 +132,10 @@ public class GameActivity extends Activity implements SensorEventListener {
 				game.walk(ClientStateAccumulator.UserInputWalk.RIGHT);
 		}*/
 		game.draw(gl);
+		
+		if(game.isFinished()) {
+			this.onGameFinished(game.getWinner());
+		}
 	}
 
 	@Override
@@ -180,10 +184,11 @@ public class GameActivity extends Activity implements SensorEventListener {
 
 		if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
 			// update acceleration values
+			// TODO: fix this 
 			if (true || deviceIsLandscapeDefault) {
 				// rotate X and Y
 				acceleration[0] =  event.values[1];
-				acceleration[1] = event.values[0];
+				acceleration[1] = event.values[0]; // this was minus, every device seems to behave a bit differently
 				acceleration[2] =  event.values[2];
 			} else {
 				System.arraycopy(event.values, 0, acceleration, 0, 3);
@@ -253,6 +258,10 @@ public class GameActivity extends Activity implements SensorEventListener {
 			    if(winIdx == playerIdx)
 			    {
 			    	builder.setMessage(res.getString(R.string.winNotification));
+			    }
+			    else if(winIdx < 0)
+			    {
+			    	builder.setMessage(res.getString(R.string.canceledNotification));
 			    }
 			    else
 			    {

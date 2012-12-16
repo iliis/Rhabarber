@@ -7,7 +7,6 @@ import java.util.Random;
 
 import javax.microedition.khronos.opengles.GL10;
 
-import com.floern.rhabarber.GameActivity;
 import com.floern.rhabarber.R;
 import com.floern.rhabarber.graphic.primitives.IGLPrimitive;
 import com.floern.rhabarber.graphic.primitives.SkeletonKeyframe;
@@ -15,7 +14,6 @@ import com.floern.rhabarber.graphic.primitives.Vertexes;
 import com.floern.rhabarber.network2.ClientStateAccumulator;
 import com.floern.rhabarber.network2.GameNetworkingProtocolConnection;
 import com.floern.rhabarber.network2.ClientStateAccumulator.Acceleration;
-import com.floern.rhabarber.network2.ClientStateAccumulator.UserInputWalk;
 import com.floern.rhabarber.network2.GameNetworkingProtocolConnection.Message;
 import com.floern.rhabarber.util.FXMath;
 import com.floern.rhabarber.util.GameBodyUserData;
@@ -37,7 +35,6 @@ public class GameWorld extends World {
 	public ArrayList<Player> players = new ArrayList<Player>(4);
 	public ArrayList<Treasure> treasures = new ArrayList<Treasure>(2);
 	private Random rand = new Random();
-	private GameActivity gameActivity;
 	private Resources resources = null;
 
 	private boolean isServer;
@@ -64,10 +61,19 @@ public class GameWorld extends World {
 
 	// maybe push to phy file? yeah, later...
 	private static final int WINNING_SCORE = 1000;
+	private boolean game_finished = false;
+	private int winner = -1;
+	
+	
+	public boolean isFinished() {return game_finished;}
+	public int     getWinner()  {return winner;}
+	
+	public void cancelGame() {game_finished = true; winner = -1;} 
+	
+	
 
-	public GameWorld(InputStream level, GameActivity gameActivity, Resources resources,
+	public GameWorld(InputStream level, Resources resources,
 			boolean isServer, int playerIdx) {
-		this.gameActivity = gameActivity;
 		this.resources = resources;
 		this.playerIdx = playerIdx;
 		this.isServer = isServer;
@@ -97,6 +103,8 @@ public class GameWorld extends World {
 		last_tick = System.nanoTime();
 	}
 
+	
+	
 	// call this once, as old data is not deleted!
 	private void loadLevel(InputStream level) {
 		this.addWorld(World.loadWorld(new PhysicsFileReader(level),
@@ -104,6 +112,8 @@ public class GameWorld extends World {
 		convertBodies();
 	}
 
+	
+	
 	// reads the additional UserData set in the Editor and uses it to create the
 	// appropriate objects out of them
 	// eg. it converts all Bodies marked as 'Treasure' into instances of
@@ -249,7 +259,8 @@ public class GameWorld extends World {
 	}
 
 	private void onGameFinished(Player winner) {
-		gameActivity.onGameFinished(winner.getIdx());
+		this.game_finished = true;
+		this.winner = winner.getIdx();
 
 	}
 

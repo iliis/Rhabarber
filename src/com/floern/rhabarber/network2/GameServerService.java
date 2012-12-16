@@ -83,6 +83,7 @@ public class GameServerService extends Service {
 	}
 	
 	
+	
 	/**
 	 * Startup Game Server
 	 */
@@ -229,7 +230,7 @@ public class GameServerService extends Service {
 		
 		try {
 			// TODO: instead of null, pass something like a IGameActivity (with onGameFinished)
-			game = new GameWorld(this.getAssets().open("level/"+gameMap), null, this.getResources(), true, -1);
+			game = new GameWorld(this.getAssets().open("level/"+gameMap), this.getResources(), true, -1);
 			
 		} catch (IOException e) {
 			Toast.makeText(this, "Cannot load level '"+gameMap+"'", Toast.LENGTH_LONG).show();
@@ -264,7 +265,7 @@ public class GameServerService extends Service {
 		
 		// start local server without graphics
 		// this is the mainloop for the simulation (this does not draw anything):
-		while(true) {
+		while(!game.isFinished()) {
 			
 			game.copyInputsFromAccumulator(client_states);
 			

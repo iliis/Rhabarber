@@ -29,5 +29,6 @@
 	<string name="ok">OK</string>
 	<string name="winNotification">You have won the game. Congratulations!</string>
 	<string name="loseNotification">You have lost the game.</string>
+	<string name="canceledNotification">This game was canceled. Nobody looses. Yay!</string>
 	
 </resources>
