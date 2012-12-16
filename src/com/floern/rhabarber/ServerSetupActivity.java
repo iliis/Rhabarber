@@ -261,6 +261,10 @@ public class ServerSetupActivity extends Activity {
      * @param playerIdx 
      */
     public void startGameActivity(String gameMap, int playerIdx) {
+		// recreate current activity
+		finish();
+    	startActivity(getIntent());
+    	
 		// TODO: duplicate code in ServerJoinAvctivity and ServerSetupActivity
     	Intent i = new Intent(this, GameActivity.class);
     	GameActivity.__clientNetworkingLogic = networkingLogic;
@@ -346,6 +350,18 @@ public class ServerSetupActivity extends Activity {
 		finish();
     	startActivity(getIntent());
 	}
+    
+    
+    @Override
+    public void onBackPressed() {
+    	// catch back key
+    	if (joinedSelf) {
+    		onJoinSelf(null);
+    	}
+    	else {
+    		super.onBackPressed();
+    	}
+    }
 	
 	
 	@Override

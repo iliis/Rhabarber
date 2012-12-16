@@ -210,6 +210,11 @@ public class GameServerService extends Service {
 	 * @param newClient The client to register
 	 */
 	private void handleClientRegistration(GameNetworkingProtocolConnection newClient) {
+		if (game != null) {
+			// game already started
+			return;
+		}
+		
 		// ckeck if user already registered
 		for (GameNetworkingProtocolConnection client : clientConnections) {
 			if (client.equals(newClient)) {
@@ -313,6 +318,8 @@ public class GameServerService extends Service {
 		for(GameNetworkingProtocolConnection client: clientConnections) {
 			client.sendEndGameMessage(game.getWinner());
 		}
+		
+		game = null;
 	}
 	
 	
@@ -325,16 +332,18 @@ public class GameServerService extends Service {
 		// remove user from list
 		clientConnections.remove(user);
 		
-		ArrayList<UserInfo> currentUsers = new ArrayList<UserInfo>(clientConnections.size());
-		for (GameNetworkingProtocolConnection client : clientConnections) {
-			currentUsers.add(new UserInfo(client.targetIP, client.targetPort));
-		}
-		if (userRegisteredListener != null)
-			userRegisteredListener.onUserListChanged(currentUsers);
-		
-		// send user list to clients
-		for (GameNetworkingProtocolConnection client : clientConnections) {
-			client.sendUserList(clientConnections);
+		if (game == null) {
+			ArrayList<UserInfo> currentUsers = new ArrayList<UserInfo>(clientConnections.size());
+			for (GameNetworkingProtocolConnection client : clientConnections) {
+				currentUsers.add(new UserInfo(client.targetIP, client.targetPort));
+			}
+			if (userRegisteredListener != null)
+				userRegisteredListener.onUserListChanged(currentUsers);
+			
+			// send user list to clients
+			for (GameNetworkingProtocolConnection client : clientConnections) {
+				client.sendUserList(clientConnections);
+			}
 		}
 	}
 	
@@ -357,15 +366,13 @@ public class GameServerService extends Service {
 				clientListenerThread.interrupt();
 			}
 			
-			if (game != null && !game.isFinished())
-			{
+			if (game != null && !game.isFinished()) {
 				game.cancelGame();
 				
 				for (GameNetworkingProtocolConnection user : clientConnections) {
 					user.sendEndGameMessage(-1);
 				}
 			}
-				
 			
 			// disconnect all users
 			for (GameNetworkingProtocolConnection user : clientConnections) {

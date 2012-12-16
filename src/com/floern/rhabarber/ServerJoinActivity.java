@@ -76,7 +76,8 @@ public class ServerJoinActivity extends Activity {
 				public void run() {
 					Toast.makeText(ServerJoinActivity.this, errorMessage, Toast.LENGTH_LONG).show();
 					if (isRegistered) {
-						// TODO: reset ui
+						setUiNotRegistered();
+						isRegistered = false;
 					}
 					else {
 						// do nothing
@@ -169,6 +170,8 @@ public class ServerJoinActivity extends Activity {
     	// unregister
     	networkingLogic.stopAvoidTimeout();
     	networkingLogic.unregisterAtServer();
+    	networkingLogic = null;
+		isRegistered = false;
     	
     	setUiNotRegistered();
     }
@@ -181,6 +184,9 @@ public class ServerJoinActivity extends Activity {
      * @param playerIdx
      */
     public void startGameActivity(String gameMap, int playerIdx) {
+    	// close this activity
+    	finish();
+    	
 		// TODO: duplicate code in ServerJoinAvctivity and ServerSetupActivity
     	Intent i = new Intent(this, GameActivity.class);
     	GameActivity.__clientNetworkingLogic = networkingLogic;
@@ -224,6 +230,18 @@ public class ServerJoinActivity extends Activity {
         userListView.setAdapter(new UserListAdapter(this, userList));
         
         serverListView = null;
+    }
+    
+    
+    @Override
+    public void onBackPressed() {
+    	// catch back key
+    	if (isRegistered) {
+    		onLeaveGame(null);
+    	}
+    	else {
+    		super.onBackPressed();
+    	}
     }
     
     

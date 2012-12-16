@@ -2,11 +2,15 @@ package com.floern.rhabarber.sensorgltest;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
+import android.content.res.Configuration;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.view.Display;
+import android.view.Surface;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -19,6 +23,8 @@ public class SensorTestOpenGLActivity extends Activity implements SensorEventLis
 	private TestSurfaceView surfaceView;
 	
 	private SensorManager sensorManager;
+	
+	private boolean deviceIsLandscapeDefault;
 
     
 	@Override
@@ -39,6 +45,16 @@ public class SensorTestOpenGLActivity extends Activity implements SensorEventLis
         // setup sensor manager
         sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
 
+		// check default device orientation
+		Display display = ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+		int orientation = (display.getWidth() <= display.getHeight()) ?
+				  Configuration.ORIENTATION_PORTRAIT
+				: Configuration.ORIENTATION_LANDSCAPE;
+		// sensor vector is rotated on landscape-default devices (some tablets)
+		int rotation = display.getRotation();
+		deviceIsLandscapeDefault = (orientation == Configuration.ORIENTATION_LANDSCAPE && (rotation == Surface.ROTATION_0  || rotation == Surface.ROTATION_180))
+				                || (orientation == Configuration.ORIENTATION_PORTRAIT  && (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270));
+
 	}
 	
 
@@ -53,8 +69,17 @@ public class SensorTestOpenGLActivity extends Activity implements SensorEventLis
     		return; // sensor data unreliable
     	}*/
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-        	// update acceleration values
-        	System.arraycopy(event.values, 0, TestRenderer.acceleration, 0, 3);
+			// update acceleration values 
+			if (deviceIsLandscapeDefault) {
+				// rotate X and Y
+				TestRenderer.acceleration[0] = event.values[1];
+				TestRenderer.acceleration[1] = -event.values[0];
+				TestRenderer.acceleration[2] = event.values[2];
+			}
+			else {
+	        	// update acceleration values
+	        	System.arraycopy(event.values, 0, TestRenderer.acceleration, 0, 3);
+			}
         }
     }
 
