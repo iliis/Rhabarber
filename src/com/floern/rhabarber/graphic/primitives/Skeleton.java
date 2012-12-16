@@ -21,6 +21,7 @@ public class Skeleton implements IGLPrimitive {
 	
 	public Vector position = new Vector();
 	public float  rotation = 0;
+	private float thickness = 2;
 	
 	public Skeleton() {
 		
@@ -68,12 +69,16 @@ public class Skeleton implements IGLPrimitive {
 		
 		Vertexes verts = new Vertexes(vects, this.position);
 		verts.setMode(GL10.GL_LINES);
-		verts.setThickness(2);
+		verts.setThickness(this.thickness);
 		verts.draw(gl);
 		
 		// make nice corners
 		//verts.setMode(GL10.GL_POINTS);
 		//verts.draw(gl);
+	}
+
+	public void setThickness(float d) {
+		thickness = d;
 	}
 
 }

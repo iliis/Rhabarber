@@ -169,8 +169,6 @@ public class Player extends MovableElement {
 
 	
 	public void draw(GL10 gl) {
-		gl.glColor4f(Color.red(color), Color.green(color), Color.blue(color), 1);
-		
 		
 		skeleton.rotation = FXMath.FX2toFloat(rotation2FX());
 		
@@ -179,7 +177,9 @@ public class Player extends MovableElement {
 		final Vector delta = new Vector(FloatMath.sin(skeleton.rotation)*length, -FloatMath.cos(skeleton.rotation)*length);
 		skeleton.position = pos;
 		skeleton.position.add(delta);
+		skeleton.setThickness(is_local_player?3:0.5f);
 		
+		gl.glColor4f(Color.red(color), Color.green(color), Color.blue(color), 1);
 		skeleton.draw(gl);
 		
 		// draw point bar (how much point a player has)
@@ -192,6 +192,7 @@ public class Player extends MovableElement {
 		
 		gl.glColor4f(0, 1, 0, 1);
 		Vertexes bar = new Vertexes();
+		if (is_local_player)
 		bar.setThickness(is_local_player?15:5);
 		bar.addPoint(left);
 		bar.addPoint(middle);
