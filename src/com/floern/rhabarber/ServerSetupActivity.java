@@ -3,7 +3,6 @@ package com.floern.rhabarber;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import com.floern.rhabarber.network2.GameNetworkingProtocolConnection.Message;
 import com.floern.rhabarber.network2.GameServerService;
 import com.floern.rhabarber.network2.ClientNetworkingLogic.GameRegisterEventListener;
 import com.floern.rhabarber.network2.ClientNetworkingLogic.GameUpdateEventListener;
@@ -12,7 +11,6 @@ import com.floern.rhabarber.network2.GameServerService.UserInfo;
 import com.floern.rhabarber.network2.GameServerService.UserListEventListener;
 import com.floern.rhabarber.network2.ClientNetworkingLogic;
 import com.floern.rhabarber.network2.NetworkUtils;
-import com.floern.rhabarber.network2.UiUtils;
 import com.floern.rhabarber.network2.UserListAdapter;
 
 import android.app.Activity;
@@ -28,7 +26,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.Space;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;

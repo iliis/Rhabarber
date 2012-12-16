@@ -284,7 +284,8 @@ public class GameNetworkingProtocolConnection {
 		case NONE:
 			buf.put((byte) 0x02); break;
 		default:
-			return; // TODO: add throw Error or so
+			Log.e("sendUserInputData()", "received invalid UserInputData ("+input+").");
+			return;
 		}
 		
 		sendMessage(new Message(Message.TYPE_CLIENT_INPUT, arr));
@@ -523,7 +524,8 @@ public class GameNetworkingProtocolConnection {
 		case 0x02:
 			return ClientStateAccumulator.UserInputWalk.NONE;
 		default:
-			return ClientStateAccumulator.UserInputWalk.NONE; // TODO: throw error or so
+			Log.e("parseUserInputMessage()", "Received invalid UserInputWalk ("+msg.payload[4]+")");
+			return ClientStateAccumulator.UserInputWalk.NONE;
 		}
 	}
 	
@@ -552,7 +554,9 @@ public class GameNetworkingProtocolConnection {
 			Body b = w.getBodyByID(id);
 			if (b != null) { // TODO: remove this check and fix underlying issue (ids not identical?)
 			b.setPositionFX(new FXVector(x, y));
-			b.setRotation2FX(a);}
+			b.setRotation2FX(a);} else {
+				Log.e("receiveServerState()", "got a Body with unknown ID ("+id+").");
+			}
 		}
 		
 		for(; player_count > 0; --player_count) {
@@ -598,7 +602,8 @@ public class GameNetworkingProtocolConnection {
 	public static void receiveInsertTreasureMessage(Message m, GameWorld w) {
 		ByteBuffer buf = ByteBuffer.wrap(m.payload);
 		
-		int id     = buf.getInt();
+		//int id     = buf.getInt();// not used, the physics engine creates a new one itself.
+									// you may however check if the new Treasure got the correct ID
 		int posx   = buf.getInt();
 		int posy   = buf.getInt();
 		int value  = buf.getInt();
@@ -738,7 +743,7 @@ public class GameNetworkingProtocolConnection {
 			TYPE_GAME_START = ++i,
 			TYPE_SERVER_GAMESTATE = ++i,
 			TYPE_INSERT_PLAYER = ++i,
-			TYPE_INSERT_TREASURE = ++i, // TODO
+			TYPE_INSERT_TREASURE = ++i,
 			TYPE_GAME_END = ++i
 			;
 		

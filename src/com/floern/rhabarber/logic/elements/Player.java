@@ -15,7 +15,6 @@ import com.floern.rhabarber.util.Vector;
 
 import android.graphics.Color;
 import android.util.FloatMath;
-import android.util.Log;
 import at.emini.physics2D.Shape;
 import at.emini.physics2D.util.FXVector;
 
@@ -50,6 +49,7 @@ public class Player extends MovableElement {
 	private static final float MOVING_THRESHOLD  = 10; // everything lower is
 														// considered standing
 														// still
+	private static final float MAX_WALKING_SPEED = 30; // limit acceleration due to user input
 
 	private List<SkeletonKeyframe> active_anim;
 	private SkeletonKeyframe active_kf, next_kf;
@@ -145,12 +145,13 @@ public class Player extends MovableElement {
 	}
 	
 	public void walk(ClientStateAccumulator.UserInputWalk direction) {
-		// TODO: limit the max velocity or some such
 		FXVector dir = new FXVector(getAxes()[1]);
-		if (direction == ClientStateAccumulator.UserInputWalk.LEFT) {
+		if (   direction == ClientStateAccumulator.UserInputWalk.LEFT
+			&& aligned_speed >= -MAX_WALKING_SPEED) {
 			dir.mult(-1);
 			applyAcceleration(dir, FXMath.floatToFX(2f));
-		} else if (direction == ClientStateAccumulator.UserInputWalk.RIGHT)
+		} else if (direction == ClientStateAccumulator.UserInputWalk.RIGHT
+				&& aligned_speed <= MAX_WALKING_SPEED) 
 			applyAcceleration(dir, FXMath.floatToFX(2f));
 	}
 

@@ -50,7 +50,7 @@ public class GameWorld extends World {
 			Color.GREEN, Color.YELLOW, Color.MAGENTA, Color.GRAY };
 	private int colorIdx = 0;
 
-	public final float G = 20; // gravity
+	public final float G = 10; // gravity
 
 	Vertexes outline; //< this is also used as a lock for receiving state from the server!
 	private float[] acceleration = new float[3];
@@ -79,9 +79,6 @@ public class GameWorld extends World {
 		this.playerIdx = playerIdx;
 		this.isServer = isServer;
 		loadLevel(level);
-		// TODO: only do this on server, communicate it with clients
-		// addTreasureRandomly(); // inital treasue (only one, maybe change that
-		// later)
 		
 		outline = new Vertexes();
 		outline.setMode(GLES10.GL_LINES); // disconnected bunch of lines
