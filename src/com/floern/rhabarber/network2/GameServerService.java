@@ -162,6 +162,9 @@ public class GameServerService extends Service {
 							// update state of client with input received from him
 							client_states.update(message);
 						}
+						else if (message.type == Message.TYPE_GAME_END) {
+							// TODO
+						}
 						else {
 							Log.i("onReceive()", "Mistimed/unknown Message received, Type: "+message.type+" Hex: "+message.hexDump());
 						}
@@ -272,6 +275,10 @@ public class GameServerService extends Service {
 			game.tick();
 			
 			game.sendStateToClients(clientConnections);
+		}
+		
+		for(GameNetworkingProtocolConnection client: clientConnections) {
+			client.sendEndGameMessage(game.getWinner());
 		}
 	}
 	

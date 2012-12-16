@@ -260,7 +260,7 @@ public class GameNetworkingProtocolConnection {
 		buf.putInt(playerIdx);
 		buf.putFloat(accel.x);
 		buf.putFloat(accel.y);
-		buf.putFloat(accel.y);
+		buf.putFloat(accel.z);
 		
 		Message accelMessage = new Message(Message.TYPE_CLIENT_ACCELERATION, arr);
 		sendMessage(accelMessage);
@@ -572,6 +572,15 @@ public class GameNetworkingProtocolConnection {
 		return s;
 	}
 
+	/**
+	 * When game is finished
+	 * @param m The message from the server.
+	 * @return PlayerID of winner. -1 for canceled game.
+	 */
+	public static int parseEndGameMessage(Message m) {
+		ByteBuffer buf = ByteBuffer.wrap(m.payload);
+		return buf.getInt();
+	}
 	
 	
 	/**
