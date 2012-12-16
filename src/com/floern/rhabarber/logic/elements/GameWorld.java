@@ -200,6 +200,9 @@ public class GameWorld extends World {
 		
 		addPlayer(p);
 		
+		if(p.getIdx() == this.playerIdx)
+			p.is_local_player = true;
+		
 		return p.getIdx();
 	}
 
@@ -253,11 +256,13 @@ public class GameWorld extends World {
 	// calculates next state of world
 	@Override
 	public void tick() {
+		
+		// what about overflows? (so far I hadn't any bugs)
+		final long         t = System.nanoTime();
+		final long        dt = t - last_tick;
+		           last_tick = t;
+		
 		if (isServer) {
-			// what about overflows? (so far I hadn't any bugs)
-			long dt = System.nanoTime() - last_tick;
-			last_tick = System.nanoTime();
-
 			applyPlayerGravities(getTimestepFX(), acceleration);
 			super.tick(); // simulate physics
 
@@ -270,7 +275,10 @@ public class GameWorld extends World {
 			
 			
 		} else {
-			// TODO client stuff
+			for (Player p : getPlayers()) {
+				// this is done on server only, sets correct speed // p.update();
+				p.animate(((float) dt) / 1000000000); // convert ns to seconds
+			}
 		}
 	}
 

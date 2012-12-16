@@ -121,7 +121,7 @@ public class GameActivity extends Activity implements SensorEventListener {
 
 	public void onDraw(GL10 gl) {
 		// TODO: fix for singleplayer (the whole project is as of now only working for multiplayer)
-		//game.tick();
+		game.tick();
 		
 		/*game.setAccel(acceleration);
 		if (walk_left != walk_right) {

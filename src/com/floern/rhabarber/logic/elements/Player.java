@@ -38,6 +38,8 @@ public class Player extends MovableElement {
 
 	public final int WINNING_SCORE;
 	public FXVector playerGravity;
+	
+	public boolean is_local_player = false;
 
 	// graphics properties (yeah, this may belong somewhere else...
 	public Skeleton skeleton;
@@ -147,9 +149,9 @@ public class Player extends MovableElement {
 		FXVector dir = new FXVector(getAxes()[1]);
 		if (direction == ClientStateAccumulator.UserInputWalk.LEFT) {
 			dir.mult(-1);
-			applyAcceleration(dir, FXMath.floatToFX(10f));
+			applyAcceleration(dir, FXMath.floatToFX(2f));
 		} else if (direction == ClientStateAccumulator.UserInputWalk.RIGHT)
-			applyAcceleration(dir, FXMath.floatToFX(10f));
+			applyAcceleration(dir, FXMath.floatToFX(2f));
 	}
 
 	public void setRotationFromGravity() {

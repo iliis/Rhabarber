@@ -20,7 +20,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
 	public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 		// Set the background frame color
-        gl.glClearColor(0f, 0f, 0f, 1f);
+        gl.glClearColor(0.1f, 0.1f, 0.1f, 1f);
 
         // Alphablending
 	    gl.glEnable(GLES10.GL_BLEND);
