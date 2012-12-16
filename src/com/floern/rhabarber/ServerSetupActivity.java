@@ -340,9 +340,13 @@ public class ServerSetupActivity extends Activity {
 	 */
 	public void onStopServer(View v) {
 		// revert UI
-		setUiServerOffline(serverBinder.getServerPort());
+		//setUiServerOffline(serverBinder.getServerPort());
 		// shutdown game serverserverBinder
 		serverBinder.stopService();
+		
+		// recreate activity
+		finish();
+    	startActivity(getIntent());
 	}
 	
 	
