@@ -1,7 +1,6 @@
 package com.floern.rhabarber.util;
 
 import android.util.FloatMath;
-import at.emini.physics2D.util.FXUtil;
 import at.emini.physics2D.util.FXVector;
 
 public class Vector {
@@ -31,7 +30,7 @@ public class Vector {
 	}
 	
 	public Vector normalized() {
-		return this.times(1/this.length());
+		return this.times(1.0f/this.length());
 	}
 	
 	public Vector times(float v) {
@@ -39,7 +38,7 @@ public class Vector {
 	}
 	
 	public float length() {
-		return FloatMath.sqrt(x*x + y+y);
+		return FloatMath.sqrt(x*x + y*y);
 	}
 	
 	public Vector rotCW() {

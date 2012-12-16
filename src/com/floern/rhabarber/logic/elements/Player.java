@@ -180,7 +180,7 @@ public class Player extends MovableElement {
 		skeleton.draw(gl);
 		
 		// draw point bar (how much point a player has)
-		final float P = Math.min(1, Math.max(0, ((float) score) / WINNING_SCORE));
+		final float P = Math.min(0.9999f, Math.max(0.0001f, ((float) score) / WINNING_SCORE));
 		final float L = 20;
 		
 		Vector left   = pos.plus( (new Vector(-L/2, -15)).rotCCW(skeleton.rotation) );
