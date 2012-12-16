@@ -76,7 +76,8 @@ public class ServerJoinActivity extends Activity {
 				public void run() {
 					Toast.makeText(ServerJoinActivity.this, errorMessage, Toast.LENGTH_LONG).show();
 					if (isRegistered) {
-						// TODO: reset ui
+						setUiNotRegistered();
+						isRegistered = false;
 					}
 					else {
 						// do nothing
@@ -210,6 +211,8 @@ public class ServerJoinActivity extends Activity {
 			}
 		});
 		serverListView.setEmptyView(findViewById(R.id.emptylist_serverlist));
+		
+    	startDiscoverServer();
     }
     
     
@@ -217,6 +220,8 @@ public class ServerJoinActivity extends Activity {
      * Set User Interface to registered state
      */
     private void setUiRegistered() {
+    	stopDiscoverServer();
+    	
         setContentView(R.layout.serverjoin_registered);
         // user list
         userListView = (ListView) findViewById(R.id.list_userlist);

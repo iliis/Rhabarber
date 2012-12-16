@@ -186,8 +186,8 @@ public class GameActivity extends Activity implements SensorEventListener {
 			// update acceleration values 
 			if (deviceIsLandscapeDefault) {
 				// rotate X and Y
-				acceleration[0] =  event.values[1];
-				acceleration[1] = -event.values[0];
+				acceleration[0] = -event.values[0];
+				acceleration[1] =  event.values[1];
 				acceleration[2] =  event.values[2];
 			} else {
 				// TODO: investigate why this has changed
