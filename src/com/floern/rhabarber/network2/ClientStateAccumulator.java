@@ -1,10 +1,6 @@
 package com.floern.rhabarber.network2;
 
-import java.util.ArrayList;
-
 import android.annotation.SuppressLint;
-import android.util.Log;
-
 import com.floern.rhabarber.network2.GameNetworkingProtocolConnection.Message;
 import com.floern.rhabarber.util.IntRef;
 

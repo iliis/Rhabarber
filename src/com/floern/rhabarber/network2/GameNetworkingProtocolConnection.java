@@ -17,6 +17,7 @@ import at.emini.physics2D.util.FXVector;
 
 import com.floern.rhabarber.logic.elements.GameWorld;
 import com.floern.rhabarber.logic.elements.Player;
+import com.floern.rhabarber.logic.elements.Treasure;
 import com.floern.rhabarber.util.DynamicFloatBuffer;
 import com.floern.rhabarber.util.IntRef;
 
@@ -296,13 +297,16 @@ public class GameNetworkingProtocolConnection {
 	 * @param bodies
 	 * @param players
 	 */
-	public void sendServerState(List<Body> bodies, List<Player> players) {
-		byte[] arr = new byte[2*4	// number of bodies, number of players
+	public void sendServerState(List<Body> bodies, List<Player> players, List<Treasure> treasures) {
+		byte[] arr = new byte[3*4	// number of bodies, number of players, number of treasures
 							+ 4*4*(bodies.size())		// for each body: id (int), position (2 ints FX), rotation (1 int 2FX)
-							+ 4*3*(players.size())];	// for each player: id (int), score (int), velocity (float)
+							+ 4*3*(players.size())		// for each player: id (int), score (int), velocity (float)
+							+ 2*4*(treasures.size())	//  for each treasure: id (int), value (int) (rest is contained in bodies)
+							];
 		ByteBuffer buf = ByteBuffer.wrap(arr);
 		buf.putInt(bodies.size());
 		buf.putInt(players.size());
+		buf.putInt(treasures.size());
 		
 		for(Body b: bodies) {
 				buf.putInt(b.getId());
@@ -315,6 +319,11 @@ public class GameNetworkingProtocolConnection {
 			buf.putInt(p.getIdx());
 			buf.putInt(p.score);
 			buf.putFloat(p.getAlignedSpeed());
+		}
+		
+		for(Treasure t: treasures) {
+			buf.putInt(t.getId());
+			buf.putInt(t.getValue());
 		}
 		
 		sendMessage(new Message(Message.TYPE_SERVER_GAMESTATE, arr));
@@ -340,6 +349,25 @@ public class GameNetworkingProtocolConnection {
 		buf.putInt(p.WINNING_SCORE);
 		
 		sendMessage(new Message(Message.TYPE_INSERT_PLAYER, arr));
+	}
+	
+	/**
+	 * Notify clients that there is a new treasure with this message.
+	 * @param t
+	 */
+	public void sendInsertTreasure(Treasure t) {
+		byte[] arr = new byte[    4 // ID
+		                       +2*4 // Position
+		                       +4	// Value
+		                       ];
+		ByteBuffer buf = ByteBuffer.wrap(arr);
+		
+		buf.putInt(t.getId());
+		buf.putInt(t.positionFX().xFX);
+		buf.putInt(t.positionFX().yFX);
+		buf.putInt(t.getValue());
+		
+		sendMessage(new Message(Message.TYPE_INSERT_TREASURE, arr));
 	}
 	
 	/**
@@ -505,13 +533,15 @@ public class GameNetworkingProtocolConnection {
 	 * @param w GameWorld of client, will be updated with data from message
 	 */
 	public static void receiveServerState(Message m, GameWorld w) {
-		// number of bodies, number of players
+		// number of bodies, number of players, number of treasures
 		// for each body: id (int), position (2 ints FX), rotation (1 int 2FX)
 		// for each player: id (int), score (int), velocity (float)
+		// for each treasure: id (int), value (int)
 				
 		ByteBuffer buf = ByteBuffer.wrap(m.payload);
 		int body_count   = buf.getInt();
 		int player_count = buf.getInt();
+		int treas_count  = buf.getInt();
 		
 		for(; body_count > 0; --body_count) {
 			int id = buf.getInt();
@@ -534,6 +564,18 @@ public class GameNetworkingProtocolConnection {
 			p.score = score;
 			p.setAlignedSpeed(speed);
 		}
+		
+		for(; treas_count > 0; --treas_count) {
+			int id    = buf.getInt();
+			int value = buf.getInt();
+			
+			Body t = w.getBodyByID(id);
+			if(t instanceof Treasure) {
+				((Treasure) t).setValue(value);
+			} else {
+				Log.e("receiveServerState()", "ServerState contains Treasure with invalid ID ("+id+")");
+			}
+		}
 	}
 	
 	/**
@@ -551,6 +593,17 @@ public class GameNetworkingProtocolConnection {
 		int wscore = buf.getInt();
 		
 		w.addPlayer(new FXVector(posx, posy), idx, color, wscore);
+	}
+	
+	public static void receiveInsertTreasureMessage(Message m, GameWorld w) {
+		ByteBuffer buf = ByteBuffer.wrap(m.payload);
+		
+		int id     = buf.getInt();
+		int posx   = buf.getInt();
+		int posy   = buf.getInt();
+		int value  = buf.getInt();
+		
+		w.addTreasure(new Treasure(posx, posy, value));
 	}
 	
 	/**

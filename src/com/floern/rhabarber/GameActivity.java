@@ -183,15 +183,18 @@ public class GameActivity extends Activity implements SensorEventListener {
 		 */
 
 		if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-			// update acceleration values
-			// TODO: fix this 
+			// update acceleration values 
 			if (deviceIsLandscapeDefault) {
 				// rotate X and Y
 				acceleration[0] =  event.values[1];
-				acceleration[1] = -event.values[0]; // this was minus, every device seems to behave a bit differently
+				acceleration[1] = -event.values[0];
 				acceleration[2] =  event.values[2];
 			} else {
-				System.arraycopy(event.values, 0, acceleration, 0, 3);
+				// TODO: investigate why this has changed
+				acceleration[0] =  event.values[1];
+				acceleration[1] =  event.values[0];
+				acceleration[2] =  event.values[2];
+				//System.arraycopy(event.values, 0, acceleration, 0, 3);
 			}
 			
 			sendAccelerationToServer();

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 import com.floern.rhabarber.logic.elements.GameWorld;
 import com.floern.rhabarber.logic.elements.Player;
+import com.floern.rhabarber.logic.elements.Treasure;
 import com.floern.rhabarber.network2.GameNetworkingProtocolConnection.*;
 
 import android.app.ActivityManager;
@@ -55,6 +56,8 @@ public class GameServerService extends Service {
 
 	/** Binder interface to this Service */
 	private final GameServerBinder mBinder = new GameServerBinder();
+	
+	private GameWorld game;
 	
 	
 	@Override
@@ -229,8 +232,6 @@ public class GameServerService extends Service {
 	 */
 	private void initGame(String gameMap) {
 		
-		GameWorld game;
-		
 		try {
 			// TODO: instead of null, pass something like a IGameActivity (with onGameFinished)
 			game = new GameWorld(this.getAssets().open("level/"+gameMap), this.getResources(), true, -1);
@@ -246,6 +247,8 @@ public class GameServerService extends Service {
 		for (@SuppressWarnings("unused") GameNetworkingProtocolConnection client : clientConnections) {
 			game.createPlayer();
 		}
+		
+		game.addTreasureRandomly();
 		
 		// send user list to clients
 		int i = 0;
@@ -263,6 +266,10 @@ public class GameServerService extends Service {
 			
 			for (Player p: game.players) {
 				client.sendInsertPlayer(p);
+			}
+			
+			for (Treasure t: game.treasures) {
+				client.sendInsertTreasure(t);
 			}
 		}
 		
@@ -323,6 +330,17 @@ public class GameServerService extends Service {
 			if (clientListenerThread != null) {
 				clientListenerThread.interrupt();
 			}
+			
+			if (game != null && !game.isFinished())
+			{
+				game.cancelGame();
+				
+				for (GameNetworkingProtocolConnection user : clientConnections) {
+					user.sendEndGameMessage(-1);
+				}
+			}
+				
+			
 			// disconnect all users
 			for (GameNetworkingProtocolConnection user : clientConnections) {
 				user.disconnect();

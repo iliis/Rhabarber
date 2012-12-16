@@ -82,7 +82,14 @@ public class ClientNetworkingLogic {
 			}
 			else if (message.type == Message.TYPE_INSERT_PLAYER) {
 				GameNetworkingProtocolConnection.receiveInsertPlayerMessage(message, game);
+			}
+			else if (message.type == Message.TYPE_INSERT_TREASURE) {
+				GameNetworkingProtocolConnection.receiveInsertTreasureMessage(message, game);
 			} // TODO: add missing message types
+			else if (message.type == Message.TYPE_GAME_END) {
+				int winner = GameNetworkingProtocolConnection.parseEndGameMessage(message);
+				game.stopGame(winner);
+			}
 			else {
 				Log.i("onReceive()", "Mistimed/unknown Message received, Type: "+message.type+"; Hex: "+message.hexDump());
 			}

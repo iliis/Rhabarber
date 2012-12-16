@@ -68,7 +68,8 @@ public class GameWorld extends World {
 	public boolean isFinished() {return game_finished;}
 	public int     getWinner()  {return winner;}
 	
-	public void cancelGame() {game_finished = true; winner = -1;} 
+	public void cancelGame() 			{game_finished = true; this.winner = -1;}
+	public void stopGame(int winner)	{game_finished = true; this.winner = winner;}
 	
 	
 
@@ -158,6 +159,7 @@ public class GameWorld extends World {
 		players.add(p);
 	}
 
+	// don't forget to send word to clients! (GameNetworkingProtocolConnection.sendInsertTreasureMessage())
 	public void addTreasure(Treasure t) {
 		this.addBody(t);
 		this.treasures.add(t);
@@ -332,7 +334,7 @@ public class GameWorld extends World {
 	// server side
 	public void sendStateToClients(ArrayList<GameNetworkingProtocolConnection> clients) {
 		for(GameNetworkingProtocolConnection c: clients) {
-			c.sendServerState(getBodiesAsList(), players);
+			c.sendServerState(getBodiesAsList(), players, treasures);
 		}
 	}
 
