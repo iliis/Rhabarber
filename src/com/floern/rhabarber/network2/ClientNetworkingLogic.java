@@ -71,7 +71,6 @@ public class ClientNetworkingLogic {
 			else if (message.type == Message.TYPE_GAME_START) {
 				
 				// init game
-				// TODO: detailed event handling
 				IntRef playerIdx = new IntRef(-1);
 				String map = GameNetworkingProtocolConnection.parseStartGameMessage(message, playerIdx);
 				

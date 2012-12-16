@@ -124,6 +124,7 @@ public class ServerSetupActivity extends Activity {
 		}
 		public void onPlayerDataUpdate() {
 			// TODO example method for receiving game state updates
+			// what should go in here?
 		}
 	};
 	

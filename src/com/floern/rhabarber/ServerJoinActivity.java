@@ -100,6 +100,7 @@ public class ServerJoinActivity extends Activity {
 		}
 		public void onPlayerDataUpdate() {
 			// TODO example method for receiving game state updates
+			// what should go in here?
 		}
 	};
 	

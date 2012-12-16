@@ -15,7 +15,6 @@ public class GameBodyUserData implements UserData {
 	public HashMap<String,String> data;
 
 	public UserData copy() {
-		// TODO Auto-generated method stub
 		GameBodyUserData d = new GameBodyUserData();
 		
 		d.is_game_element = this.is_game_element;

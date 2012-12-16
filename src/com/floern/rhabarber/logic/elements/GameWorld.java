@@ -305,7 +305,8 @@ public class GameWorld extends World {
 		// https://trello.com/card/gemeinsame-gravitation-normalisieren/50a0c9d75e0399ad5e0201ca/20
 		sharedGravity.mult(0);
 		
-		//TODO add playerindex to clientAccumulator so the values get matched to the right player...
+		// add playerindex to clientAccumulator so the values get matched to the right player?
+		// for now, it's working with just using the array indices. this should be correct.
 		for(int i = 0; i < copy.accels.length; ++i) {
 		
 			final Player       p = players.get(i);

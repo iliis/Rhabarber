@@ -57,7 +57,22 @@ public class GameServerService extends Service {
 	/** Binder interface to this Service */
 	private final GameServerBinder mBinder = new GameServerBinder();
 	
+	/** The actual simulation, this is the root instance of the game.
+	 *  Every client (including the local one) just copies the state of this world.
+	 */
 	private GameWorld game;
+	
+	/** keep simulation speed slower or equal to this
+	 * (time in nanoseconds a frame of the simulation has to take)
+	 */
+	private final long MIN_FRAMETIME = 10*1000*1000;
+	
+	/**
+	 * Do not delay a single frame for less time than this (if < MIN_FRAMETIME)
+	 * This is to prevent unnecessary short delays;
+	 * (time in nanoseconds)
+	 */
+	private final long FRAMETIME_COARSENESS = 10*1000;
 	
 	
 	@Override
@@ -166,7 +181,8 @@ public class GameServerService extends Service {
 							client_states.update(message);
 						}
 						else if (message.type == Message.TYPE_GAME_END) {
-							// TODO
+							int winner = GameNetworkingProtocolConnection.parseEndGameMessage(message);
+							game.stopGame(winner);
 						}
 						else {
 							Log.i("onReceive()", "Mistimed/unknown Message received, Type: "+message.type+" Hex: "+message.hexDump());
@@ -233,7 +249,6 @@ public class GameServerService extends Service {
 	private void initGame(String gameMap) {
 		
 		try {
-			// TODO: instead of null, pass something like a IGameActivity (with onGameFinished)
 			game = new GameWorld(this.getAssets().open("level/"+gameMap), this.getResources(), true, -1);
 			
 		} catch (IOException e) {
@@ -257,10 +272,10 @@ public class GameServerService extends Service {
 			
 			try {
 				// TODO: fix this reace condition cleanly
+				// maybe with a callback from the clients when they loaded the map (and initialzed OpenGL and all the other things)
 				// waits for GameActivity to start
 				Thread.sleep(2000);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			
@@ -277,11 +292,22 @@ public class GameServerService extends Service {
 		// this is the mainloop for the simulation (this does not draw anything):
 		while(!game.isFinished()) {
 			
+			final long starttime = System.nanoTime(); 
+			
 			game.copyInputsFromAccumulator(client_states);
 			
 			game.tick();
 			
 			game.sendStateToClients(clientConnections);
+			
+			final long undertime = MIN_FRAMETIME - (System.nanoTime() - starttime);
+			if (undertime > FRAMETIME_COARSENESS) {
+				try {
+					Thread.sleep(undertime / 1000000, (int) (undertime % 1000000));
+				} catch (InterruptedException e) {
+					// thats ok...
+				}
+			}
 		}
 		
 		for(GameNetworkingProtocolConnection client: clientConnections) {
