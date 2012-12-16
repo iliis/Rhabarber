@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.SocketException;
 import java.util.ArrayList;
 
+import com.floern.rhabarber.logic.elements.GameWorld;
+import com.floern.rhabarber.logic.elements.Player;
 import com.floern.rhabarber.network2.GameNetworkingProtocolConnection.*;
 
 import android.app.ActivityManager;
@@ -14,6 +16,7 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.Toast;
 
 public class GameServerService extends Service {
 	
@@ -41,6 +44,9 @@ public class GameServerService extends Service {
 	/** List of registered clients */
 	private ArrayList<GameNetworkingProtocolConnection> clientConnections = new ArrayList<GameNetworkingProtocolConnection>();
 	
+	/** data received from all clients */
+	public final ClientStateAccumulator client_states = new ClientStateAccumulator();
+	
 	/** Flag, true if server is running */
 	private volatile boolean serverIsRunning = false;
 	
@@ -54,6 +60,8 @@ public class GameServerService extends Service {
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		// get Server Port
+		// TODO: this sometimes throws a NullPointerException... seems like some sort of race condition
+		Log.d("foo", "onStartCommand(): intent = "+intent);
 		serverPort = intent.getIntExtra(EXTRAS_SERVER_PORT, 0);
 		
 		if (serverPort <= 0 || serverPort > 0xFFFF) {
@@ -148,6 +156,11 @@ public class GameServerService extends Service {
 							// remove user out of the game
 							handleRemovedUser(newUser);
 						}
+						else if (  message.type == Message.TYPE_CLIENT_ACCELERATION
+								|| message.type == Message.TYPE_CLIENT_INPUT) {
+							// update state of client with input received from him
+							client_states.update(message);
+						}
 						else {
 							Log.i("onReceive()", "Mistimed/unknown Message received, Type: "+message.type+" Hex: "+message.hexDump());
 						}
@@ -211,11 +224,53 @@ public class GameServerService extends Service {
 	 * @param map to play on
 	 */
 	private void initGame(String gameMap) {
+		
+		GameWorld game;
+		
+		try {
+			// TODO: instead of null, pass something like a IGameActivity (with onGameFinished)
+			game = new GameWorld(this.getAssets().open("level/"+gameMap), null, this.getResources(), true, -1);
+			
+		} catch (IOException e) {
+			Toast.makeText(this, "Cannot load level '"+gameMap+"'", Toast.LENGTH_LONG).show();
+			e.printStackTrace();
+			return;
+		}
+		
+		client_states.allocate(clientConnections.size());
+		
+		for (@SuppressWarnings("unused") GameNetworkingProtocolConnection client : clientConnections) {
+			game.createPlayer();
+		}
+		
 		// send user list to clients
-		// TODO: start game logic
 		int i = 0;
 		for (GameNetworkingProtocolConnection client : clientConnections) {
 			client.sendStartGameMessage(i++, gameMap);
+			
+			try {
+				// TODO: fix this reace condition cleanly
+				// waits for GameActivity to start
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			for (Player p: game.players) {
+				client.sendInsertPlayer(p);
+			}
+		}
+		
+		// start local server without graphics
+		// this is the mainloop for the simulation (this does not draw anything):
+		while(true) {
+			
+			game.copyInputsFromAccumulator(client_states);
+			
+			game.tick();
+			
+			game.sendStateToClients(clientConnections);
 		}
 	}
 	

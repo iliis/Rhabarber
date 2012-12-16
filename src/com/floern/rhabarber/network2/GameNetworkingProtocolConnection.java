@@ -18,6 +18,7 @@ import at.emini.physics2D.util.FXVector;
 import com.floern.rhabarber.logic.elements.GameWorld;
 import com.floern.rhabarber.logic.elements.Player;
 import com.floern.rhabarber.util.DynamicFloatBuffer;
+import com.floern.rhabarber.util.IntRef;
 
 import android.util.Log;
 
@@ -53,8 +54,6 @@ public class GameNetworkingProtocolConnection {
 	/** Timestamp when the last message was sent */
 	public long lastSendActivity = 0;
 	
-	
-	
 	/**
 	 * Create a new GameNetworkingProtocol connection
 	 * @param clientSocket TCP socket
@@ -80,7 +79,7 @@ public class GameNetworkingProtocolConnection {
 				try {
 					while (true) {
 						Message msg = read();
-						Log.d("received message", msg.hexDump());
+						//Log.d("received message", msg.hexDump());
 						receiveCallback.onReceive(msg);
 					}
 				} catch (IncompatibleProtocolVersionException e) {
@@ -297,19 +296,19 @@ public class GameNetworkingProtocolConnection {
 	 * @param bodies
 	 * @param players
 	 */
-	public void sendServerState(Body[] bodies, List<Player> players) {
+	public void sendServerState(List<Body> bodies, List<Player> players) {
 		byte[] arr = new byte[2*4	// number of bodies, number of players
-							+ 4*4*(bodies.length)		// for each body: id (int), position (2 ints FX), rotation (1 int 2FX)
+							+ 4*4*(bodies.size())		// for each body: id (int), position (2 ints FX), rotation (1 int 2FX)
 							+ 4*3*(players.size())];	// for each player: id (int), score (int), velocity (float)
 		ByteBuffer buf = ByteBuffer.wrap(arr);
-		buf.putInt(bodies.length);
+		buf.putInt(bodies.size());
 		buf.putInt(players.size());
 		
 		for(Body b: bodies) {
-			buf.putInt(b.getId());
-			buf.putInt(b.positionFX().xFX);
-			buf.putInt(b.positionFX().yFX);
-			buf.putInt(b.rotation2FX());
+				buf.putInt(b.getId());
+				buf.putInt(b.positionFX().xFX);
+				buf.putInt(b.positionFX().yFX);
+				buf.putInt(b.rotation2FX());
 		}
 		
 		for(Player p: players) {
@@ -319,6 +318,28 @@ public class GameNetworkingProtocolConnection {
 		}
 		
 		sendMessage(new Message(Message.TYPE_SERVER_GAMESTATE, arr));
+	}
+	
+	/**
+	 * Send word to clients that there is a new player on the field.
+	 * @param p the chosen one
+	 */
+	public void sendInsertPlayer(Player p) {
+		
+		byte[] arr = new byte[ 4	// ID
+		                      +2*4	// Position
+		                      +4	// Color
+		                      +4	// Winning Score
+		                      ];
+		ByteBuffer buf = ByteBuffer.wrap(arr);
+		
+		buf.putInt(p.getIdx());
+		buf.putInt(p.positionFX().xFX);
+		buf.putInt(p.positionFX().yFX);
+		buf.putInt(p.color);
+		buf.putInt(p.WINNING_SCORE);
+		
+		sendMessage(new Message(Message.TYPE_INSERT_PLAYER, arr));
 	}
 	
 	/**
@@ -355,7 +376,7 @@ public class GameNetworkingProtocolConnection {
 	 * @param msg
 	 */
 	private void sendMessage(Message msg) {
-		Log.d("sendMessage()", msg.hexDump());
+		//Log.d("sendMessage()", msg.hexDump());
 		try {
 			outputStream.write(msg.getBytes());
 			outputStream.flush();
@@ -445,13 +466,13 @@ public class GameNetworkingProtocolConnection {
 	}
 	
 	
-	public static ClientStateAccumulator.Acceleration parseAccelerationMessage(Message msg, Integer playerIdxOut) {
+	public static ClientStateAccumulator.Acceleration parseAccelerationMessage(Message msg, IntRef playerIdxOut) {
 		// wrong message type?
 		if (msg.type != Message.TYPE_CLIENT_ACCELERATION)
 			return null;
 		
 		ByteBuffer b = ByteBuffer.wrap(msg.payload);
-		playerIdxOut = b.getInt();
+		playerIdxOut.value = b.getInt();
 		
 		ClientStateAccumulator.Acceleration a = new ClientStateAccumulator.Acceleration();
 		
@@ -462,9 +483,9 @@ public class GameNetworkingProtocolConnection {
 		return a;
 	}
 	
-	public static ClientStateAccumulator.UserInputWalk parseUserInputMessage(Message msg, Integer playerIdxOut) {
+	public static ClientStateAccumulator.UserInputWalk parseUserInputMessage(Message msg, IntRef playerIdxOut) {
 		IntBuffer ibuf = ByteBuffer.wrap(msg.payload).asIntBuffer();
-		playerIdxOut = ibuf.get();
+		playerIdxOut.value = ibuf.get();
 		
 		switch(msg.payload[4]) {
 		case 0x00:
@@ -483,11 +504,11 @@ public class GameNetworkingProtocolConnection {
 	 * @param m Message from server.
 	 * @param w GameWorld of client, will be updated with data from message
 	 */
-	public void receiveServerState(Message m, GameWorld w) {
+	public static void receiveServerState(Message m, GameWorld w) {
 		// number of bodies, number of players
 		// for each body: id (int), position (2 ints FX), rotation (1 int 2FX)
 		// for each player: id (int), score (int), velocity (float)
-		
+				
 		ByteBuffer buf = ByteBuffer.wrap(m.payload);
 		int body_count   = buf.getInt();
 		int player_count = buf.getInt();
@@ -498,13 +519,14 @@ public class GameNetworkingProtocolConnection {
 				y  = buf.getInt(),
 				a  = buf.getInt();
 			
-			Body b = w.getBodies()[id];
+			Body b = w.getBodyByID(id);
+			if (b != null) { // TODO: remove this check and fix underlying issue (ids not identical?)
 			b.setPositionFX(new FXVector(x, y));
-			b.setRotation2FX(a);
+			b.setRotation2FX(a);}
 		}
 		
 		for(; player_count > 0; --player_count) {
-			int id    = buf.getInt();
+			int id    = buf.getInt(); if (id < 0) Log.e("foo", "player id = "+id+" in receiveServerState()");
 			int score = buf.getInt();
 			float speed = buf.getFloat();
 			
@@ -515,16 +537,33 @@ public class GameNetworkingProtocolConnection {
 	}
 	
 	/**
+	 * adds a new Player to the world w
+	 * @param m
+	 * @param w
+	 */
+	public static void receiveInsertPlayerMessage(Message m, GameWorld w) {
+		ByteBuffer buf = ByteBuffer.wrap(m.payload);
+		
+		int idx    = buf.getInt();
+		int posx   = buf.getInt();
+		int posy   = buf.getInt();
+		int color  = buf.getInt();
+		int wscore = buf.getInt();
+		
+		w.addPlayer(new FXVector(posx, posy), idx, color, wscore);
+	}
+	
+	/**
 	 * Start a new game.
 	 * @param msg The message from the server.
 	 * @param playerIdxOut The index this client got assigned from the server.
 	 * @return The filename of the map to load
 	 */
-	public static String parseStartGameMessage(Message msg, Integer playerIdxOut) {
+	public static String parseStartGameMessage(Message msg, IntRef playerIdxOut) {
 		ByteBuffer buf   = ByteBuffer.wrap(msg.payload);
 		
-		playerIdxOut    = buf.getInt();
-		int stringsize = buf.getInt();
+		playerIdxOut.value = buf.getInt();
+		int stringsize     = buf.getInt();
 		
 		byte[] strbuf = new byte[stringsize];
 		buf.get(strbuf);
@@ -636,6 +675,8 @@ public class GameNetworkingProtocolConnection {
 			// server --> client
 			TYPE_GAME_START = ++i,
 			TYPE_SERVER_GAMESTATE = ++i,
+			TYPE_INSERT_PLAYER = ++i,
+			TYPE_INSERT_TREASURE = ++i, // TODO
 			TYPE_GAME_END = ++i
 			;
 		

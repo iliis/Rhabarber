@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import com.floern.rhabarber.logic.elements.GameWorld;
 import com.floern.rhabarber.network2.GameNetworkingProtocolConnection.IncomingMessageListener;
 import com.floern.rhabarber.network2.GameNetworkingProtocolConnection.Message;
 import com.floern.rhabarber.network2.GameServerService.UserInfo;
+import com.floern.rhabarber.util.IntRef;
 
 import android.util.Log;
 
@@ -19,12 +21,14 @@ public class ClientNetworkingLogic {
 	private final int serverPort;
 
 	/** Socket of the register listener */
-	private GameNetworkingProtocolConnection serverConnection;
+	public GameNetworkingProtocolConnection serverConnection;
 	
 	/** Callback for register events */
 	private final GameRegisterEventListener registerEventListener;
 	/** Callback for game updates events */
 	private final GameUpdateEventListener updateEventListener;
+	
+	public volatile GameWorld game;
 	
 
 	/** Code that is executed to setup a connection to the server */
@@ -48,6 +52,7 @@ public class ClientNetworkingLogic {
 			registerEventListener.onNetworkingError("Connection Timeout");
 		}
 		public void onReceive(Message message) {
+			
 			if (message.type == Message.TYPE_REGISTRATION_CONFIRM) {
 				// confirm registration
 				registerEventListener.onRegisterSuccess();
@@ -64,15 +69,20 @@ public class ClientNetworkingLogic {
 				// idle received, ignore
 			}
 			else if (message.type == Message.TYPE_GAME_START) {
+				
 				// init game
 				// TODO: detailed event handling
-				Integer playerIdx = new Integer(-1);
+				IntRef playerIdx = new IntRef(-1);
 				String map = GameNetworkingProtocolConnection.parseStartGameMessage(message, playerIdx);
-				updateEventListener.onInitGame(map, playerIdx);
+				
+				updateEventListener.onInitGame(map, playerIdx.value);
 			}
 			else if (message.type == Message.TYPE_SERVER_GAMESTATE) {
-				// TODO
+				GameNetworkingProtocolConnection.receiveServerState(message, game);
 			}
+			else if (message.type == Message.TYPE_INSERT_PLAYER) {
+				GameNetworkingProtocolConnection.receiveInsertPlayerMessage(message, game);
+			} // TODO: add missing message types
 			else {
 				Log.i("onReceive()", "Mistimed/unknown Message received, Type: "+message.type+"; Hex: "+message.hexDump());
 			}
@@ -123,10 +133,10 @@ public class ClientNetworkingLogic {
 	 */
 	public ClientNetworkingLogic(String serverIP, int serverPort, 
 			GameRegisterEventListener registerEventListener, GameUpdateEventListener updateEventListener) {
-		this.serverIP = serverIP;
+		this.serverIP   = serverIP;
 		this.serverPort = serverPort;
 		this.registerEventListener = registerEventListener;
-		this.updateEventListener = updateEventListener;
+		this.updateEventListener   = updateEventListener;
 		
 		// setup connection to the server 
 		connectionSetupRunnable.run();

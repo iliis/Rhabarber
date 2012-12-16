@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import com.floern.rhabarber.network2.ClientNetworkingLogic;
 import com.floern.rhabarber.network2.ClientNetworkingLogic.GameRegisterEventListener;
 import com.floern.rhabarber.network2.ClientNetworkingLogic.GameUpdateEventListener;
+import com.floern.rhabarber.network2.GameNetworkingProtocolConnection.Message;
 import com.floern.rhabarber.network2.GameServerService;
 import com.floern.rhabarber.network2.GameServerService.UserInfo;
 import com.floern.rhabarber.network2.NetworkUtils;
@@ -181,7 +182,7 @@ public class ServerJoinActivity extends Activity {
     public void startGameActivity(String gameMap, int playerIdx) {
 		// TODO: duplicate code in ServerJoinAvctivity and ServerSetupActivity
     	Intent i = new Intent(this, GameActivity.class);
-    	GameActivity.clientNetworkingLogic = networkingLogic;
+    	GameActivity.__clientNetworkingLogic = networkingLogic;
     	i.putExtra("level", gameMap);
     	i.putExtra("playerIdx", playerIdx);
     	i.putExtra("isserver", false);

@@ -13,10 +13,14 @@ import com.floern.rhabarber.graphic.primitives.IGLPrimitive;
 import com.floern.rhabarber.graphic.primitives.SkeletonKeyframe;
 import com.floern.rhabarber.graphic.primitives.Vertexes;
 import com.floern.rhabarber.network2.ClientStateAccumulator;
+import com.floern.rhabarber.network2.GameNetworkingProtocolConnection;
 import com.floern.rhabarber.network2.ClientStateAccumulator.Acceleration;
+import com.floern.rhabarber.network2.ClientStateAccumulator.UserInputWalk;
 import com.floern.rhabarber.network2.GameNetworkingProtocolConnection.Message;
 import com.floern.rhabarber.util.FXMath;
 import com.floern.rhabarber.util.GameBodyUserData;
+
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.opengl.GLES10;
 import android.util.Log;
@@ -30,16 +34,15 @@ public class GameWorld extends World {
 
 	// separate list of players for easier retrieval of players
 	// more than 4 players are probably not feasible anyway
-	private ArrayList<Player> players = new ArrayList<Player>(4);
-	private ArrayList<Treasure> treasures = new ArrayList<Treasure>(2);
+	public ArrayList<Player> players = new ArrayList<Player>(4);
+	public ArrayList<Treasure> treasures = new ArrayList<Treasure>(2);
 	private Random rand = new Random();
 	private GameActivity gameActivity;
+	private Resources resources = null;
 
 	private boolean isServer;
 	private int playerIdx = -1; // ID of the player on this device
 
-	// TODO get this from network
-	private ClientStateAccumulator stateAccumulator = null;
 	private FXVector sharedGravity;
 
 	private ArrayList<FXVector> spawnpoints_player = new ArrayList<FXVector>();
@@ -50,11 +53,10 @@ public class GameWorld extends World {
 			Color.GREEN, Color.YELLOW, Color.MAGENTA, Color.GRAY };
 	private int colorIdx = 0;
 
-	public final float G = 100; // gravity
+	public final float G = 20; // gravity
 
-	Vertexes outline;
+	Vertexes outline; //< this is also used as a lock for receiving state from the server!
 	private float[] acceleration = new float[3];
-	private float[] positions = new float[3];
 
 	long last_tick;
 
@@ -63,20 +65,17 @@ public class GameWorld extends World {
 	// maybe push to phy file? yeah, later...
 	private static final int WINNING_SCORE = 1000;
 
-	public GameWorld(InputStream level, GameActivity gameActivity,
+	public GameWorld(InputStream level, GameActivity gameActivity, Resources resources,
 			boolean isServer, int playerIdx) {
 		this.gameActivity = gameActivity;
+		this.resources = resources;
 		this.playerIdx = playerIdx;
 		this.isServer = isServer;
 		loadLevel(level);
 		// TODO: only do this on server, communicate it with clients
 		// addTreasureRandomly(); // inital treasue (only one, maybe change that
 		// later)
-
-		if (this.isServer) {
-			stateAccumulator = new ClientStateAccumulator();
-		}
-
+		
 		outline = new Vertexes();
 		outline.setMode(GLES10.GL_LINES); // disconnected bunch of lines
 		outline.setThickness(3);
@@ -175,36 +174,32 @@ public class GameWorld extends World {
 		}
 
 	}
-
-	public int addPlayer()
-	// return index of added player
-	{
+	
+	public int createPlayer() {
 		if (!playerSpawnIterator.hasNext()) {
 			this.playerSpawnIterator = spawnpoints_player.iterator();
 		}
-		FXVector spawnPos = playerSpawnIterator.next();
-		Player p = new Player(spawnPos, players.size(), gameActivity
-				.getResources().openRawResource(R.raw.player),
-				playerColors[colorIdx], 1000);
-		p.anim_running_left = SkeletonKeyframe.loadSKAnimation(
-				p.skeleton,
-				gameActivity.getResources().openRawResource(
-						R.raw.player_running_left));
-		p.anim_running_right = SkeletonKeyframe.loadSKAnimation(
-				p.skeleton,
-				gameActivity.getResources().openRawResource(
-						R.raw.player_running_right));
-		p.anim_standing = SkeletonKeyframe.loadSKAnimation(
-				p.skeleton,
-				gameActivity.getResources().openRawResource(
-						R.raw.player_standing));
-		p.setActiveAnim(p.anim_running_right);
-		addPlayer(p);
+		
 		colorIdx++;
 		if (colorIdx >= playerColors.length) {
 			colorIdx = 0;
 
 		}
+		
+		return addPlayer(playerSpawnIterator.next(), players.size(), playerColors[colorIdx], 1000);
+	}
+
+	public int addPlayer(FXVector pos, int Idx, int color, int winning_score)
+	// return index of added player
+	{
+		Player p = new Player(pos, Idx, resources.openRawResource(R.raw.player),color, winning_score);
+		p.anim_running_left  = SkeletonKeyframe.loadSKAnimation(p.skeleton, resources.openRawResource(R.raw.player_running_left));
+		p.anim_running_right = SkeletonKeyframe.loadSKAnimation(p.skeleton, resources.openRawResource(R.raw.player_running_right));
+		p.anim_standing      = SkeletonKeyframe.loadSKAnimation(p.skeleton, resources.openRawResource(R.raw.player_standing));
+		p.setActiveAnim(p.anim_running_right);
+		
+		addPlayer(p);
+		
 		return p.getIdx();
 	}
 
@@ -263,8 +258,6 @@ public class GameWorld extends World {
 			long dt = System.nanoTime() - last_tick;
 			last_tick = System.nanoTime();
 
-			copyInputsFromAccumulator();
-
 			applyPlayerGravities(getTimestepFX(), acceleration);
 			super.tick(); // simulate physics
 
@@ -274,21 +267,19 @@ public class GameWorld extends World {
 			}
 
 			this.processGame();
-			this.sendStateToClients();
+			
+			
 		} else {
 			// TODO client stuff
 		}
 	}
 
 	// server side
-	private void copyInputsFromAccumulator() {
+	public void copyInputsFromAccumulator(ClientStateAccumulator stateAccumulator) {
 		ClientStateAccumulator copy;
 		synchronized (stateAccumulator) {
 			copy = stateAccumulator.copy();
 		}
-
-		Iterator<Player> playerIt = players.iterator();
-		Iterator<Acceleration> accelsIt = copy.accels.iterator();
 
 		// shared gravity is normal (global) gravity and players are just not
 		// affected by normal gravity
@@ -297,13 +288,20 @@ public class GameWorld extends World {
 		sharedGravity.mult(0);
 		
 		//TODO add playerindex to clientAccumulator so the values get matched to the right player...
-		while (playerIt.hasNext() && accelsIt.hasNext()) {
-			Player p = playerIt.next();
-			Acceleration a = accelsIt.next();
-			p.playerGravity = new FXVector(FXMath.floatToFX(a.x),
-					FXMath.floatToFX(a.y));
-			p.playerGravity.normalize();
-			p.playerGravity.multFX(FXMath.floatToFX(G));
+		for(int i = 0; i < copy.accels.length; ++i) {
+		
+			final Player       p = players.get(i);
+			final Acceleration a = copy.accels[i];
+			
+			if(a != null) {
+				p.playerGravity = new FXVector(	FXMath.floatToFX(a.x),
+												FXMath.floatToFX(a.y));
+				p.playerGravity.normalize();
+				p.playerGravity.multFX(FXMath.floatToFX(G));
+			}
+			
+			if(copy.inputs[i] != null)
+				p.walk(copy.inputs[i]);
 
 			sharedGravity.add(p.playerGravity);
 		}
@@ -313,57 +311,86 @@ public class GameWorld extends World {
 	}
 
 	// server side
-	private void sendStateToClients() {
-		// TODO
+	public void sendStateToClients(ArrayList<GameNetworkingProtocolConnection> clients) {
+		for(GameNetworkingProtocolConnection c: clients) {
+			c.sendServerState(getBodiesAsList(), players);
+		}
 	}
 
 	// client side
 	public void receiveStateFromServer(Message m) {
-		// run this in OpenGL thread somehow
+		// TODO: run this in OpenGL thread somehow
+		synchronized (outline) {
+			GameNetworkingProtocolConnection.receiveServerState(m, this);
+		}
 	}
 
 	public void setAccel(float[] g) {
 		this.acceleration = g;
 	}
+	
+	/**
+	 * Convert the internal Body[]-Array into a List<Body> which does not contain null elements.
+	 * @return all bodies (inclusive players and treasures) of this world
+	 */
+	public ArrayList<Body> getBodiesAsList() {
+		ArrayList<Body> b = new ArrayList<Body>(getBodyCount());
+		
+		for(int i = 0; i < getBodies().length; ++i) {
+			if(getBodies()[i] != null)
+				b.add(getBodies()[i]);
+		}
+		
+		return b;
+	}
+	
+	public Body getBodyByID(int id) {
+		for(Body b: getBodies()) {
+			if(b != null && b.getId() == id)
+				return b;
+		}
+		
+		return null;
+	}
 
-	public void walk(ClientStateAccumulator.UserInputWalk direction) {
-		// TODO: limit the max velocity or some such
+	// use this only in clients
+	/*public void walk(ClientStateAccumulator.UserInputWalk direction) {
+				if (playerIdx >= 0) {
+				players.get(playerIdx).walk(direction);
+		}
+	}*/
 
-		if (playerIdx >= 0) {
-
-			if (this.isServer) {
-				FXVector dir = new FXVector(players.get(playerIdx).getAxes()[1]);
-				if (direction == ClientStateAccumulator.UserInputWalk.LEFT) {
-					dir.mult(-1);
-					players.get(playerIdx).applyAcceleration(dir,
-							FXMath.floatToFX(10f));
-				} else if (direction == ClientStateAccumulator.UserInputWalk.RIGHT)
-					players.get(playerIdx).applyAcceleration(dir,
-							FXMath.floatToFX(10f));
-			} else {
-				// send UserInputMessage
-
+	public void draw(GL10 gl) {
+		synchronized (outline) {
+			gl.glColor4f(0.6f, 0.7f, 1, 1);
+			outline.draw(gl);
+	
+			for (Body b: getBodiesAsList()) {
+				if (b instanceof IGLPrimitive) {
+					// draw element
+					((IGLPrimitive) b).draw(gl);
+				} else {
+					// draw shape
+	
+					Vertexes verts = new Vertexes(b);
+					gl.glColor4f(1, 1, 1, 1);
+					verts.setMode(GLES10.GL_LINE_LOOP);
+					verts.draw(gl);
+				}
 			}
 		}
 	}
-
-	public void draw(GL10 gl) {
-		gl.glColor4f(0.6f, 0.7f, 1, 1);
-		outline.draw(gl);
-
-		Body[] b = getBodies();
-		for (int i = 0; i < getBodyCount(); i++) {
-			if (b[i] instanceof IGLPrimitive) {
-				// draw element
-				((IGLPrimitive) b[i]).draw(gl);
-			} else {
-				// draw shape
-
-				Vertexes verts = new Vertexes(b[i]);
-				gl.glColor4f(1, 1, 1, 1);
-				verts.setMode(GLES10.GL_LINE_LOOP);
-				verts.draw(gl);
+	
+	public void logBodies() {
+		for (Body b: getBodiesAsList()) {
+			if (b instanceof Player) {
+				Log.d("foo", "PLAYER:");
+			} else if (b instanceof Treasure) {
+				Log.d("foo", "TREASURE:");
 			}
+			
+			Body bb = getBodies()[b.getId()];
+			Log.d("foo", "["+b.getId()+" = "+(bb!=null?bb.getId():"NULL")+"] position: "+b.positionFX().xAsFloat()+" \t "+b.positionFX().yAsFloat());
 		}
 	}
 

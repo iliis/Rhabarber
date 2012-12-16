@@ -3,6 +3,7 @@ package com.floern.rhabarber;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import com.floern.rhabarber.network2.GameNetworkingProtocolConnection.Message;
 import com.floern.rhabarber.network2.GameServerService;
 import com.floern.rhabarber.network2.ClientNetworkingLogic.GameRegisterEventListener;
 import com.floern.rhabarber.network2.ClientNetworkingLogic.GameUpdateEventListener;
@@ -75,6 +76,7 @@ public class ServerSetupActivity extends Activity {
 		}
 		public void onServiceDisconnected(ComponentName name) {
 			Toast.makeText(ServerSetupActivity.this, "onServiceDisconnected() called", Toast.LENGTH_SHORT).show();
+			serverBinder = null;
 		}};
 	
 	/** The device's own IP address */
@@ -237,13 +239,15 @@ public class ServerSetupActivity extends Activity {
 	public void onStartGame(View v) {
 		// get selected map
 		Spinner mapChooser = (Spinner) findViewById(R.id.spinner_map);
-		String gameMap = (String) mapChooser.getSelectedItem();
+		String  gameMap    = (String)  mapChooser.getSelectedItem();
 		
 		// start game
 		serverBinder.initGame(gameMap);
 		
 		// disable start-game button
-		((Button) findViewById(R.id.btn_start_game)).setClickable(false);
+		Button b = (Button) findViewById(R.id.btn_start_game);
+		b.setEnabled(false);
+		b.setText("Server is running ...");
 		
 		if (joinedSelf) {
 			// continue self to battlefield if joined self
@@ -261,10 +265,10 @@ public class ServerSetupActivity extends Activity {
     public void startGameActivity(String gameMap, int playerIdx) {
 		// TODO: duplicate code in ServerJoinAvctivity and ServerSetupActivity
     	Intent i = new Intent(this, GameActivity.class);
-    	GameActivity.clientNetworkingLogic = networkingLogic;
-    	i.putExtra("level", gameMap);
+    	GameActivity.__clientNetworkingLogic = networkingLogic;
+    	i.putExtra("level",     gameMap);
     	i.putExtra("playerIdx", playerIdx);
-    	i.putExtra("isserver", true);
+    	i.putExtra("isserver",  false); // handle local client as a normal networked one
     	startActivity(i);
     }
 	

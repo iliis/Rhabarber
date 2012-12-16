@@ -9,6 +9,7 @@ import javax.microedition.khronos.opengles.GL10;
 import com.floern.rhabarber.graphic.primitives.Skeleton;
 import com.floern.rhabarber.graphic.primitives.SkeletonKeyframe;
 import com.floern.rhabarber.graphic.primitives.Vertexes;
+import com.floern.rhabarber.network2.ClientStateAccumulator;
 import com.floern.rhabarber.util.FXMath;
 import com.floern.rhabarber.util.Vector;
 
@@ -31,11 +32,11 @@ public class Player extends MovableElement {
 
 	// defines playernumber
 	private int playerIdx;
-	private int color;
+	public int color;
 	
 	public int score;
 
-	private final int WINNING_SCORE;
+	public final int WINNING_SCORE;
 	public FXVector playerGravity;
 
 	// graphics properties (yeah, this may belong somewhere else...
@@ -61,6 +62,11 @@ public class Player extends MovableElement {
 	public Player(int x, int y, int playerIdx, InputStream skeleton, int color, int winning_score) {
 		super(x, y, Shape.createRectangle(hitBoxWidth, hitBoxHeight));
 		WINNING_SCORE = winning_score;
+		
+		if(playerIdx < 0) {
+			 // well, not exactly an 'array out of bound' error, but playerIdx is used as an array index and should be positive
+			throw new ArrayIndexOutOfBoundsException();
+		}
 		
 		this.score = 0;
 		this.color = color;
@@ -134,6 +140,16 @@ public class Player extends MovableElement {
 			active_kf.apply_interpolated(frame_age / active_kf.duration,
 					next_kf);
 		}
+	}
+	
+	public void walk(ClientStateAccumulator.UserInputWalk direction) {
+		// TODO: limit the max velocity or some such
+		FXVector dir = new FXVector(getAxes()[1]);
+		if (direction == ClientStateAccumulator.UserInputWalk.LEFT) {
+			dir.mult(-1);
+			applyAcceleration(dir, FXMath.floatToFX(10f));
+		} else if (direction == ClientStateAccumulator.UserInputWalk.RIGHT)
+			applyAcceleration(dir, FXMath.floatToFX(10f));
 	}
 
 	public void setRotationFromGravity() {

@@ -1,6 +1,7 @@
 package com.floern.rhabarber;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -10,6 +11,7 @@ import com.floern.rhabarber.logic.elements.GameWorld;
 import com.floern.rhabarber.logic.elements.Player;
 import com.floern.rhabarber.network2.ClientNetworkingLogic;
 import com.floern.rhabarber.network2.ClientStateAccumulator;
+import com.floern.rhabarber.network2.GameNetworkingProtocolConnection;
 import com.floern.rhabarber.util.FXMath;
 
 import android.graphics.Color;
@@ -46,7 +48,8 @@ import at.emini.physics2D.util.FXVector;
 public class GameActivity extends Activity implements SensorEventListener {
 
 	// connection with server
-	public static ClientNetworkingLogic clientNetworkingLogic = null;
+	public static ClientNetworkingLogic __clientNetworkingLogic = null; // global variable, as we can't pass sockets via Intent
+	private       ClientNetworkingLogic   clientNetworkingLogic = null;
 	
 	private GameGLSurfaceView surfaceView;
 
@@ -57,14 +60,16 @@ public class GameActivity extends Activity implements SensorEventListener {
 
 	private float[] acceleration = new float[3];
 	private int playerIdx;
-	private boolean isserver = true;
+	private boolean isserver = false;
 	boolean walk_left = false, walk_right = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		// TODO: load 'clientNetworkingLogic' into a private field and set the static field 'clientNetworkingLogic' to null
+		clientNetworkingLogic = __clientNetworkingLogic;
+		__clientNetworkingLogic = null;
+		
 		
 		
 		// avoid screen turning off
@@ -97,10 +102,14 @@ public class GameActivity extends Activity implements SensorEventListener {
 		try {
 			isserver   = getIntent().getExtras().getBoolean("isserver");
 			playerIdx  = getIntent().getExtras().getInt("playerIdx");
-			game = new GameWorld(this.getAssets().open(	"level/"+getIntent().getExtras().getString("level")), this,isserver, playerIdx);
+			game = new GameWorld(this.getAssets().open(	"level/"+getIntent().getExtras().getString("level")), this, this.getResources(), isserver, playerIdx);
 			Log.d("foo", "starting a game");
 			Log.d("foo", "isserver = "+isserver);
 			Log.d("foo", "playerIdx = "+playerIdx);
+			clientNetworkingLogic.game = game;
+			Log.d("foo", "linked world to network stuff");
+			
+			
 			//playerIdx = game.addPlayer();
 			
 			surfaceView.renderer.readLevelSize(game);
@@ -111,15 +120,17 @@ public class GameActivity extends Activity implements SensorEventListener {
 	}
 
 	public void onDraw(GL10 gl) {
-		game.tick();
-		game.setAccel(acceleration);
+		// TODO: fix for singleplayer (the whole project is as of now only working for multiplayer)
+		//game.tick();
+		
+		/*game.setAccel(acceleration);
 		if (walk_left != walk_right) {
 			
 			if (walk_left) {
 				game.walk(ClientStateAccumulator.UserInputWalk.LEFT);
 			} else
 				game.walk(ClientStateAccumulator.UserInputWalk.RIGHT);
-		}
+		}*/
 		game.draw(gl);
 	}
 
@@ -139,6 +150,13 @@ public class GameActivity extends Activity implements SensorEventListener {
 					}
 				}
 			}
+			
+			if     (!walk_right &&  walk_left)
+				sendUserInputToServer(ClientStateAccumulator.UserInputWalk.LEFT);
+			else if( walk_right && !walk_left)
+				sendUserInputToServer(ClientStateAccumulator.UserInputWalk.RIGHT);
+			else
+				sendUserInputToServer(ClientStateAccumulator.UserInputWalk.NONE);
 
 			return true;
 		}
@@ -162,24 +180,25 @@ public class GameActivity extends Activity implements SensorEventListener {
 
 		if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
 			// update acceleration values
-			if (deviceIsLandscapeDefault) {
+			if (true || deviceIsLandscapeDefault) {
 				// rotate X and Y
 				acceleration[0] =  event.values[1];
-				acceleration[1] = -event.values[0];
+				acceleration[1] = event.values[0];
 				acceleration[2] =  event.values[2];
 			} else {
 				System.arraycopy(event.values, 0, acceleration, 0, 3);
 			}
+			
+			sendAccelerationToServer();
 		}
 	}
 	
 	public void sendAccelerationToServer() {
-		// TODO
+		clientNetworkingLogic.serverConnection.sendAccelerationData(playerIdx, new ClientStateAccumulator.Acceleration(acceleration));
 	}
 	
 	public void sendUserInputToServer(ClientStateAccumulator.UserInputWalk i) {
-		// TODO
-		
+		clientNetworkingLogic.serverConnection.sendUserInputData(playerIdx, i);
 	}
 
 	/**
