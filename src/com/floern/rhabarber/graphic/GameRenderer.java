@@ -31,6 +31,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 		
         // try some smoothing (AA)
         gl.glShadeModel(GL10.GL_SMOOTH);
+        gl.glEnable(GL10.GL_LINE_SMOOTH);
         gl.glHint(GL10.GL_POLYGON_SMOOTH_HINT, GL10.GL_NICEST);
 	}
 	
