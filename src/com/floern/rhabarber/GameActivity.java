@@ -1,46 +1,33 @@
 package com.floern.rhabarber;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import javax.microedition.khronos.opengles.GL10;
 
 import com.floern.rhabarber.graphic.GameGLSurfaceView;
-import com.floern.rhabarber.graphic.primitives.SkeletonKeyframe;
 import com.floern.rhabarber.logic.elements.GameWorld;
-import com.floern.rhabarber.logic.elements.Player;
 import com.floern.rhabarber.network2.ClientNetworkingLogic;
 import com.floern.rhabarber.network2.ClientStateAccumulator;
-import com.floern.rhabarber.network2.GameNetworkingProtocolConnection;
-import com.floern.rhabarber.util.FXMath;
 
-import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.os.Looper;
 import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import at.emini.physics2D.Event;
-import at.emini.physics2D.PhysicsEventListener;
-import at.emini.physics2D.util.FXVector;
 
 /* contains the game itself, starts open gl (which calls the physics and logic on every frame)
  * 
@@ -249,29 +236,35 @@ public class GameActivity extends Activity implements SensorEventListener {
 		super.onDestroy();
 	}
 	
+	/**
+	 * stop rendering & show end dialog
+	 * @param winIdx
+	 */
 	public void onGameFinished(final int winIdx)
 	{
 		runOnUiThread(new Runnable() {
 			public void run() {
+				// stop sensor
+				sensorDisable();
+				// stop renderung
+				surfaceView.pauseRendering();
+				
+				// show dialog
 				Resources res = getResources();
 				AlertDialog builder = new AlertDialog.Builder(GameActivity.this).create();
 			    builder.setTitle("Game finished!");
 			    builder.setCanceledOnTouchOutside(false);
 			    builder.setCancelable(false);
-			    if(winIdx == playerIdx)
-			    {
+			    if (winIdx == playerIdx) {
 			    	builder.setMessage(res.getString(R.string.winNotification));
 			    }
-			    else if(winIdx < 0)
-			    {
+			    else if (winIdx < 0) {
 			    	builder.setMessage(res.getString(R.string.canceledNotification));
 			    }
-			    else
-			    {
+			    else {
 			    	builder.setMessage(res.getString(R.string.loseNotification));
 			    }
 			    builder.setButton(Dialog.BUTTON_POSITIVE, res.getString(R.string.ok), new OnClickListener() {
-					
 					public void onClick(DialogInterface dialog, int which) {
 						finish();
 					}
@@ -279,6 +272,22 @@ public class GameActivity extends Activity implements SensorEventListener {
 			    builder.show();
 			}
 		});
+	}
+	
+	
+	@Override
+	public void onBackPressed() {
+		// log off
+		new Thread(new Runnable() {
+			public void run() {
+				clientNetworkingLogic.unregisterAtServer();
+				runOnUiThread(new Runnable() {
+					public void run() {
+						GameActivity.super.onBackPressed();
+					}
+				});
+			}
+		}).start();
 	}
 	
 	
