@@ -127,10 +127,7 @@ public class GameWorld extends World {
 		}
 	}
 
-	// Factory for game Elements, reads the UserData and creates the appropriate
-	// Element
-	// TODO: change this into void and add newly created element directly to
-	// this world (by usint addPlayer(), addTreasure() etc.)
+	// Factory for game Elements, reads the UserData and creates the appropriate Element
 	private void convertAndAddBody(Body b) {
 		GameBodyUserData userdata = (GameBodyUserData) b.getUserData();
 		assert (userdata.is_game_element == true);
@@ -178,8 +175,7 @@ public class GameWorld extends World {
 			t.setPositionFX(spawnpoint.positionFX());
 			t.setValue(Integer.parseInt(d.data.get("value")));
 		} else {
-			Log.e("foo",
-					"No treasure spawnpoints defined in map (GameWorld.addTreasureRandomly)");
+			Log.e("foo", "No treasure spawnpoints defined in map (GameWorld.addTreasureRandomly)");
 		}
 
 	}
@@ -250,8 +246,8 @@ public class GameWorld extends World {
 	}
 
 	private void onTreasureCollected(Player p, Treasure t) {
-		moveTreasureRandomly(t);
 		p.score += t.getValue();
+		moveTreasureRandomly(t);
 
 		if (p.score >= WINNING_SCORE)
 			onGameFinished(p);
@@ -341,7 +337,6 @@ public class GameWorld extends World {
 
 	// client side
 	public void receiveStateFromServer(Message m) {
-		// TODO: run this in OpenGL thread somehow
 		synchronized (outline) {
 			GameNetworkingProtocolConnection.receiveServerState(m, this);
 		}
