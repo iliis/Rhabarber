@@ -290,6 +290,9 @@ public class GameWorld extends World {
 				p.animate(((float) dt) / 1000000000); // convert ns to seconds
 			}
 		}
+		
+		// today is a good day to clean up our mess
+		//System.gc();
 	}
 
 	// server side

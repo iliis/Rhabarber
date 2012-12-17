@@ -35,7 +35,7 @@ public class UserListAdapter extends ArrayAdapter<UserInfo> {
 		UserInfo user       = data.get(pos);
 		TextView text_left  = ((TextView) viewToUse.findViewById(R.id.text_left));
 		TextView text_right = ((TextView) viewToUse.findViewById(R.id.text_right));
-		text_left.setText(user.ip);
+		text_left .setText(user.ip);
 		text_right.setText(user.port > 0 ? Integer.toString(user.port) : "");
 		viewToUse.setTag(user);
 		return viewToUse;

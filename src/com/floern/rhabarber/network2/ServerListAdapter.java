@@ -35,7 +35,7 @@ public class ServerListAdapter extends ArrayAdapter<ServerInfo> {
 		ServerInfo server   = data.get(pos);
 		TextView text_left  = ((TextView) viewToUse.findViewById(R.id.text_left));
 		TextView text_right = ((TextView) viewToUse.findViewById(R.id.text_right));
-		text_left.setText(server.address);
+		text_left .setText(server.address);
 		text_right.setText(Integer.toString(server.port));
 		viewToUse.setTag(server);
 		return viewToUse;

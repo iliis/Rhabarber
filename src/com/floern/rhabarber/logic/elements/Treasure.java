@@ -59,7 +59,7 @@ public class Treasure extends MovableElement {
 		else // good treasure -> draw yellow
 			gl.glColor4f(1, .9f, 0, 1);
 		
-		verts.setMode(GLES10.GL_LINE_LOOP);
+		verts.setMode(GLES10.GL_TRIANGLE_FAN);
 		verts.setThickness(2);
 		verts.draw(gl);
 	}
@@ -71,7 +71,8 @@ public class Treasure extends MovableElement {
 		int radius = hitCircleWidth;
 		float angleStep = ((float) Math.PI) / 5;
 		float currAngle = 0f;
-		for (int i=0; i<2*5; ++i) {
+		add(new FXVector(0, 0)); // this is going to be a triangle fan
+		for (int i=0; i<=2*5; ++i) {
 			float scale = radius * (i%2==0?1f:.4f);
 			float x = FloatMath.cos(currAngle) * scale;
 			float y = FloatMath.sin(currAngle) * scale;

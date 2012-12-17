@@ -29,7 +29,9 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         // Enable use of vertex arrays
         gl.glEnableClientState(GLES10.GL_VERTEX_ARRAY);
 		
-        
+        // try some smoothing (AA)
+        gl.glShadeModel(GL10.GL_SMOOTH);
+        gl.glHint(GL10.GL_POLYGON_SMOOTH_HINT, GL10.GL_NICEST);
 	}
 	
 	public void setRendererCallback(GameActivity a) {

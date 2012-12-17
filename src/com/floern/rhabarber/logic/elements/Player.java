@@ -179,30 +179,51 @@ public class Player extends MovableElement {
 		skeleton.position.add(delta);
 		skeleton.setThickness(is_local_player?3:0.5f);
 		
-		gl.glColor4f(Color.red(color), Color.green(color), Color.blue(color), 1);
+		gl.glColor4f(	Color.red(color)   / 255f,
+						Color.green(color) / 255f,
+						Color.blue(color)  / 255f,
+						1 );
+		
 		skeleton.draw(gl);
 		
 		// draw point bar (how much point a player has)
 		final float P = Math.min(0.9999f, Math.max(0.0001f, ((float) score) / WINNING_SCORE));
-		final float L = (is_local_player?40:20);
+		final float L = (is_local_player?30:20);
 		
-		Vector left   = pos.plus( (new Vector(-L/2, -15)).rotCCW(skeleton.rotation) );
-		Vector right  = pos.plus( (new Vector( L/2, -15)).rotCCW(skeleton.rotation) );
-		Vector middle = left.plus( right.minus(left).normalized().times(P*16) ); 
+		// vector pointing from player center in direction of head (absolute)
+		final Vector up = (new Vector(0,-1)).rotCCW(skeleton.rotation);
+		
+		Vector left   = pos.plus( up.times(is_local_player?25:15)).plus(up.rotCCW().times(L/2));
+		Vector right  = pos.plus( up.times(is_local_player?25:15)).plus(up.rotCW ().times(L/2));
+		Vector middle = left.plus( right.minus(left).normalized().times(P*L) ); 
 		
 		gl.glColor4f(0, 1, 0, 1);
 		Vertexes bar = new Vertexes();
 		if (is_local_player)
-		bar.setThickness(is_local_player?15:5);
+		bar.setThickness(is_local_player?8:3);
 		bar.addPoint(left);
 		bar.addPoint(middle);
 		bar.draw(gl);
 		
 		gl.glColor4f(1, 0, 0, 1);
 		bar = new Vertexes();
-		bar.setThickness(is_local_player?15:5);
+		bar.setThickness(is_local_player?8:3);
 		bar.addPoint(middle);
 		bar.addPoint(right);
 		bar.draw(gl);
+		
+		if (is_local_player) {
+			// draw a yellow arrow over player
+			
+			gl.glColor4f(1, 1, 0, 1);
+			bar = new Vertexes();
+			bar.setThickness(3);
+			
+			bar.addPoint(left.plus (new Vector(0, 0)));
+			bar.addPoint(left.plus(right).times(0.5f).plus(up.times(-10)));
+			bar.addPoint(right.plus(new Vector(0, 0)));
+			
+			bar.draw(gl);
+		}
 	}
 }
