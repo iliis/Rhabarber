@@ -225,6 +225,10 @@ public class GameWorld extends World {
 	public ArrayList<Player> getPlayers() {
 		return players;
 	}
+	
+	public Player getLocalPlayer() {
+		return players.get(playerIdx);
+	}
 
 	private void processGame() {
 		// rhabarberbarbarabar
@@ -244,7 +248,7 @@ public class GameWorld extends World {
 			}
 		}
 	}
-
+	
 	private void onTreasureCollected(Player p, Treasure t) {
 		p.score += t.getValue();
 		moveTreasureRandomly(t);
@@ -278,6 +282,8 @@ public class GameWorld extends World {
 			}
 
 			this.processGame();
+			
+			
 			
 			
 		} else {

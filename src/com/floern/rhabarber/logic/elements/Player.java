@@ -15,6 +15,8 @@ import com.floern.rhabarber.util.Vector;
 
 import android.graphics.Color;
 import android.util.FloatMath;
+import android.util.Log;
+import at.emini.physics2D.Contact;
 import at.emini.physics2D.Shape;
 import at.emini.physics2D.util.FXVector;
 
@@ -39,6 +41,7 @@ public class Player extends MovableElement {
 	public FXVector playerGravity;
 	
 	public boolean is_local_player = false;
+	public boolean is_touching_ground = true;
 
 	// graphics properties (yeah, this may belong somewhere else...
 	public Skeleton skeleton;
@@ -49,7 +52,7 @@ public class Player extends MovableElement {
 	private static final float MOVING_THRESHOLD  = 10; // everything lower is
 														// considered standing
 														// still
-	private static final float MAX_WALKING_SPEED = 30; // limit acceleration due to user input
+	private static final float MAX_WALKING_SPEED = 40; // limit acceleration due to user input
 
 	private List<SkeletonKeyframe> active_anim;
 	private SkeletonKeyframe active_kf, next_kf;
@@ -101,6 +104,13 @@ public class Player extends MovableElement {
 	// update internal state, should only be called in server
 	public void update() {
 		this.aligned_speed = FXMath.FXtoFloat(this.velocityFX().dotFX(this.getAxes()[1]));
+		
+		this.is_touching_ground = false;
+		for(Contact c: getContacts())
+			if(c != null) {
+				this.is_touching_ground = true;
+				break;
+			}
 	}
 	
 	public void setAlignedSpeed(float v) {
@@ -197,7 +207,7 @@ public class Player extends MovableElement {
 		Vector right  = pos.plus( up.times(is_local_player?25:15)).plus(up.rotCCW().times(L/2));
 		Vector middle = left.plus( right.minus(left).normalized().times(P*L) ); 
 		
-		gl.glColor4f(0, 1, 0, 1);
+		gl.glColor4f(245/255f, 165/255f, 3/255f, 1);
 		Vertexes bar = new Vertexes();
 		bar.setMode(GL10.GL_TRIANGLE_FAN);
 		bar.addPoint(left);
@@ -206,7 +216,7 @@ public class Player extends MovableElement {
 		bar.addPoint(middle);
 		bar.draw(gl);
 		
-		gl.glColor4f(1, 0, 0, 1);
+		gl.glColor4f(54/255f, 177/255f, 191/255f, 1);
 		bar = new Vertexes();
 		bar.setMode(GL10.GL_TRIANGLE_FAN);
 		bar.addPoint(middle);
@@ -218,9 +228,10 @@ public class Player extends MovableElement {
 		if (is_local_player) {
 			// draw a yellow arrow over player
 			
-			gl.glColor4f(1, 1, 0, 1);
+			gl.glColor4f(233/255f, 241/255f, 223/255f, 1);
 			bar = new Vertexes();
 			bar.setThickness(3);
+			bar.setMode(GL10.GL_TRIANGLE_FAN);
 			
 			bar.addPoint(left.plus (new Vector(0, 0)));
 			bar.addPoint(left.plus(right).times(0.5f).plus(up.times(-10)));

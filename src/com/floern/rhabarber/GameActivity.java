@@ -142,6 +142,12 @@ public class GameActivity extends Activity implements SensorEventListener {
 				}
 			}
 			
+			// you can't walk while flying trough the air ;)
+			if (!game.getLocalPlayer().is_touching_ground) {
+				walk_right = false;
+				walk_left  = false;
+			}
+			
 			if     (!walk_right &&  walk_left)
 				sendUserInputToServer(ClientStateAccumulator.UserInputWalk.LEFT);
 			else if( walk_right && !walk_left)

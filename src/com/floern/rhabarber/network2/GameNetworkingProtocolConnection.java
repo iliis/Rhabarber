@@ -301,7 +301,7 @@ public class GameNetworkingProtocolConnection {
 	public void sendServerState(List<Body> bodies, List<Player> players, List<Treasure> treasures) {
 		byte[] arr = new byte[3*4	// number of bodies, number of players, number of treasures
 							+ 4*4*(bodies.size())		// for each body: id (int), position (2 ints FX), rotation (1 int 2FX)
-							+ 4*3*(players.size())		// for each player: id (int), score (int), velocity (float)
+							+ (1+4*3)*(players.size())	// for each player: id (int), score (int), velocity (float), touching (boolean (byte))
 							+ 2*4*(treasures.size())	//  for each treasure: id (int), value (int) (rest is contained in bodies)
 							];
 		ByteBuffer buf = ByteBuffer.wrap(arr);
@@ -320,6 +320,7 @@ public class GameNetworkingProtocolConnection {
 			buf.putInt(p.getIdx());
 			buf.putInt(p.score);
 			buf.putFloat(p.getAlignedSpeed());
+			buf.put(p.is_touching_ground ? (byte) 1 : (byte) 0);
 		}
 		
 		for(Treasure t: treasures) {
@@ -537,7 +538,7 @@ public class GameNetworkingProtocolConnection {
 	public static void receiveServerState(Message m, GameWorld w) {
 		// number of bodies, number of players, number of treasures
 		// for each body: id (int), position (2 ints FX), rotation (1 int 2FX)
-		// for each player: id (int), score (int), velocity (float)
+		// for each player: id (int), score (int), velocity (float), touching (boolean (byte))
 		// for each treasure: id (int), value (int)
 				
 		ByteBuffer buf = ByteBuffer.wrap(m.payload);
@@ -563,10 +564,12 @@ public class GameNetworkingProtocolConnection {
 			int id    = buf.getInt(); if (id < 0) Log.e("foo", "player id = "+id+" in receiveServerState()");
 			int score = buf.getInt();
 			float speed = buf.getFloat();
+			boolean touching = buf.get() != 0;
 			
 			Player p = w.getPlayers().get(id); // assuming player IDs correspond to position in array (should be the case accoring to GameWorld.AddPlayer())
 			p.score = score;
 			p.setAlignedSpeed(speed);
+			p.is_touching_ground = touching;
 		}
 		
 		for(; treas_count > 0; --treas_count) {
