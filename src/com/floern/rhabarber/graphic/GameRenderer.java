@@ -66,19 +66,21 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 		if (world_width >= world_height * aspect) {
 			// map is wider than high (even considering a non-quadratic screen)
 			final float h  = world_width/aspect;
-			gl.glOrthof(world_min_x,
+			render_callback.setGLOrtho(gl,
+						world_min_x,
 						world_max_x,
 						world_min_y+h+(world_height-h)/2,
 						world_min_y+  (world_height-h)/2,
-						-1f, 1f);
+						width, height);
 		} else {
 			// map is higher than wide (even considering a non-quadratic screen)
 			final float w  = world_height*aspect;
-			gl.glOrthof(world_min_x+  (world_width -w)/2,
+			render_callback.setGLOrtho(gl,
+						world_min_x+  (world_width -w)/2,
 						world_min_x+w+(world_width -w)/2,
 						world_max_y,
 						world_min_y,
-						-1f, 1f);
+						width, height);
 		}
 		
 		gl.glMatrixMode(GL10.GL_MODELVIEW);

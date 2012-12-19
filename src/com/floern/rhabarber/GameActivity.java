@@ -8,6 +8,8 @@ import com.floern.rhabarber.graphic.GameGLSurfaceView;
 import com.floern.rhabarber.logic.elements.GameWorld;
 import com.floern.rhabarber.network2.ClientNetworkingLogic;
 import com.floern.rhabarber.network2.ClientStateAccumulator;
+import com.floern.rhabarber.util.FXMath;
+import com.floern.rhabarber.util.Vector;
 
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -28,6 +30,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import at.emini.physics2D.util.FXVector;
 
 /* contains the game itself, starts open gl (which calls the physics and logic on every frame)
  * 
@@ -124,6 +127,27 @@ public class GameActivity extends Activity implements SensorEventListener {
 			this.onGameFinished(game.getWinner());
 		}
 	}
+	
+	// screen corners in world coordinates (eg, [0,0] in pixels is [top,left] in the world)
+	float top, left, bottom, right, screen_w, screen_h;
+	
+	public Vector worldToScreen(Vector pos) {
+		Vector s = new Vector(right-left, bottom-top);
+		return pos.minus(new Vector(left, top)).divided(s).times(new Vector(screen_w, screen_h));
+	}
+	
+	public void setGLOrtho(GL10 gl, float left, float right, float bottom, float top, float screen_w, float screen_h) {
+		gl.glOrthof(left, right, bottom, top, -1f, 1f);
+		
+		// cache this values so we don't have to query OpenGL to get them
+		this.top    = top;
+		this.left   = left;
+		this.right  = right;
+		this.bottom = bottom;
+		
+		this.screen_w = screen_w;
+		this.screen_h = screen_h;
+	}
 
 	@Override
 	public boolean onTouchEvent(MotionEvent ev) {
@@ -134,11 +158,21 @@ public class GameActivity extends Activity implements SensorEventListener {
 			if ((MotionEvent.ACTION_MASK & ev.getAction()) != MotionEvent.ACTION_UP) {
 
 				for (int p = 0; p < ev.getPointerCount(); p++) {
-					if (ev.getX(p) > this.getWindow().getDecorView().getWidth() / 2) {
+					Vector touch  = new Vector(ev.getX(p), ev.getY(p));
+					Vector player = worldToScreen(new Vector(game.getLocalPlayer().positionFX()));
+					float x = touch.minus(player).rotCW(FXMath.FX2toFloat(game.getLocalPlayer().rotation2FX())).x;
+					
+					Log.d("foo", "x = "+x);
+					
+					/*if (ev.getX(p) > this.getWindow().getDecorView().getWidth() / 2) {
 						walk_right = true;
 					} else {
 						walk_left = true;
-					}
+					}*/
+					if (x > 10)
+						walk_right = true;
+					else if (x < -10)
+						walk_left = true;
 				}
 			}
 			

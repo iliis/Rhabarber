@@ -16,6 +16,11 @@ public class Vector {
 		this.y = y;
 	}
 	
+	public Vector(FXVector vFX) {
+		this.x = vFX.xAsFloat();
+		this.y = vFX.yAsFloat();
+	}
+
 	public void add(Vector v) {
 		this.x += v.x;
 		this.y += v.y;
@@ -60,5 +65,33 @@ public class Vector {
 	
 	public FXVector asFX() {
 		return new FXVector(FXMath.floatToFX(x), FXMath.floatToFX(y));
+	}
+
+	/**
+	 * performs an element-wise multiplication
+	 *     this.x * v.x
+	 *     this.y * v.y
+	 * @param v
+	 * @return the result
+	 */
+	public Vector times(Vector v) {
+		return new Vector(this.x * v.x, this.y * v.y);
+	}
+	
+	public Vector divided(Vector v) {
+		return new Vector(this.x / v.x, this.y / v.y);
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder result = new StringBuilder();
+		
+		result.append("[ ");
+		result.append(this.x);
+		result.append(" ,  ");
+		result.append(this.y);
+		result.append(" ]");
+		
+		return result.toString();
 	}
 }
