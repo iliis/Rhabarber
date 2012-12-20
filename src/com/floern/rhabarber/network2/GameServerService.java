@@ -176,7 +176,8 @@ public class GameServerService extends Service {
 							handleRemovedUser(newUser);
 						}
 						else if (  message.type == Message.TYPE_CLIENT_ACCELERATION
-								|| message.type == Message.TYPE_CLIENT_INPUT) {
+								|| message.type == Message.TYPE_CLIENT_INPUT
+								|| message.type == Message.TYPE_CLIENT_READY) {
 							// update state of client with input received from him
 							client_states.update(message);
 						}
@@ -273,17 +274,22 @@ public class GameServerService extends Service {
 		// send user list to clients
 		int i = 0;
 		for (GameNetworkingProtocolConnection client : clientConnections) {
-			client.sendStartGameMessage(i++, gameMap);
+			client.sendInitGameMessage(i++, gameMap);
+		}
 			
+		
+		
+		// wait for all clients to start
+		// maybe do this synchronized ( copy() )
+		while (!client_states.all_ready()) {
 			try {
-				// TODO: fix this reace condition cleanly
-				// maybe with a callback from the clients when they loaded the map (and initialzed OpenGL and all the other things)
-				// waits for GameActivity to start
-				Thread.sleep(2000);
+				Thread.sleep(100);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			
+		}
+				
+		for (GameNetworkingProtocolConnection client : clientConnections) {
 			for (Player p: game.players) {
 				client.sendInsertPlayer(p);
 			}
@@ -291,6 +297,10 @@ public class GameServerService extends Service {
 			for (Treasure t: game.treasures) {
 				client.sendInsertTreasure(t);
 			}
+		}
+		
+		for (GameNetworkingProtocolConnection client : clientConnections) {
+			client.sendStartGameMessage();
 		}
 		
 		// start local server without graphics

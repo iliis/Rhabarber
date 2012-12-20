@@ -291,6 +291,14 @@ public class GameNetworkingProtocolConnection {
 		sendMessage(new Message(Message.TYPE_CLIENT_INPUT, arr));
 	}
 	
+	public void sendClientReady(int playerIdx) {
+		byte[] arr = new byte[4];
+		ByteBuffer buf = ByteBuffer.wrap(arr);
+		buf.putInt(playerIdx);
+		
+		sendMessage(new Message(Message.TYPE_CLIENT_READY, arr));
+	}
+	
 	/**
 	 * Send the current state of the world to a client. This includes the following:
 	 * - ID, positionFX, RotationFX of all Bodies (inclusive Players and Treasures)
@@ -377,7 +385,7 @@ public class GameNetworkingProtocolConnection {
 	 * @param playerIdx ID the client gets assigned
 	 * @param map Level to load (which contains everything necessary to initialize a shared world)
 	 */
-	public void sendStartGameMessage(int playerIdx, String map) {
+	public void sendInitGameMessage(int playerIdx, String map) {
 		byte[] stringdata = map.getBytes();
 		byte[] arr = new byte[4+4+stringdata.length]; // index, string length, string
 		ByteBuffer buf = ByteBuffer.wrap(arr);
@@ -386,7 +394,14 @@ public class GameNetworkingProtocolConnection {
 		buf.putInt(map.length());
 		buf.put(stringdata);
 		
-		sendMessage(new Message(Message.TYPE_GAME_START, arr));
+		sendMessage(new Message(Message.TYPE_GAME_INIT, arr));
+	}
+	
+	/**
+	 * tells client to start the game (all players are ready)
+	 */
+	public void sendStartGameMessage() {
+		sendMessage(new Message(Message.TYPE_GAME_START, new byte[0]));
 	}
 	
 	/**
@@ -530,6 +545,11 @@ public class GameNetworkingProtocolConnection {
 		}
 	}
 	
+	public static int parseClientReadyMessage(Message msg) {
+		IntBuffer ibuf = ByteBuffer.wrap(msg.payload).asIntBuffer();
+		return ibuf.get();
+	}
+	
 	/**
 	 * Updates the state of client's world to the one from the server
 	 * @param m Message from server.
@@ -615,12 +635,12 @@ public class GameNetworkingProtocolConnection {
 	}
 	
 	/**
-	 * Start a new game.
+	 * Init a new game, but don't start it yet.
 	 * @param msg The message from the server.
 	 * @param playerIdxOut The index this client got assigned from the server.
 	 * @return The filename of the map to load
 	 */
-	public static String parseStartGameMessage(Message msg, IntRef playerIdxOut) {
+	public static String parseInitGameMessage(Message msg, IntRef playerIdxOut) {
 		ByteBuffer buf   = ByteBuffer.wrap(msg.payload);
 		
 		playerIdxOut.value = buf.getInt();
@@ -741,9 +761,11 @@ public class GameNetworkingProtocolConnection {
 			// client --> server
 			TYPE_CLIENT_ACCELERATION = ++i,
 			TYPE_CLIENT_INPUT = ++i,
+			TYPE_CLIENT_READY = ++i,
 			
 			// server --> client
-			TYPE_GAME_START = ++i,
+			TYPE_GAME_INIT = ++i, // load map, wait for other players (TYPE_CLIENT_READY)
+			TYPE_GAME_START = ++i, // all ready, start game
 			TYPE_SERVER_GAMESTATE = ++i,
 			TYPE_INSERT_PLAYER = ++i,
 			TYPE_INSERT_TREASURE = ++i,

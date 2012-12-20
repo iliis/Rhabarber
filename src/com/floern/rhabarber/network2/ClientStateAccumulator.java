@@ -43,10 +43,12 @@ public class ClientStateAccumulator {
 	
 	public UserInputWalk[] inputs = null;
 	public Acceleration[]  accels = null;
+	public boolean[]       ready  = null;
 	
 	public void allocate(int size) {
 		inputs = new UserInputWalk[size];
 		accels = new Acceleration [size];
+		ready  = new boolean[size];
 	}
 	
 	/**
@@ -69,6 +71,9 @@ public class ClientStateAccumulator {
 			UserInputWalk a = GameNetworkingProtocolConnection.parseUserInputMessage(m, playerIdx);
 			this.inputs[playerIdx.value] = a;
 			
+		} else if (m.type == Message.TYPE_CLIENT_READY) {
+			int playerIdx = GameNetworkingProtocolConnection.parseClientReadyMessage(m);
+			this.ready[playerIdx] = true;
 		}
 	}
 	
@@ -82,7 +87,15 @@ public class ClientStateAccumulator {
 		
 		System.arraycopy(this.inputs, 0, c.inputs, 0, this.inputs.length);
 		System.arraycopy(this.accels, 0, c.accels, 0, this.accels.length);
+		System.arraycopy(this.ready,  0, c.ready,  0, this.ready .length);
 		
 		return c;
+	}
+	
+	public boolean all_ready() {
+		for (boolean b: ready) 
+			if (b) return true;
+		
+		return false;
 	}
 }

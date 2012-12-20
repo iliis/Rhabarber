@@ -5,6 +5,7 @@ import java.io.IOException;
 import javax.microedition.khronos.opengles.GL10;
 
 import com.floern.rhabarber.graphic.GameGLSurfaceView;
+import com.floern.rhabarber.graphic.primitives.Skeleton;
 import com.floern.rhabarber.logic.elements.GameWorld;
 import com.floern.rhabarber.network2.ClientNetworkingLogic;
 import com.floern.rhabarber.network2.ClientStateAccumulator;
@@ -52,7 +53,11 @@ public class GameActivity extends Activity implements SensorEventListener {
 	private int playerIdx;
 	private boolean isserver = false;
 	boolean walk_left = false, walk_right = false;
-
+	
+	private boolean self_ready = false;
+	
+	private Skeleton waiting_text;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -87,6 +92,8 @@ public class GameActivity extends Activity implements SensorEventListener {
 		int rotation = display.getRotation();
 		deviceIsLandscapeDefault = (orientation == Configuration.ORIENTATION_LANDSCAPE && (rotation == Surface.ROTATION_0  || rotation == Surface.ROTATION_180))
 				                || (orientation == Configuration.ORIENTATION_PORTRAIT  && (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270));
+		
+		
 
 		// setup up the actual game
 		try {
@@ -94,10 +101,12 @@ public class GameActivity extends Activity implements SensorEventListener {
 			playerIdx  = getIntent().getExtras().getInt("playerIdx");
 			game = new GameWorld(this.getAssets().open(	"level/"+getIntent().getExtras().getString("level")), this.getResources(), isserver, playerIdx);
 			Log.d("foo", "starting a game");
-			Log.d("foo", "isserver = "+isserver);
 			Log.d("foo", "playerIdx = "+playerIdx);
 			clientNetworkingLogic.game = game;
-			Log.d("foo", "linked world to network stuff");
+			
+			this.waiting_text = new Skeleton(getResources().openRawResource(R.raw.waiting), 0.5f);
+			this.waiting_text.position.x = game.min_x + (game.max_x-game.min_x)/2;
+			this.waiting_text.position.y = game.min_y + (game.max_y-game.min_y)/2;
 			
 			
 			//playerIdx = game.addPlayer();
@@ -106,12 +115,24 @@ public class GameActivity extends Activity implements SensorEventListener {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		
 
 	}
 
 	public void onDraw(GL10 gl) {
+		
+		if (!self_ready) {
+			self_ready = true;
+			clientNetworkingLogic.serverConnection.sendClientReady(playerIdx);
+		}
+		
+		
 		// TODO: fix for singleplayer (the whole project is as of now only working for multiplayer)
-		game.tick();
+		if (game.all_ready)
+			game.tick();
+		else
+			this.waiting_text.draw(gl);
 		
 		/*game.setAccel(acceleration);
 		if (walk_left != walk_right) {
@@ -158,17 +179,18 @@ public class GameActivity extends Activity implements SensorEventListener {
 			if ((MotionEvent.ACTION_MASK & ev.getAction()) != MotionEvent.ACTION_UP) {
 
 				for (int p = 0; p < ev.getPointerCount(); p++) {
+					
+					// calculate the horizonal distance between the player and the touch of the user
 					Vector touch  = new Vector(ev.getX(p), ev.getY(p));
 					Vector player = worldToScreen(new Vector(game.getLocalPlayer().positionFX()));
 					float x = touch.minus(player).rotCW(FXMath.FX2toFloat(game.getLocalPlayer().rotation2FX())).x;
-					
-					Log.d("foo", "x = "+x);
 					
 					/*if (ev.getX(p) > this.getWindow().getDecorView().getWidth() / 2) {
 						walk_right = true;
 					} else {
 						walk_left = true;
 					}*/
+					
 					if (x > 10)
 						walk_right = true;
 					else if (x < -10)

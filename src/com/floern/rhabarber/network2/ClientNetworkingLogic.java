@@ -68,13 +68,16 @@ public class ClientNetworkingLogic {
 			else if (message.type == Message.TYPE_IDLE) {
 				// idle received, ignore
 			}
-			else if (message.type == Message.TYPE_GAME_START) {
+			else if (message.type == Message.TYPE_GAME_INIT) {
 				
 				// init game
 				IntRef playerIdx = new IntRef(-1);
-				String map = GameNetworkingProtocolConnection.parseStartGameMessage(message, playerIdx);
+				String map = GameNetworkingProtocolConnection.parseInitGameMessage(message, playerIdx);
 				
 				updateEventListener.onInitGame(map, playerIdx.value);
+			}
+			else if (message.type == Message.TYPE_GAME_START) {
+				game.all_ready = true;
 			}
 			else if (message.type == Message.TYPE_SERVER_GAMESTATE) {
 				GameNetworkingProtocolConnection.receiveServerState(message, game);
@@ -221,6 +224,7 @@ public class ClientNetworkingLogic {
 		 * @param playerIdx ID of this client (assigned by server)
 		 */
 		void onInitGame(final String gameMap, final int playerIdx);
+		
 		/**
 		 * User was registered
 		 */

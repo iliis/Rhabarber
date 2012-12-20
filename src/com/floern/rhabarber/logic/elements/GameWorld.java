@@ -64,6 +64,8 @@ public class GameWorld extends World {
 	private boolean game_finished = false;
 	private int winner = -1;
 	
+	public volatile boolean all_ready = false;
+	
 	
 	public boolean isFinished() {return game_finished;}
 	public int     getWinner()  {return winner;}
